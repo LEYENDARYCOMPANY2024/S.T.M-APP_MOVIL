@@ -2,6 +2,10 @@
 
 Este proyecto es una aplicación creada con Flutter.
 
+## que es
+
+Este repositorio contiene el desarrollo completo de la aplicación móvil, incluyendo todas las interfaces y funcionalidades dirigidas a los pacientes. Construido con Flutter, ofrece una experiencia fluida y optimizada para dispositivos móviles.
+
 ## 🚀 Configuración Inicial
 
 1. **Instalar Java** (JDK 21)  
@@ -25,7 +29,7 @@ Este proyecto es una aplicación creada con Flutter.
    ```sh
    flutter run
    ```
-   
+
    ```sh
    flutter devices
    ```
