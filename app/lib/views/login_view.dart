@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/login_viewmodel.dart';
+import 'register_view.dart';
 
 class LoginView extends StatelessWidget {
   @override
@@ -66,6 +67,19 @@ class LoginView extends StatelessWidget {
                 child: Text(
                   'Iniciar Sesión',
                   style: TextStyle(fontSize: 18),
+                ),
+              ),
+              SizedBox(height: 20),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => RegisterView()),
+                  );
+                },
+                child: Text(
+                  '¿No tienes cuenta? Regístrate',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
             ],
