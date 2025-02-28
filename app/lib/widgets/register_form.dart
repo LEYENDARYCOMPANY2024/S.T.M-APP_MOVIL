@@ -1,0 +1,192 @@
+// widget/register_form.dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../viewmodels/register_viewmodel.dart';
+
+class RegisterForm extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final registerViewModel = Provider.of<RegisterViewModel>(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Título y descripción
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 30),
+          child: Column(
+            children: [
+              const Icon(
+                Icons.person_add,
+                size: 70,
+                color: Colors.white,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                "Crear Cuenta Nueva",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Por favor, complete los siguientes campos para registrarse como paciente en el sistema",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.9),
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        // Formulario
+        Card(
+          elevation: 8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              children: [
+                _buildTextField(
+                  controller: registerViewModel.codigoController,
+                  label: "Código de Paciente",
+                  icon: Icons.badge_outlined,
+                  hint: "Ingrese su código único de paciente",
+                ),
+                const SizedBox(height: 20),
+                _buildTextField(
+                  controller: registerViewModel.usuarioController,
+                  label: "Nombre de Usuario",
+                  icon: Icons.person_outline,
+                  hint: "Elija un nombre de usuario",
+                ),
+                const SizedBox(height: 20),
+                _buildTextField(
+                  controller: registerViewModel.passwordController,
+                  label: "Contraseña",
+                  icon: Icons.lock_outline,
+                  hint: "Cree una contraseña segura",
+                  isPassword: true,
+                ),
+                const SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "La contraseña debe tener al menos 8 caracteres",
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        
+        const SizedBox(height: 30),
+        
+        // Botón de registro
+        registerViewModel.isLoading
+            ? const Center(child: CircularProgressIndicator(color: Colors.white))
+            : ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.blue[800],
+                  elevation: 5,
+                  shadowColor: Colors.black.withOpacity(0.3),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                onPressed: () => registerViewModel.register(context),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'COMPLETAR REGISTRO',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.check_circle_outline, size: 18),
+                  ],
+                ),
+              ),
+        
+        const SizedBox(height: 20),
+        
+        // Política de privacidad y términos
+        Text(
+          "Al registrarse, acepta nuestros términos y política de privacidad",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.8),
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required String hint,
+    bool isPassword = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.blue[800],
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: TextField(
+            controller: controller,
+            obscureText: isPassword,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(color: Colors.grey[400]),
+              prefixIcon: Icon(icon, color: Colors.blue[800]),
+              suffixIcon: isPassword
+                  ? IconButton(
+                      icon: const Icon(Icons.visibility_off, color: Colors.grey),
+                      onPressed: () {
+                        // Implementar toggle para mostrar/ocultar contraseña
+                      },
+                    )
+                  : null,
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 15),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
