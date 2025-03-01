@@ -6,6 +6,7 @@ import 'views/register_view.dart'; // Asegúrate de importar RegisterView
 import 'viewmodels/login_viewmodel.dart';
 import 'viewmodels/register_viewmodel.dart'; // Importar RegisterViewModel
 import 'services/auth_services.dart';
+import 'views/home_view.dart'; // Importar HomeView
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
         routes: {
           '/login': (context) => LoginView(), // Ruta de login
           '/register': (context) => const RegisterView(), // Ruta de registro
+          '/home': (context) => HomeView(), // Nueva ruta para la pantalla principal
         },
       ),
     );

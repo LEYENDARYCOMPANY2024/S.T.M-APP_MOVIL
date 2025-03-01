@@ -107,7 +107,12 @@ class LoginForm extends StatelessWidget {
               ),
               padding: EdgeInsets.symmetric(vertical: 16),
             ),
-            onPressed: viewModel.login,
+            onPressed: () {
+              viewModel.login();
+
+              // Redirigir a la página de HomeView
+              Navigator.pushReplacementNamed(context, '/home'); // Esto redirige a la vista Home
+            },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
