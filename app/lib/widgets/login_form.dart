@@ -29,7 +29,7 @@ class LoginForm extends StatelessWidget {
               color: Colors.white,
             ),
           ),
-          
+
           // Título
           Text(
             'Bienvenido a',
@@ -62,7 +62,7 @@ class LoginForm extends StatelessWidget {
             ),
           ),
           SizedBox(height: 40),
-          
+
           // Campos de texto
           _buildTextField(
             controller: viewModel.usernameController,
@@ -76,7 +76,7 @@ class LoginForm extends StatelessWidget {
             isPassword: true,
             icon: Icons.lock_outline,
           ),
-          
+
           // Link para recuperar contraseña
           Align(
             alignment: Alignment.centerRight,
@@ -94,7 +94,7 @@ class LoginForm extends StatelessWidget {
             ),
           ),
           SizedBox(height: 20),
-          
+
           // Botón de inicio de sesión
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -107,11 +107,17 @@ class LoginForm extends StatelessWidget {
               ),
               padding: EdgeInsets.symmetric(vertical: 16),
             ),
-            onPressed: () {
-              viewModel.login();
+            onPressed: () async {
+              bool success = await viewModel.login();
 
-              // Redirigir a la página de HomeView
-              Navigator.pushReplacementNamed(context, '/home'); // Esto redirige a la vista Home
+              if (success) {
+                // Redirigir solo si el login es exitoso
+                Navigator.pushReplacementNamed(context, '/home');
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Usuario o contraseña incorrectos")),
+                );
+              }
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -129,7 +135,7 @@ class LoginForm extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Separador
           Padding(
             padding: EdgeInsets.symmetric(vertical: 20),
@@ -151,7 +157,7 @@ class LoginForm extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Botón de registro
           OutlinedButton(
             style: OutlinedButton.styleFrom(

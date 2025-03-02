@@ -8,14 +8,30 @@ class LoginViewModel extends ChangeNotifier {
 
   LoginViewModel(this._authService);
 
-  Future<void> login() async {
-    String username = usernameController.text;
-    String password = passwordController.text;
-    bool success = await _authService.login(username, password);
-    if (success) {
-      print('Login exitoso');
-    } else {
-      print('Credenciales incorrectas');
+  Future<bool> login() async {
+    String username = usernameController.text.trim();
+    String password = passwordController.text.trim();
+
+    try {
+      bool success = await _authService.login(username, password);
+
+      if (success) {
+        print('✅ Login exitoso');
+      } else {
+        print('❌ Credenciales incorrectas');
+      }
+
+      return success;
+    } catch (e) {
+      print('⚠️ Error en login: $e');
+      return false;
     }
+  }
+
+  @override
+  void dispose() {
+    usernameController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }
