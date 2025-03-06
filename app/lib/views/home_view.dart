@@ -1,8 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../viewmodels/login_viewmodel.dart';
+import '../services/token_service.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
+  const HomeView({Key? key}) : super(key: key);
+
+  @override
+  _HomeViewState createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  int? userId;
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadUserId();
+  }
+  
+  Future<void> _loadUserId() async {
+    final id = await TokenService.getUserId();
+    if (mounted) {
+      setState(() {
+        userId = id;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<LoginViewModel>(context);
+    
     return Scaffold(
       backgroundColor: Colors.blue[700],
       appBar: AppBar(
@@ -14,9 +43,29 @@ class HomeView extends StatelessWidget {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () async {
+              await viewModel.logout();
+              Navigator.of(context).pushReplacementNamed('/login');
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.account_circle, color: Colors.white),
             onPressed: () {
               // Acción para el perfil de usuario
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text("Información de Usuario"),
+                  content: Text("ID de Usuario: ${userId ?? 'Cargando...'}"),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Cerrar"),
+                    ),
+                  ],
+                ),
+              );
             },
           ),
         ],
@@ -25,6 +74,11 @@ class HomeView extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            _buildCard(
+              title: "Información de Usuario",
+              content: "ID de Usuario: ${userId ?? 'Cargando...'}",
+            ),
+            const SizedBox(height: 20),
             _buildCard(
               title: "Próxima sesión",
               content: "Terapeuta: [nombre terapeuta]\nHora y fecha: [hora y fecha]",

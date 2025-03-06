@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'views/login_view.dart';
-import 'views/register_view.dart'; // Asegúrate de importar RegisterView
+import 'views/register_view.dart';
+import 'views/home_view.dart';
+import 'views/splash_view.dart'; // Importar SplashView
 import 'viewmodels/login_viewmodel.dart';
-import 'viewmodels/register_viewmodel.dart'; // Importar RegisterViewModel
+import 'viewmodels/register_viewmodel.dart';
 import 'services/auth_services.dart';
-import 'views/home_view.dart'; // Importar HomeView
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,18 +26,27 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Crear una instancia única del AuthService
+    final authService = AuthService();
+    
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => LoginViewModel(AuthService())), // Proveedor para Login
-        ChangeNotifierProvider(create: (_) => RegisterViewModel(AuthService())), // Proveedor para Register
+        ChangeNotifierProvider(create: (_) => LoginViewModel(authService)),
+        ChangeNotifierProvider(create: (_) => RegisterViewModel(authService)),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        initialRoute: '/login', // Ruta inicial
+        title: 'S.M.M - Sistema de Monitoreo de la Marcha',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        initialRoute: '/', // Ruta inicial apunta al splash
         routes: {
+          '/': (context) => const SplashView(), // Ruta de splash
           '/login': (context) => LoginView(), // Ruta de login
           '/register': (context) => const RegisterView(), // Ruta de registro
-          '/home': (context) => HomeView(), // Nueva ruta para la pantalla principal
+          '/home': (context) => const HomeView(), // Ruta para la pantalla principal
         },
       ),
     );
