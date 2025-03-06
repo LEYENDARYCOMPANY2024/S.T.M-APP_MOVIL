@@ -12,6 +12,7 @@ class Paciente {
   final String nombreUsuario;
   final String contrasena;
   final String estadoPaciente;
+  final String correoElectronico;  // Nuevo atributo
 
   Paciente({
     required this.id,
@@ -27,6 +28,7 @@ class Paciente {
     required this.nombreUsuario,
     required this.contrasena,
     required this.estadoPaciente,
+    required this.correoElectronico,  // Inicializa el nuevo atributo
   });
 
   // Convertir un mapa (de Supabase) a un objeto Paciente
@@ -45,6 +47,7 @@ class Paciente {
       nombreUsuario: map['nombre_usuario_p'] ?? '',
       contrasena: map['contrasena_p'] ?? '',
       estadoPaciente: map['estado_paciente'] ?? '',
+      correoElectronico: map['correo_electronico_p'] ?? '',  // Recuperar el correo electrónico del mapa
     );
   }
 
@@ -64,6 +67,7 @@ class Paciente {
       'nombre_usuario_p': nombreUsuario,
       'contrasena_p': contrasena,
       'estado_paciente': estadoPaciente,
+      'correo_electronico_p': correoElectronico,  // Agregar el correo electrónico al mapa
     };
   }
 }

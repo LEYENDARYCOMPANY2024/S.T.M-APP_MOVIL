@@ -3,11 +3,17 @@ import 'package:provider/provider.dart';
 import '../viewmodels/login_viewmodel.dart';
 import '../views/register_view.dart';
 
-class LoginForm extends StatelessWidget {
+class LoginForm extends StatefulWidget {
+  @override
+  _LoginFormState createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  bool _isPasswordVisible = false;
+
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<LoginViewModel>(context);
-    final size = MediaQuery.of(context).size;
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
@@ -81,9 +87,7 @@ class LoginForm extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              onPressed: () {
-                // Implementar recuperación de contraseña
-              },
+              onPressed: () {},
               child: Text(
                 '¿Olvidaste tu contraseña?',
                 style: TextStyle(
@@ -109,9 +113,7 @@ class LoginForm extends StatelessWidget {
             ),
             onPressed: () async {
               bool success = await viewModel.login();
-
               if (success) {
-                // Redirigir solo si el login es exitoso
                 Navigator.pushReplacementNamed(context, '/home');
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -201,7 +203,7 @@ class LoginForm extends StatelessWidget {
       ),
       child: TextField(
         controller: controller,
-        obscureText: isPassword,
+        obscureText: isPassword ? !_isPasswordVisible : false,
         style: TextStyle(color: Colors.white),
         decoration: InputDecoration(
           contentPadding: EdgeInsets.symmetric(vertical: 16),
@@ -211,9 +213,14 @@ class LoginForm extends StatelessWidget {
           prefixIcon: Icon(icon, color: Colors.white),
           suffixIcon: isPassword
               ? IconButton(
-                  icon: Icon(Icons.visibility, color: Colors.white.withOpacity(0.7)),
+                  icon: Icon(
+                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
                   onPressed: () {
-                    // Implementar toggle para mostrar/ocultar contraseña
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
                   },
                 )
               : null,
