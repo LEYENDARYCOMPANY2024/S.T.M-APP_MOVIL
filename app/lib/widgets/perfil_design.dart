@@ -1,103 +1,152 @@
 import 'package:flutter/material.dart';
 import '../models/paciente.dart';
 
-class PerfilDesign extends StatelessWidget {
+class PerfilDesign extends StatefulWidget {
   final Paciente paciente;
 
   const PerfilDesign({Key? key, required this.paciente}) : super(key: key);
 
   @override
+  _PerfilDesignState createState() => _PerfilDesignState();
+}
+
+class _PerfilDesignState extends State<PerfilDesign> {
+  final TextEditingController _usuarioController = TextEditingController();
+  final TextEditingController _correoController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _showPasswordField = false;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFE3F2FD), // Fondo suave (color azul claro en hex)
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        backgroundColor: Color(0xFF1976D2), // Azul fuerte (hex)
+        backgroundColor: Color(0xFF1565C0), // Azul profundo
         title: const Text(
-          'Mi Perfil',
+          'Perfil del Paciente',
           style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
         ),
-        elevation: 0,
+        elevation: 4,
+        shadowColor: Colors.black45,
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Nombre de usuario y Edad
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF1976D2), // Azul fuerte (hex)
-                      borderRadius: BorderRadius.circular(15),
+              // Avatar con efecto
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      spreadRadius: 2,
                     ),
-                    child: Text(
-                      paciente.nombreUsuario,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Color(0xFF1565C0),
+                  child: Text(
+                    widget.paciente.nombreUsuario[0].toUpperCase(),
+                    style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
-                  const SizedBox(width: 20),
-                  Text(
-                    '${paciente.edad} años',
-                    style: const TextStyle(
-                      color: Colors.blueGrey,
-                      fontSize: 18,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              // Nombre completo
-              Text(
-                '${paciente.nombre} ${paciente.primerApellido} ${paciente.segundoApellido ?? ''}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.blueGrey,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 20),
-              Divider(
-                color: Color(0xFF1976D2), // Azul para el divisor (hex)
-                thickness: 2,
-                indent: 50,
-                endIndent: 50,
+              const SizedBox(height: 15),
+              // Nombre y edad
+              Text(
+                widget.paciente.nombreUsuario,
+                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.black87),
+              ),
+              Text(
+                '${widget.paciente.edad} años',
+                style: const TextStyle(fontSize: 18, color: Colors.blueGrey),
               ),
               const SizedBox(height: 20),
-              // Datos adicionales
-              _buildInfoRow('Género', paciente.genero),
-              const SizedBox(height: 20),
-              _buildInfoRow(
-                'Estado Civil',
-                paciente.estadoCivil ?? 'No disponible',
+              // Tarjeta con información personal estilizada
+              Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                elevation: 6,
+                shadowColor: Colors.black38,
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildInfoRow(Icons.person, 'Nombre Completo', '${widget.paciente.nombre} ${widget.paciente.primerApellido} ${widget.paciente.segundoApellido ?? ''}'),
+                      _buildInfoRow(Icons.wc, 'Género', widget.paciente.genero),
+                      _buildInfoRow(Icons.favorite, 'Estado Civil', widget.paciente.estadoCivil ?? 'No disponible'),
+                      _buildInfoRow(Icons.school, 'Escolaridad', widget.paciente.escolaridad ?? 'No disponible'),
+                      _buildInfoRow(Icons.work, 'Ocupación', widget.paciente.ocupacion.isNotEmpty ? widget.paciente.ocupacion : 'No disponible'),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 20),
-              _buildInfoRow(
-                'Escolaridad',
-                paciente.escolaridad ?? 'No disponible',
-              ),
-              const SizedBox(height: 20),
-              _buildInfoRow(
-                'Ocupación',
-                paciente.ocupacion.isNotEmpty ? paciente.ocupacion : 'No disponible',
-              ),
-              const SizedBox(height: 20),
-              // Estado del paciente (Activo/Inactivo)
-              _buildStatusIndicator(paciente.estadoPaciente),
+              const SizedBox(height: 25),
+              _buildStatusIndicator(widget.paciente.estadoPaciente),
               const SizedBox(height: 30),
+              // Formulario para cambiar usuario y correo
+              Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                elevation: 6,
+                shadowColor: Colors.black38,
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: _usuarioController,
+                        decoration: InputDecoration(
+                          labelText: 'Nuevo Usuario',
+                          prefixIcon: Icon(Icons.person, color: Color(0xFF1565C0)),
+                        ),
+                      ),
+                      if (_showPasswordField)
+                        TextField(
+                          controller: _passwordController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            labelText: 'Contraseña Actual',
+                            prefixIcon: Icon(Icons.lock, color: Color(0xFF1565C0)),
+                          ),
+                        ),
+                      TextField(
+                        controller: _correoController,
+                        decoration: InputDecoration(
+                          labelText: 'Correo Electrónico',
+                          prefixIcon: Icon(Icons.email, color: Color(0xFF1565C0)),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _showPasswordField = true;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF1565C0),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: const Text('Guardar Cambios', style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -105,31 +154,24 @@ class PerfilDesign extends StatelessWidget {
     );
   }
 
-  // Método para construir una fila con el texto y el valor
-  Widget _buildInfoRow(String title, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          '$title: ',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1976D2), // Azul fuerte (hex)
+  Widget _buildInfoRow(IconData icon, String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Row(
+        children: [
+          Icon(icon, color: Color(0xFF1565C0)),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Text(
+              '$title: $value',
+              style: const TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w500),
+            ),
           ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            color: Colors.black,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  // Método para mostrar el estado activo/inactivo con un contorno de color
   Widget _buildStatusIndicator(String estadoPaciente) {
     Color borderColor = estadoPaciente.toLowerCase() == 'activo' ? Colors.green : Colors.red;
     String statusText = estadoPaciente.toLowerCase() == 'activo' ? 'Activo' : 'Inactivo';
