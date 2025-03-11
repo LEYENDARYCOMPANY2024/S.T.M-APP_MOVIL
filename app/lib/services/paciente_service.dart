@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/terapeuta.dart';
 import '../models/paciente.dart';
+import '../services/hash_services.dart';
 
 class PacienteService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -41,6 +42,60 @@ class PacienteService {
     } catch (e) {
       print('❌ Error al obtener paciente: $e');
       return null;
+    }
+  }
+
+  // Verificar la contraseña del paciente
+  Future<bool> verificarContrasena(int pacienteId, String contrasenaIngresada) async {
+    try {
+      final pacienteData = await _supabase
+          .from('pacientes')
+          .select('contrasena_p')
+          .eq('id_paciente', pacienteId)
+          .maybeSingle();
+
+      if (pacienteData == null) {
+        print('⚠️ No se encontró el paciente con ID: $pacienteId');
+        return false;
+      }
+
+      String contrasenaAlmacenada = pacienteData['contrasena_p'];
+      
+      // Usar el HashService para verificar la contraseña con BCrypt
+      return HashService.verifyPassword(contrasenaIngresada, contrasenaAlmacenada);
+    } catch (e) {
+      print('❌ Error al verificar contraseña: $e');
+      return false;
+    }
+  }
+
+  // Actualizar el nombre de usuario y/o correo electrónico del paciente
+  Future<bool> actualizarDatosPaciente(int pacienteId, {String? nuevoUsuario, String? nuevoCorreo}) async {
+    try {
+      Map<String, dynamic> datosActualizar = {};
+      
+      if (nuevoUsuario != null && nuevoUsuario.isNotEmpty) {
+        datosActualizar['nombre_usuario_p'] = nuevoUsuario;
+      }
+      
+      if (nuevoCorreo != null && nuevoCorreo.isNotEmpty) {
+        datosActualizar['correo_electronico_p'] = nuevoCorreo;
+      }
+      
+      if (datosActualizar.isEmpty) {
+        return false; // No hay datos para actualizar
+      }
+
+      await _supabase
+          .from('pacientes')
+          .update(datosActualizar)
+          .eq('id_paciente', pacienteId);
+      
+      print('✅ Datos actualizados correctamente');
+      return true;
+    } catch (e) {
+      print('❌ Error al actualizar datos del paciente: $e');
+      return false;
     }
   }
 
