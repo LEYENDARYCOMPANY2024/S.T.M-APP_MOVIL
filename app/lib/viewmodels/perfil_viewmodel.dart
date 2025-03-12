@@ -5,22 +5,23 @@ import '../models/paciente.dart';
 
 class PerfilViewModel extends ChangeNotifier {
   final PacienteService _pacienteService = PacienteService();
-  Paciente? paciente; // Datos del paciente
+  Paciente? paciente;
 
-  bool isLoading = true; // Estado de carga
-  String? errorMessage; // Mensaje de error en caso de falla
-  String? successMessage; // Mensaje de éxito
+  bool isLoading = true;
+  String? errorMessage;
+  String? successMessage;
 
-  // Cargar los datos del paciente para la pantalla de perfil
+  // 🔹 Cargar datos del paciente
   Future<void> cargarDatos() async {
     try {
+      print("🔄 Cargando datos del perfil...");
       isLoading = true;
       errorMessage = null;
       successMessage = null;
       notifyListeners();
 
-      // Obtener el ID del usuario actual desde el servicio de tokens
       final userId = await TokenService.getUserId();
+      print("📢 ID del usuario obtenido: $userId");
 
       if (userId == null) {
         errorMessage = "No se pudo obtener el ID del usuario";
@@ -29,9 +30,14 @@ class PerfilViewModel extends ChangeNotifier {
         return;
       }
 
-      // Obtener los datos del paciente
-      paciente = await _pacienteService.getPaciente(userId);
+      final nuevoPaciente = await _pacienteService.getPaciente(userId);
+      print("📢 Datos del paciente recibidos: ${nuevoPaciente?.toMap()}");
 
+      if (nuevoPaciente == null) {
+        errorMessage = "No se encontraron datos del paciente";
+      }
+
+      paciente = nuevoPaciente;
       isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -42,27 +48,24 @@ class PerfilViewModel extends ChangeNotifier {
     }
   }
 
-  // Verificar contraseña y actualizar datos del usuario
+  // 🔹 Actualizar datos del paciente
   Future<bool> actualizarDatos({
     required String contrasenaActual,
     String? nuevoUsuario,
     String? nuevoCorreo,
   }) async {
     try {
-      // Resetear mensajes
       errorMessage = null;
       successMessage = null;
       notifyListeners();
 
-      // Verificar si hay algo que actualizar
-      if ((nuevoUsuario == null || nuevoUsuario.isEmpty) && 
+      if ((nuevoUsuario == null || nuevoUsuario.isEmpty) &&
           (nuevoCorreo == null || nuevoCorreo.isEmpty)) {
         errorMessage = "No se ingresaron datos para actualizar";
         notifyListeners();
         return false;
       }
 
-      // Obtener el ID del usuario actual
       final userId = await TokenService.getUserId();
       if (userId == null) {
         errorMessage = "No se pudo obtener el ID del usuario";
@@ -70,10 +73,9 @@ class PerfilViewModel extends ChangeNotifier {
         return false;
       }
 
-      // Verificar la contraseña
       bool contrasenaCorrecta = await _pacienteService.verificarContrasena(
-        userId, 
-        contrasenaActual
+        userId,
+        contrasenaActual,
       );
 
       if (!contrasenaCorrecta) {
@@ -82,7 +84,6 @@ class PerfilViewModel extends ChangeNotifier {
         return false;
       }
 
-      // Actualizar los datos del paciente
       bool actualizado = await _pacienteService.actualizarDatosPaciente(
         userId,
         nuevoUsuario: nuevoUsuario,
@@ -90,9 +91,20 @@ class PerfilViewModel extends ChangeNotifier {
       );
 
       if (actualizado) {
-        // Actualización exitosa, volver a cargar los datos
         successMessage = "Datos actualizados correctamente";
-        await cargarDatos(); // Recargar los datos del paciente
+
+        // 🔹 Optimización: Solo actualiza los datos en memoria sin recargar toda la vista
+        if (paciente != null) {
+          paciente = paciente!.copyWith(
+            nombreUsuario: nuevoUsuario ?? paciente!.nombreUsuario,
+            correoElectronico: nuevoCorreo ?? paciente!.correoElectronico,
+          );
+        } else {
+          // Si `paciente` es nulo, recargamos los datos completos
+          await cargarDatos();
+        }
+
+        notifyListeners();
         return true;
       } else {
         errorMessage = "No se pudieron actualizar los datos";
@@ -100,14 +112,14 @@ class PerfilViewModel extends ChangeNotifier {
         return false;
       }
     } catch (e) {
-      print('❌ Error al actualizar datos: $e');
+      print("❌ Error al actualizar datos: $e");
       errorMessage = "Ocurrió un error inesperado";
       notifyListeners();
       return false;
     }
   }
 
-  // Limpiar mensajes
+  // 🔹 Limpiar mensajes después de mostrarlos
   void limpiarMensajes() {
     errorMessage = null;
     successMessage = null;

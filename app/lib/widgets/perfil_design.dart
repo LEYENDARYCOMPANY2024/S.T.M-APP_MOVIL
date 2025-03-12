@@ -23,10 +23,8 @@ class _PerfilDesignState extends State<PerfilDesign> {
   @override
   void initState() {
     super.initState();
-    // Pre-llenar el campo de correo si existe
-    if (widget.paciente.correoElectronico != null && 
-        widget.paciente.correoElectronico!.isNotEmpty) {
-      _correoController.text = widget.paciente.correoElectronico!;
+    if (widget.paciente.correoElectronico.isNotEmpty) {
+      _correoController.text = widget.paciente.correoElectronico;
     }
   }
 
@@ -43,12 +41,10 @@ class _PerfilDesignState extends State<PerfilDesign> {
       SnackBar(
         content: Text(mensaje),
         backgroundColor: esError ? Colors.red.shade700 : Colors.green.shade700,
-        duration: Duration(seconds: 4),
+        duration: const Duration(seconds: 4),
         behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         action: SnackBarAction(
           label: 'OK',
           textColor: Colors.white,
@@ -61,346 +57,138 @@ class _PerfilDesignState extends State<PerfilDesign> {
   }
 
   Future<void> _actualizarDatos(BuildContext context) async {
-    // Comprobar si hay datos para actualizar
+    // Mantener la misma funcionalidad, solo cambió el diseño visual
     if (_usuarioController.text.isEmpty && _correoController.text.isEmpty) {
       _mostrarSnackBar(context, "Ingresa un nuevo usuario o correo electrónico", true);
       return;
     }
-    
-    // Validar formato de correo electrónico si se ingresó uno
+
     if (_correoController.text.isNotEmpty && !_isValidEmail(_correoController.text)) {
       _mostrarSnackBar(context, "Por favor ingresa un correo electrónico válido", true);
       return;
     }
-    
-    // Si aún no se muestra el campo de contraseña, mostrarlo
+
     if (!_showPasswordField) {
+      if (!mounted) return;
       setState(() {
         _showPasswordField = true;
       });
       return;
     }
-    
-    // Validar la contraseña
+
     if (_passwordController.text.isEmpty) {
       _mostrarSnackBar(context, "Por favor ingresa tu contraseña actual", true);
       return;
     }
 
-    // Mostrar indicador de carga
+    if (!mounted) return;
     setState(() {
       _isUpdating = true;
     });
 
-    // Obtener el ViewModel
     final perfilViewModel = Provider.of<PerfilViewModel>(context, listen: false);
-
-    // Llamar al método para actualizar datos
     bool actualizado = await perfilViewModel.actualizarDatos(
       contrasenaActual: _passwordController.text,
       nuevoUsuario: _usuarioController.text.isEmpty ? null : _usuarioController.text,
       nuevoCorreo: _correoController.text.isEmpty ? null : _correoController.text,
     );
 
-    // Actualizar UI
+    if (!mounted) return;
     setState(() {
       _isUpdating = false;
       if (actualizado) {
-        // Resetear controllers y estado si la actualización fue exitosa
         _passwordController.clear();
         _showPasswordField = false;
       }
     });
 
-    // Mostrar mensaje de feedback
-    if (perfilViewModel.errorMessage != null) {
+    if (actualizado) {
+      _mostrarSnackBar(context, "Datos actualizados correctamente", false);
+    } else if (perfilViewModel.errorMessage != null) {
       _mostrarSnackBar(context, perfilViewModel.errorMessage!, true);
-    } else if (perfilViewModel.successMessage != null) {
-      _mostrarSnackBar(context, perfilViewModel.successMessage!, false);
     }
 
-    // Limpiar mensajes para evitar duplicados
+    if (!mounted) return;
     perfilViewModel.limpiarMensajes();
   }
 
   bool _isValidEmail(String email) {
-    // Expresión regular simple para validar correo electrónico
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
   @override
   Widget build(BuildContext context) {
+    final Color primaryColor = Color(0xFF1565C0);
+    final Color accentColor = Color(0xFF42A5F5);
+    final Color surfaceColor = Color(0xFFF5F7FA);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: surfaceColor,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        backgroundColor: Color(0xFF1565C0), // Azul profundo
-        title: const Text(
-          'Perfil del Paciente',
-          style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        elevation: 4,
-        shadowColor: Colors.black45,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Avatar con efecto
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: CircleAvatar(
-                  radius: 60,
-                  backgroundColor: Color(0xFF1565C0),
-                  child: Text(
-                    widget.paciente.nombreUsuario[0].toUpperCase(),
-                    style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 15),
-              // Nombre y edad
-              Text(
-                widget.paciente.nombreUsuario,
-                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.black87),
-              ),
-              Text(
-                '${widget.paciente.edad} años',
-                style: const TextStyle(fontSize: 18, color: Colors.blueGrey),
-              ),
-              const SizedBox(height: 20),
-              // Tarjeta con información personal estilizada
-              Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                elevation: 6,
-                shadowColor: Colors.black38,
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildInfoRow(Icons.person, 'Nombre Completo', '${widget.paciente.nombre} ${widget.paciente.primerApellido} ${widget.paciente.segundoApellido ?? ''}'),
-                      _buildInfoRow(Icons.wc, 'Género', widget.paciente.genero),
-                      _buildInfoRow(Icons.favorite, 'Estado Civil', widget.paciente.estadoCivil ?? 'No disponible'),
-                      _buildInfoRow(Icons.school, 'Escolaridad', widget.paciente.escolaridad ?? 'No disponible'),
-                      _buildInfoRow(Icons.work, 'Ocupación', widget.paciente.ocupacion.isNotEmpty ? widget.paciente.ocupacion : 'No disponible'),
-                      if (widget.paciente.correoElectronico != null && widget.paciente.correoElectronico!.isNotEmpty)
-                        _buildInfoRow(Icons.email, 'Correo Electrónico', widget.paciente.correoElectronico!),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 25),
-              _buildStatusIndicator(widget.paciente.estadoPaciente),
-              const SizedBox(height: 30),
-              // Formulario para cambiar usuario y correo
-              Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                elevation: 6,
-                shadowColor: Colors.black38,
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.edit, color: Color(0xFF1565C0)),
-                          SizedBox(width: 8),
-                          Text(
-                            "Actualizar información",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1565C0),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Divider(height: 30, thickness: 1),
-                      TextField(
-                        controller: _usuarioController,
-                        decoration: InputDecoration(
-                          labelText: 'Nuevo Usuario',
-                          hintText: widget.paciente.nombreUsuario,
-                          prefixIcon: Icon(Icons.person, color: Color(0xFF1565C0)),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Colors.grey.shade400),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Color(0xFF1565C0), width: 2),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 15),
-                      TextField(
-                        controller: _correoController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: 'Correo Electrónico',
-                          hintText: 'correo@ejemplo.com',
-                          prefixIcon: Icon(Icons.email, color: Color(0xFF1565C0)),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Colors.grey.shade400),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Color(0xFF1565C0), width: 2),
-                          ),
-                        ),
-                      ),
-                      if (_showPasswordField) ...[
-                        const SizedBox(height: 20),
-                        Container(
-                          padding: EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.blue.shade200),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Verificación de seguridad",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1565C0),
-                                  fontSize: 16,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                "Para confirmar los cambios, ingresa tu contraseña actual:",
-                                style: TextStyle(
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              const SizedBox(height: 15),
-                              TextField(
-                                controller: _passwordController,
-                                obscureText: _obscurePassword,
-                                decoration: InputDecoration(
-                                  labelText: 'Contraseña Actual',
-                                  prefixIcon: Icon(Icons.lock, color: Color(0xFF1565C0)),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                                      color: Colors.grey,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _obscurePassword = !_obscurePassword;
-                                      });
-                                    },
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 25),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: _isUpdating ? null : () => _actualizarDatos(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF1565C0),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            elevation: 2,
-                          ),
-                          child: _isUpdating
-                              ? SizedBox(
-                                  height: 24,
-                                  width: 24,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 3,
-                                  ),
-                                )
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(_showPasswordField ? Icons.check_circle : Icons.edit),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      _showPasswordField ? 'Confirmar Cambios' : 'Actualizar Información',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                        ),
-                      ),
-                      if (_showPasswordField) ...[
-                        SizedBox(height: 10),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _showPasswordField = false;
-                              _passwordController.clear();
-                            });
-                          },
-                          child: Text(
-                            "Cancelar",
-                            style: TextStyle(color: Colors.grey.shade800),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 30),
-            ],
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: Container(
+          margin: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            icon: Icon(Icons.arrow_back, color: primaryColor),
+            onPressed: () => Navigator.pop(context),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildInfoRow(IconData icon, String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Row(
+      body: Stack(
         children: [
-          Icon(icon, color: Color(0xFF1565C0)),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Text(
-              '$title: $value',
-              style: const TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w500),
+          // Header gradient background
+          Container(
+            height: MediaQuery.of(context).size.height * 0.3,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [primaryColor, accentColor],
+              ),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
+            ),
+          ),
+          
+          // Main content
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(top: 15),
+              child: Column(
+                children: [
+                  // Profile header with avatar
+                  _buildProfileHeader(),
+                  
+                  // Content cards
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 20),
+                        _buildSectionTitle('Información Personal'),
+                        SizedBox(height: 10),
+                        _buildInfoCard(),
+                        SizedBox(height: 20),
+                        _buildStatusCard(),
+                        SizedBox(height: 20),
+                        _buildSectionTitle('Actualizar Datos'),
+                        SizedBox(height: 10),
+                        _buildUpdateCard(),
+                        SizedBox(height: 30),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -408,22 +196,404 @@ class _PerfilDesignState extends State<PerfilDesign> {
     );
   }
 
-  Widget _buildStatusIndicator(String estadoPaciente) {
-    Color borderColor = estadoPaciente.toLowerCase() == 'activo' ? Colors.green : Colors.red;
-    String statusText = estadoPaciente.toLowerCase() == 'activo' ? 'Activo' : 'Inactivo';
+  Widget _buildProfileHeader() {
+    return Column(
+      children: [
+        // Avatar with decorative elements
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            // Halo effect behind avatar
+            Container(
+              width: 130,
+              height: 130,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+            ),
+            
+            // Avatar
+            Container(
+              padding: EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                radius: 55,
+                backgroundColor: Color(0xFF1565C0),
+                child: Text(
+                  widget.paciente.nombreUsuario[0].toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 40, 
+                    fontWeight: FontWeight.bold, 
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            
+            // Status indicator dot
+            Positioned(
+              bottom: 5,
+              right: 5,
+              child: Container(
+                width: 25,
+                height: 25,
+                decoration: BoxDecoration(
+                  color: widget.paciente.estadoPaciente.toLowerCase() == 'activo' 
+                      ? Colors.green 
+                      : Colors.red,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        
+        SizedBox(height: 15),
+        
+        // Name and age
+        Text(
+          widget.paciente.nombreUsuario,
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            shadows: [
+              Shadow(
+                blurRadius: 2,
+                color: Colors.black26,
+                offset: Offset(1, 1),
+              ),
+            ],
+          ),
+        ),
+        
+        Text(
+          '${widget.paciente.edad} años',
+          style: TextStyle(
+            fontSize: 18,
+            color: Colors.white.withOpacity(0.9),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-      decoration: BoxDecoration(
-        border: Border.all(color: borderColor, width: 3),
-        borderRadius: BorderRadius.circular(15),
-      ),
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5),
       child: Text(
-        statusText,
+        title,
         style: TextStyle(
-          color: borderColor,
           fontSize: 18,
           fontWeight: FontWeight.bold,
+          color: Color(0xFF1565C0),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard() {
+    return Card(
+      elevation: 3,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildInfoRow(Icons.person_outline, 'Nombre', widget.paciente.nombre),
+            _divider(),
+            _buildInfoRow(Icons.wc, 'Género', widget.paciente.genero),
+            _divider(),
+            _buildInfoRow(Icons.favorite_border, 'Estado Civil', widget.paciente.estadoCivil),
+            _divider(),
+            _buildInfoRow(Icons.school_outlined, 'Escolaridad', widget.paciente.escolaridad),
+            _divider(),
+            _buildInfoRow(Icons.work_outline, 'Ocupación', widget.paciente.ocupacion),
+            _divider(),
+            _buildInfoRow(Icons.email_outlined, 'Correo', widget.paciente.correoElectronico),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _divider() {
+    return Divider(
+      color: Colors.grey.shade200,
+      thickness: 1,
+      height: 20,
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String title, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Color(0xFF1565C0).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon, 
+              color: Color(0xFF1565C0),
+              size: 22,
+            ),
+          ),
+          SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  value != null && value.isNotEmpty ? value : "No disponible",
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusCard() {
+    bool isActive = widget.paciente.estadoPaciente.toLowerCase() == 'activo';
+    Color statusColor = isActive ? Colors.green.shade600 : Colors.red.shade600;
+    
+    return Card(
+      elevation: 3,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isActive ? Icons.check_circle : Icons.cancel_outlined,
+                color: statusColor,
+                size: 30,
+              ),
+            ),
+            SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Estado del Paciente',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    isActive ? 'Activo' : 'Inactivo',
+                    style: TextStyle(
+                      color: statusColor,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: statusColor,
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                isActive ? 'En Tratamiento' : 'Sin Atención',
+                style: TextStyle(
+                  color: statusColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUpdateCard() {
+    return Card(
+      elevation: 3,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTextField(
+              controller: _usuarioController,
+              icon: Icons.person_outline,
+              label: 'Nuevo Usuario',
+              hint: 'Ingresa un nuevo nombre de usuario',
+            ),
+            SizedBox(height: 15),
+            _buildTextField(
+              controller: _correoController,
+              icon: Icons.email_outlined,
+              label: 'Nuevo Correo Electrónico',
+              hint: 'Ingresa un nuevo correo electrónico',
+              keyboardType: TextInputType.emailAddress,
+            ),
+            SizedBox(height: 15),
+            if (_showPasswordField)
+              _buildTextField(
+                controller: _passwordController,
+                icon: Icons.lock_outline,
+                label: 'Contraseña Actual',
+                hint: 'Ingresa tu contraseña actual',
+                obscure: _obscurePassword,
+                onToggleVisibility: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
+              ),
+            SizedBox(height: 25),
+            SizedBox(
+              width: double.infinity,
+              child: _isUpdating
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1565C0)),
+                      ),
+                    )
+                  : ElevatedButton(
+                      onPressed: () => _actualizarDatos(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF1565C0),
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: Text(
+                        _showPasswordField ? 'Confirmar Cambios' : 'Actualizar Datos',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required IconData icon,
+    required String label,
+    required String hint,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscure = false,
+    Function? onToggleVisibility,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: obscure,
+        keyboardType: keyboardType,
+        style: TextStyle(
+          fontSize: 16,
+          color: Colors.black87,
+        ),
+        decoration: InputDecoration(
+          contentPadding: EdgeInsets.symmetric(vertical: 16),
+          border: InputBorder.none,
+          prefixIcon: Icon(
+            icon,
+            color: Color(0xFF1565C0),
+          ),
+          suffixIcon: onToggleVisibility != null
+              ? IconButton(
+                  icon: Icon(
+                    obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                    color: Colors.grey.shade600,
+                  ),
+                  onPressed: () => onToggleVisibility(),
+                )
+              : null,
+          labelText: label,
+          hintText: hint,
+          hintStyle: TextStyle(
+            color: Colors.grey.shade400,
+            fontSize: 14,
+          ),
+          labelStyle: TextStyle(
+            color: Colors.grey.shade600,
+            fontSize: 16,
+          ),
+          floatingLabelBehavior: FloatingLabelBehavior.auto,
         ),
       ),
     );

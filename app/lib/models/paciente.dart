@@ -31,6 +31,29 @@ class Paciente {
     required this.correoElectronico,  // Inicializa el nuevo atributo
   });
 
+  // 🔹 Método para actualizar solo los valores modificados sin perder los demás datos
+  Paciente copyWith({
+    String? nombreUsuario,
+    String? correoElectronico,
+  }) {
+    return Paciente(
+      id: id,
+      nombre: nombre,
+      primerApellido: primerApellido,
+      segundoApellido: segundoApellido,
+      edad: edad,
+      codigo: codigo,
+      genero: genero,
+      estadoCivil: estadoCivil,
+      escolaridad: escolaridad,
+      ocupacion: ocupacion,
+      nombreUsuario: nombreUsuario ?? this.nombreUsuario,
+      contrasena: contrasena,
+      estadoPaciente: estadoPaciente,
+      correoElectronico: correoElectronico ?? this.correoElectronico,
+    );
+  }
+
   // Convertir un mapa (de Supabase) a un objeto Paciente
   factory Paciente.fromMap(Map<String, dynamic> map) {
     return Paciente(
