@@ -18,25 +18,6 @@ class EjerciciosView extends StatelessWidget {
           "Ejercicios",
           style: TextStyle(color: Colors.white),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person, color: Colors.white),
-            onPressed: () {
-              Navigator.of(context).pushNamed('/perfil');
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: () => ejerciciosViewModel.recargarDatos(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () async {
-              // Lógica de logout
-              Navigator.of(context).pushReplacementNamed('/login');
-            },
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -55,6 +36,24 @@ class EjerciciosView extends StatelessWidget {
                   ))
               .toList(),
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.blue[900],
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white70,
+        currentIndex: 1,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Inicio"),
+          BottomNavigationBarItem(icon: Icon(Icons.fitness_center), label: "Ejercicios"),
+          BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: "Progreso"),
+        ],
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.of(context).pushReplacementNamed('/home');
+          } else if (index == 2) {
+            Navigator.of(context).pushReplacementNamed('/progreso');
+          }
+        },
       ),
     );
   }
