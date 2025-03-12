@@ -66,10 +66,17 @@ class _HomeViewState extends State<HomeView> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Inicio"),
           BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: "Progreso"),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: "Sesiones"),
+          BottomNavigationBarItem(icon: Icon(Icons.fitness_center), label: "Ejercicios"),
         ],
         onTap: (index) {
-          // Manejo de navegación en el BottomNavigationBar
+          if (index == 0) {
+            // Navegar a la vista de inicio (ya estamos aquí, no es necesario hacer nada)
+          } else if (index == 1) {
+            // Navegar a la vista de progreso (puedes implementar esto si tienes una vista de progreso)
+          } else if (index == 2) {
+            // Navegar a la vista de ejercicios
+            Navigator.of(context).pushNamed('/ejercicios');
+          }
         },
       ),
     );

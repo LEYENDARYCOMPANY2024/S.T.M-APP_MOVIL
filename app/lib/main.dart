@@ -6,10 +6,12 @@ import 'views/register_view.dart';
 import 'views/home_view.dart';
 import 'views/splash_view.dart';
 import 'views/perfil_view.dart';  // Importa el PerfilView
+import 'views/ejercicios_view.dart'; // Importa la nueva vista de ejercicios
 import 'viewmodels/login_viewmodel.dart';
 import 'viewmodels/register_viewmodel.dart';
 import 'viewmodels/home_viewmodel.dart'; // Importar el HomeViewModel
 import 'viewmodels/perfil_viewmodel.dart'; // Importa el PerfilViewModel
+import 'viewmodels/ejercicios_viewmodel.dart'; // Importa el EjerciciosViewModel
 import 'services/auth_services.dart';
 
 void main() async {
@@ -39,6 +41,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => RegisterViewModel(authService)),
         ChangeNotifierProvider(create: (_) => HomeViewModel()), // Proveedor del HomeViewModel
         ChangeNotifierProvider(create: (_) => PerfilViewModel()), // Proveedor del PerfilViewModel
+        ChangeNotifierProvider(create: (_) => EjerciciosViewModel()), // Proveedor del EjerciciosViewModel
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -53,7 +56,8 @@ class MyApp extends StatelessWidget {
           '/login': (context) => LoginView(), // Ruta de login
           '/register': (context) => const RegisterView(), // Ruta de registro
           '/home': (context) => const HomeView(), // Ruta para la pantalla principal
-          '/perfil': (context) => const PerfilView(), // Nueva ruta para el perfil
+          '/perfil': (context) => const PerfilView(), // Ruta para el perfil
+          '/ejercicios': (context) => const EjerciciosView(), // Nueva ruta para ejercicios
         },
       ),
     );
