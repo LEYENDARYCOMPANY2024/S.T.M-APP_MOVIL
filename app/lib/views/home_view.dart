@@ -36,7 +36,7 @@ class _HomeViewState extends State<HomeView> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.person, color: Colors.white), // Icono de perfil
+            icon: const Icon(Icons.person, color: Colors.white),
             onPressed: () {
               Navigator.of(context).pushNamed('/perfil');
             },
@@ -70,13 +70,17 @@ class _HomeViewState extends State<HomeView> {
         ],
         onTap: (index) {
           if (index == 0) {
-            // Navegar a la vista de inicio (ya estamos aquí, no es necesario hacer nada)
           } else if (index == 1) {
-            // Navegar a la vista de progreso (puedes implementar esto si tienes una vista de progreso)
           } else if (index == 2) {
-            // Navegar a la vista de ejercicios
             Navigator.of(context).pushNamed('/ejercicios');
           }
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blue[300],
+        child: Icon(Icons.event_note, color: Colors.white),
+        onPressed: () {
+          Navigator.of(context).pushNamed('/sesion');
         },
       ),
     );
