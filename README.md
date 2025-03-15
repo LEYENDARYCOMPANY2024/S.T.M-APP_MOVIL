@@ -1,9 +1,8 @@
-<<<<<<< HEAD
 # 📱 Mi Primera App en Flutter
 
 Este proyecto es una aplicación creada con Flutter.
 
-## que es
+## Que es
 
 Este repositorio contiene el desarrollo completo de la aplicación móvil, incluyendo todas las interfaces y funcionalidades dirigidas a los pacientes. Construido con Flutter, ofrece una experiencia fluida y optimizada para dispositivos móviles.
 
@@ -28,9 +27,29 @@ Este repositorio contiene el desarrollo completo de la aplicación móvil, inclu
    cd mi_primera_app
    ```
    ```sh
-   flutter run
+   flutter run   
    ```
 
-   ```sh
-   flutter devices
-   ```
+## 📦 Mantenimiento y Construcción
+
+Para asegurar que las librerías estén actualizadas y el proyecto funcione correctamente, ejecuta los siguientes comandos:
+
+### 1. Actualizar dependencias
+```sh
+flutter pub get
+```
+```sh
+flutter pub upgrade
+```
+
+### 2. Limpiar el proyecto
+```sh
+flutter clean
+```
+
+### 3. Generar APK
+```sh
+flutter build apk
+```
+
+
