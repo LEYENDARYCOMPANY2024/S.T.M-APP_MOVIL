@@ -135,15 +135,83 @@ class PacienteService {
     }
   }
 
-  // Obtener la próxima sesión del paciente
   Future<Map<String, dynamic>?> getProximaSesion(int pacienteId) async {
-    // Aquí implementarías la consulta para obtener la próxima sesión
-    // Por ahora retornaremos datos ficticios
+  try {
+    // Obtener la fecha actual
+    final now = DateTime.now();
+    final hoy = now.toString().split(' ')[0]; // Formato YYYY-MM-DD
+    
+    // Primero, obtenemos todas las sesiones del paciente
+    final response = await _supabase
+        .from('paciente_sesiones_p')
+        .select('sesiones(*)')
+        .eq('id_paciente_ps_fk', pacienteId);
+    
+    print('📅 Respuesta de sesiones: $response');
+    
+    if (response == null || response.isEmpty) {
+      print('ℹ️ No hay sesiones para el paciente ID: $pacienteId');
+      return null;
+    }
+    
+    // Filtrar y ordenar manualmente las sesiones para encontrar la próxima
+    List<Map<String, dynamic>> sesiones = [];
+    for (var item in response) {
+      final sesionData = item['sesiones'];
+      // Verificar si la fecha es futura o de hoy
+      if (sesionData['fecha_inicio'] != null && sesionData['fecha_inicio'].compareTo(hoy) >= 0) {
+        sesiones.add(sesionData);
+      }
+    }
+    
+    if (sesiones.isEmpty) {
+      print('ℹ️ No hay sesiones futuras para el paciente ID: $pacienteId');
+      return null;
+    }
+    
+    // Ordenar las sesiones por fecha_inicio
+    sesiones.sort((a, b) => a['fecha_inicio'].compareTo(b['fecha_inicio']));
+    
+    // Obtener la primera (más cercana) sesión
+    final proximaSesion = sesiones.first;
+    
+    // Formatear la fecha para mostrarla en español
+    final fechaInicio = DateTime.parse(proximaSesion['fecha_inicio']);
+    final List<String> meses = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    
+    final fechaFormateada = '${fechaInicio.day} de ${meses[fechaInicio.month - 1]}, ${fechaInicio.year}';
+    
+    // Extraer y formatear la hora
+    String horaInicio = 'Pendiente';
+    if (proximaSesion['hora_inicio'] != null) {
+      try {
+        // Intentar parsear la hora del timestamp
+        final horaCompleta = DateTime.parse(proximaSesion['hora_inicio']);
+        horaInicio = '${horaCompleta.hour.toString().padLeft(2, '0')}:${horaCompleta.minute.toString().padLeft(2, '0')}';
+      } catch (e) {
+        print('⚠️ Error al parsear la hora: $e');
+        // Si hay error, intentar extraer solo la parte de la hora si es un string
+        if (proximaSesion['hora_inicio'] is String) {
+          final partes = proximaSesion['hora_inicio'].split('T');
+          if (partes.length > 1) {
+            horaInicio = partes[1].substring(0, 5); // Formato HH:MM
+          }
+        }
+      }
+    }
+    
     return {
-      'fecha': 'Marzo 10, 2025',
-      'hora': '15:30',
+      'fecha': fechaFormateada,
+      'hora': horaInicio,
     };
+  } catch (e) {
+    print('❌ Error al obtener próxima sesión: $e');
+    return null;
   }
+}
 
   // Obtener datos de progreso del paciente
   Future<Map<String, dynamic>> getDatosProgreso(int pacienteId) async {
