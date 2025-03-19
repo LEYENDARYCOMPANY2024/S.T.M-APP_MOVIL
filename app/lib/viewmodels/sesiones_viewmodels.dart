@@ -16,41 +16,37 @@ class SesionesViewModel extends ChangeNotifier {
   
   // Cargar todos los terapeutas del paciente
   Future<void> cargarTerapeutas() async {
-    try {
-      isLoading = true;
-      errorMessage = null;
-      notifyListeners();
-      
-      // Obtener el ID del usuario actual
-      final userId = await TokenService.getUserId();
-      
-      if (userId == null) {
-        errorMessage = "No se pudo obtener el ID del usuario";
-        isLoading = false;
-        notifyListeners();
-        return;
-      }
-      
-      // Obtener los terapeutas del paciente
-      terapeutas = await _sesionService.getTerapeutasPaciente(userId);
-      
-      // Inicializar el mapa de sesiones por terapeuta
-      sesionesPorTerapeuta.clear();
-      
-      // Para cada terapeuta, cargar sus sesiones con el paciente
-      for (var terapeuta in terapeutas) {
-        await cargarSesionesTerapeuta(userId, terapeuta.id);
-      }
-      
+  try {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    final userId = await TokenService.getUserId();
+    if (userId == null) {
+      errorMessage = "No se pudo obtener el ID del usuario";
       isLoading = false;
       notifyListeners();
-    } catch (e) {
-      print('❌ Error al cargar terapeutas: $e');
-      errorMessage = "Ocurrió un error al cargar los datos de terapeutas";
-      isLoading = false;
-      notifyListeners();
+      return;
     }
+
+    // Obtener todos los terapeutas (de sesiones y de historial)
+    terapeutas = await _sesionService.getTerapeutasPaciente(userId);
+    sesionesPorTerapeuta.clear();
+
+    for (var terapeuta in terapeutas) {
+      await cargarSesionesTerapeuta(userId, terapeuta.id);
+    }
+
+    isLoading = false;
+    notifyListeners();
+    } catch (e) {
+    print('❌ Error al cargar terapeutas con historial: $e');
+    errorMessage = "Ocurrió un error al cargar los datos de terapeutas";
+    isLoading = false;
+    notifyListeners();
   }
+}
+
   
   // Cargar las sesiones de un terapeuta específico
   Future<void> cargarSesionesTerapeuta(int pacienteId, int terapeutaId) async {
