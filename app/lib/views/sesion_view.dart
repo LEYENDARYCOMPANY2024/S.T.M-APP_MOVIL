@@ -168,10 +168,7 @@ class _SesionesViewState extends State<SesionesView> {
   }
 
   // Tarjeta de terapeuta con expansión para sesiones
-  Widget _buildTerapeutaCard(SesionesViewModel viewModel, Terapeuta terapeuta) {
-    // Verificar si hay sesiones para este terapeuta
-    List<Sesion> sesiones = viewModel.sesionesPorTerapeuta[terapeuta.id] ?? [];
-    
+  Widget _buildTerapeutaCard(SesionesViewModel viewModel, Terapeuta terapeuta) {    
     return Card(
       color: Colors.grey[800],
       margin: const EdgeInsets.only(bottom: 16.0),
@@ -181,6 +178,14 @@ class _SesionesViewState extends State<SesionesView> {
         backgroundColor: Colors.grey[800],
         collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        onExpansionChanged: (expanded) {
+          // Cuando se expande, carga las sesiones
+          if (expanded) {
+            viewModel.cargarSesionesTerapeuta(terapeuta.id);
+          }
+          viewModel.toggleTerapeutaExpansion(terapeuta.id);
+        },
+        initiallyExpanded: viewModel.terapeutasExpandidos[terapeuta.id] ?? false,
         title: Row(
           children: [
             CircleAvatar(
@@ -214,26 +219,46 @@ class _SesionesViewState extends State<SesionesView> {
         collapsedIconColor: Colors.white,
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         children: [
-          sesiones.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "No hay sesiones registradas con este terapeuta",
-                    style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
-                    textAlign: TextAlign.center,
-                  ),
-                )
-              : ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: sesiones.length,
-                  itemBuilder: (context, index) {
-                    final sesion = sesiones[index];
-                    return _buildSesionTile(sesion);
-                  },
-                ),
+          _buildSesionesContent(viewModel, terapeuta),
         ],
       ),
+    );
+  }
+
+  // Contenido de sesiones dentro de cada terapeuta
+  Widget _buildSesionesContent(SesionesViewModel viewModel, Terapeuta terapeuta) {
+    // Verificar si ya se cargaron las sesiones
+    if (!viewModel.sesionesPorTerapeuta.containsKey(terapeuta.id)) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    }
+    
+    // Obtener las sesiones del terapeuta
+    List<Sesion> sesiones = viewModel.sesionesPorTerapeuta[terapeuta.id] ?? [];
+    
+    if (sesiones.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          "No hay sesiones registradas con este terapeuta",
+          style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+    
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: sesiones.length,
+      itemBuilder: (context, index) {
+        final sesion = sesiones[index];
+        return _buildSesionTile(sesion);
+      },
     );
   }
 
@@ -281,6 +306,7 @@ class _SesionesViewState extends State<SesionesView> {
             icon: Icon(Icons.visibility, color: Colors.white70),
             onPressed: () {
               // Acción para ver detalles de la sesión
+              // Aquí se podría implementar la navegación a una pantalla de detalles
             },
           ),
         ],
