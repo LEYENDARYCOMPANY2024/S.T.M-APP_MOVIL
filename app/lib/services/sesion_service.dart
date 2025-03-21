@@ -76,9 +76,10 @@ class SesionService {
           .eq('id_terapeuta', terapeutaId)
           .single();
 
-      String nombreTerapeuta = terapeutaData != null
-          ? Terapeuta.fromMap(terapeutaData).nombreCompleto
-          : "Terapeuta desconocido";
+      String nombreTerapeuta = terapeutaData.isNotEmpty
+        ? Terapeuta.fromMap(terapeutaData).nombreCompleto
+        : "Terapeuta desconocido";
+
 
       // Obtener las sesiones directamente de paciente_sesiones_p
       final sesionesResponse = await _supabase

@@ -1,7 +1,5 @@
 // views/register_view.dart
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../viewmodels/register_viewmodel.dart';
 import '../widgets/register_form.dart';
 
 class RegisterView extends StatelessWidget {

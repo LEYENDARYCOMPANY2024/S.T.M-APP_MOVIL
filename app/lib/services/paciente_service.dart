@@ -149,10 +149,11 @@ class PacienteService {
     
     print('📅 Respuesta de sesiones: $response');
     
-    if (response == null || response.isEmpty) {
+    if (response.isEmpty) {
       print('ℹ️ No hay sesiones para el paciente ID: $pacienteId');
       return null;
     }
+
     
     // Filtrar y ordenar manualmente las sesiones para encontrar la próxima
     List<Map<String, dynamic>> sesiones = [];
