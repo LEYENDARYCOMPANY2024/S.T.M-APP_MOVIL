@@ -48,7 +48,7 @@ class EjerciciosService {
 
         List<Ejercicio> ejercicios = [];
         
-        if (respEjercicios != null && respEjercicios.isNotEmpty) {
+        if (respEjercicios.isNotEmpty) {
           ejercicios = (respEjercicios as List).map((item) {
             Map<String, dynamic> ejercicioData = item['ejercicios'];
             return Ejercicio.fromMap(ejercicioData);
