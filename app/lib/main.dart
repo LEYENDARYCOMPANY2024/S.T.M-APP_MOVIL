@@ -14,6 +14,7 @@ import 'viewmodels/home_viewmodel.dart'; // Importar el HomeViewModel
 import 'viewmodels/perfil_viewmodel.dart'; // Importa el PerfilViewModel
 import 'viewmodels/ejercicios_viewmodel.dart'; // Importa el EjerciciosViewModel
 import 'viewmodels/sesiones_viewmodels.dart'; // Importa el SesionViewModel
+import 'services/ejercicios_services.dart'; // Importa el servicio de ejercicios
 import 'services/auth_services.dart';
 
 void main() async {
@@ -43,7 +44,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => RegisterViewModel(authService)),
         ChangeNotifierProvider(create: (_) => HomeViewModel()), // Proveedor del HomeViewModel
         ChangeNotifierProvider(create: (_) => PerfilViewModel()), // Proveedor del PerfilViewModel
-        ChangeNotifierProvider(create: (_) => EjerciciosViewModel()), // Proveedor del EjerciciosViewModel
+        ChangeNotifierProvider(create: (_) => EjerciciosViewModel(EjerciciosService(Supabase.instance.client)),), // Proveedor del EjerciciosViewModel
         ChangeNotifierProvider(create: (_) => SesionesViewModel()), // Proveedor del SesionViewModel
       ],
       child: MaterialApp(

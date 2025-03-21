@@ -1,46 +1,69 @@
+// viewmodels/ejercicios_viewmodel.dart
 import 'package:flutter/material.dart';
+import '../models/nivel.dart';
+import '../services/ejercicios_services.dart';
 
 class EjerciciosViewModel extends ChangeNotifier {
-  // Lista de niveles con su estado de completado
-  final List<Nivel> _niveles = [
-    Nivel(nombre: "Nivel 1", descripcion: "ver más >", completado: false),
-    Nivel(nombre: "Nivel 2", descripcion: "ver más >", completado: false),
-    Nivel(nombre: "Nivel 3", descripcion: "a", completado: false),
-    Nivel(nombre: "Nivel 4", descripcion: "b", completado: false),
-    Nivel(nombre: "Nivel 5", descripcion: "b", completado: false),
-    Nivel(nombre: "Nivel 6", descripcion: "a", completado: false),
-    Nivel(nombre: "Nivel 7", descripcion: "a", completado: false),
-    Nivel(nombre: "Nivel 8", descripcion: "a", completado: false),
-  ];
+  final EjerciciosService _ejerciciosService;
+  List<Nivel> _niveles = [];
+  bool _cargando = false;
+  String _error = '';
+  int _idPaciente = 0; // Esto debería venir de tu sistema de autenticación
 
-  // Obtener la lista de niveles
+  EjerciciosViewModel(this._ejerciciosService);
+
+  // Getters
   List<Nivel> get niveles => _niveles;
+  bool get cargando => _cargando;
+  String get error => _error;
 
-  // Marcar un nivel como completado
-  void completarNivel(int index) {
-    if (index >= 0 && index < _niveles.length) {
-      _niveles[index].completado = true;
-      notifyListeners(); // Notificar a los listeners que los datos han cambiado
+  // Establecer el ID del paciente actual
+  void establecerIdPaciente(int id) {
+    _idPaciente = id;
+  }
+
+  // Cargar niveles y ejercicios
+  Future<void> cargarNivelesYEjercicios() async {
+    _cargando = true;
+    _error = '';
+    notifyListeners();
+
+    try {
+      // Verificar que tenemos un ID de paciente válido
+      if (_idPaciente <= 0) {
+        _error = 'No se ha establecido un paciente válido';
+        _cargando = false;
+        notifyListeners();
+        return;
+      }
+
+      _niveles = await _ejerciciosService.obtenerNivelesConEjercicios(_idPaciente);
+      print('Niveles cargados: ${_niveles.map((n) => '${n.nombre}: ${n.estado}').toList()}');
+      
+      _cargando = false;
+      notifyListeners();
+    } catch (e) {
+      _error = 'Error al cargar los niveles y ejercicios: $e';
+      _cargando = false;
+      notifyListeners();
     }
   }
 
-  // Recargar datos (simulado)
-  Future<void> recargarDatos() async {
-    // Simular una carga de datos
-    await Future.delayed(const Duration(seconds: 2));
-    notifyListeners();
+  // Cambiar el estado de expansión de un nivel
+  void toggleExpansion(int index) {
+    if (index >= 0 && index < _niveles.length) {
+      _niveles[index] = _niveles[index].copyWith(
+        expandido: !_niveles[index].expandido
+      );
+      notifyListeners();
+    }
   }
-}
 
-// Modelo de datos para un nivel
-class Nivel {
-  final String nombre;
-  final String descripcion;
-  bool completado;
-
-  Nivel({
-    required this.nombre,
-    required this.descripcion,
-    this.completado = false,
-  });
+  // Verificar si un nivel está desbloqueado
+  bool nivelDesbloqueado(int index) {
+    if (index >= 0 && index < _niveles.length) {
+      return _niveles[index].estado == 'desbloqueado';
+    }
+    return false;
+  }
 }
