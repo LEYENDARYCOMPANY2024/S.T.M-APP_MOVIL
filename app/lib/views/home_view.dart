@@ -65,7 +65,7 @@ class _HomeViewState extends State<HomeView> {
         unselectedItemColor: Colors.white70,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Inicio"),
-          BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: "Progreso"),
+          BottomNavigationBarItem(icon: Icon(Icons.assignment), label: "Historial Clinico"),
           BottomNavigationBarItem(icon: Icon(Icons.fitness_center), label: "Ejercicios"),
         ],
         onTap: (index) {
@@ -177,12 +177,18 @@ class _HomeViewState extends State<HomeView> {
               ],
             ),
             const SizedBox(height: 15),
-            viewModel.terapeuta != null
-                ? _buildTerapeutaInfo(viewModel.terapeuta!)
-                : Text(
-                    "No tienes un terapeuta asignado actualmente",
-                    style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
-                  ),
+            // Verificamos si el paciente está inactivo
+            viewModel.paciente != null && viewModel.paciente!.estadoPaciente == 'inactivo'
+              ? Text(
+                  "Sin terapeuta",
+                  style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
+                )
+              : viewModel.terapeuta != null
+                  ? _buildTerapeutaInfo(viewModel.terapeuta!)
+                  : Text(
+                      "No tienes un terapeuta asignado actualmente",
+                      style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
+                    ),
           ],
         ),
       ),
@@ -264,12 +270,19 @@ class _HomeViewState extends State<HomeView> {
               ],
             ),
             const SizedBox(height: 15),
-            viewModel.proximaSesion != null
-                ? _buildSessionInfo(viewModel)
-                : Text(
-                    "No hay sesiones programadas",
-                    style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
-                  ),
+            // Verificar si el paciente está inactivo
+            viewModel.paciente != null && viewModel.paciente!.estadoPaciente == 'inactivo'
+              ? Text(
+                  "Estás inactivo, no tienes sesiones",
+                  style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
+                )
+              : viewModel.proximaSesion != null
+                  ? _buildSessionInfo(viewModel)
+                  : Text(
+                      "No hay sesiones programadas",
+                      style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
+                    ),
+
           ],
         ),
       ),
