@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'views/login_view.dart';
 import 'views/register_view.dart';
 import 'views/home_view.dart';
@@ -20,10 +21,13 @@ import 'services/auth_services.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializar Supabase directamente
+  // Cargar variables de entorno
+  await dotenv.load(fileName: "assets/.env");
+
+  // Inicializar Supabase con variables seguras
   await Supabase.initialize(
-    url: "https://hxjmzijhcmhfcrjcptge.supabase.co", // Coloca aquí tu URL de Supabase
-    anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4am16aWpoY21oZmNyamNwdGdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwODMxODgsImV4cCI6MjA1NTY1OTE4OH0.fZ1QaYkFTfJTdupOUkV7V9a7kIIVHCt_XusnNWxkyqw", // Coloca aquí tu Key de Supabase
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
   runApp(const MyApp());
