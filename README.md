@@ -47,9 +47,15 @@ flutter pub upgrade
 flutter clean
 ```
 
-### 3. Generar APK
+### 3. Generar APK en forma de release (prueba)
 ```sh
-flutter build apk
+flutter build apk --release
+```
+
+### 4. Generar apk Listo ()
+
+```sh
+flutter build apk --release --output=build/app/outputs/flutter-apk/SMM.apk
 ```
 
 
