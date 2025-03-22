@@ -48,9 +48,6 @@ class AuthService {
       final token = await TokenService.getToken();
       if (token == null) return false;
       
-      // Aquí puedes implementar verificación adicional del token si lo deseas
-      // Por ejemplo, validar que no haya expirado o verificar contra Supabase
-      
       return true;
     } catch (e) {
       print('❌ Error al verificar token: $e');
@@ -79,7 +76,6 @@ class AuthService {
 
       final int pacienteId = response['id_paciente'];
 
-      // Verificar si el usuario ya está en uso
       final usernameExists = await _supabase
           .from('pacientes')
           .select('id_paciente')
@@ -91,13 +87,11 @@ class AuthService {
         return false;
       }
 
-      // 🔹 Hashear la contraseña antes de guardarla
       String hashedPassword = HashService.hashPassword(password);
 
-      // Guardar usuario y contraseña hasheada
       await _supabase.from('pacientes').update({
         'nombre_usuario_p': username,
-        'contrasena_p': hashedPassword,  // Se guarda encriptada
+        'contrasena_p': hashedPassword,
       }).eq('id_paciente', pacienteId);
 
       print('✅ Registro exitoso');
@@ -114,16 +108,36 @@ class AuthService {
     final randomBytes = List<int>.generate(16, (_) => random.nextInt(256));
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     
-    // Crear un payload con información básica
     final payload = {
       'user_id': userId,
       'username': username,
       'timestamp': timestamp,
       'random': base64Encode(randomBytes),
     };
-    
-    // Codificar el payload en base64
+
     final token = base64Encode(utf8.encode(json.encode(payload)));
     return token;
+  }
+
+  // 🔹 Obtener ID del Paciente desde el Token
+  Future<int?> obtenerIdPacienteDesdeToken() async {
+    try {
+      final token = await TokenService.getToken();
+      if (token == null) {
+        print('❌ No hay token disponible');
+        return null;
+      }
+      
+      final decoded = json.decode(utf8.decode(base64Decode(token)));
+      if (decoded is Map<String, dynamic> && decoded.containsKey('user_id')) {
+        return decoded['user_id'] as int?;
+      } else {
+        print('❌ Error: El token no contiene un ID de paciente válido.');
+        return null;
+      }
+    } catch (e) {
+      print('❌ Error al obtener ID de paciente desde el token: $e');
+      return null;
+    }
   }
 }

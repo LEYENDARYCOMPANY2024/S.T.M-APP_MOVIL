@@ -1,6 +1,7 @@
-// views/ejercicios_view.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 import '../viewmodels/ejercicios_viewmodel.dart';
 import '../models/ejercicio.dart';
 
@@ -12,16 +13,73 @@ class EjerciciosView extends StatefulWidget {
 }
 
 class _EjerciciosViewState extends State<EjerciciosView> {
+  // Mapa para almacenar los controladores de video
+  final Map<String, ChewieController> _videoControllers = {};
+  
   @override
   void initState() {
     super.initState();
-    // Establecer el ID del paciente y cargar datos
-    // Esto debería obtenerse desde tu sistema de autenticación
+    // Cargar los datos automáticamente
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final viewModel = Provider.of<EjerciciosViewModel>(context, listen: false);
-      viewModel.establecerIdPaciente(1); // Ejemplo: paciente con ID 1
       viewModel.cargarNivelesYEjercicios();
     });
+  }
+
+  @override
+  void dispose() {
+    // Liberar los controladores de video
+    _disposeAllVideoControllers();
+    super.dispose();
+  }
+
+  void _disposeAllVideoControllers() {
+    for (var controller in _videoControllers.values) {
+      controller.dispose();
+    }
+    _videoControllers.clear();
+  }
+
+  void _initializeVideoController(Ejercicio ejercicio) {
+    if (ejercicio.videoUrl == null || ejercicio.videoUrl!.isEmpty) return;
+    
+    // Evitar inicializar varias veces el mismo controlador
+    if (_videoControllers.containsKey(ejercicio.id.toString())) return;
+    
+    try {
+      final videoPlayerController = VideoPlayerController.network(ejercicio.videoUrl!);
+      
+      final chewieController = ChewieController(
+        videoPlayerController: videoPlayerController,
+        aspectRatio: 16 / 9,
+        autoPlay: false,
+        looping: false,
+        placeholder: Container(
+          color: Colors.grey[800],
+          child: const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          ),
+        ),
+        errorBuilder: (context, errorMessage) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Error al cargar el video: $errorMessage',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          );
+        },
+      );
+      
+      _videoControllers[ejercicio.id.toString()] = chewieController;
+      
+      // Notificar a la UI para actualizar
+      if (mounted) setState(() {});
+    } catch (e) {
+      print('❌ Error al inicializar el reproductor de video: $e');
+    }
   }
 
   @override
@@ -136,7 +194,18 @@ class _EjerciciosViewState extends State<EjerciciosView> {
                                     color: Colors.white,
                                   ),
                                   onPressed: desbloqueado
-                                      ? () => ejerciciosViewModel.toggleExpansion(index)
+                                      ? () {
+                                          ejerciciosViewModel.toggleExpansion(index);
+                                          
+                                          // Inicializar los controladores de video si el nivel se expande
+                                          if (!nivel.expandido && desbloqueado) {
+                                            for (var ejercicio in nivel.ejercicios) {
+                                              if (ejercicio.videoUrl != null && ejercicio.videoUrl!.isNotEmpty) {
+                                                _initializeVideoController(ejercicio);
+                                              }
+                                            }
+                                          }
+                                        }
                                       : null,
                                 ),
                               ],
@@ -197,8 +266,11 @@ class _EjerciciosViewState extends State<EjerciciosView> {
     );
   }
   
-  // Widget para mostrar un ejercicio individual
+  // Widget para mostrar un ejercicio individual con reproductor de video
   Widget _buildEjercicioItem(Ejercicio ejercicio) {
+    final bool tieneVideo = ejercicio.videoUrl != null && ejercicio.videoUrl!.isNotEmpty;
+    final String ejercicioId = ejercicio.id.toString();
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(12),
@@ -225,22 +297,35 @@ class _EjerciciosViewState extends State<EjerciciosView> {
               fontSize: 14,
             ),
           ),
-          if (ejercicio.videoUrl != null && ejercicio.videoUrl!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.play_circle_outline),
-                label: const Text("Ver video"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[300],
-                  foregroundColor: Colors.white,
+          if (tieneVideo) ...[
+            const SizedBox(height: 12),
+            // Reproductor de video
+            if (_videoControllers.containsKey(ejercicioId))
+              Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue[300]!, width: 2),
                 ),
-                onPressed: () {
-                  // Aquí iría la lógica para abrir el video
-                  // Puedes usar url_launcher o un reproductor integrado
-                },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Chewie(controller: _videoControllers[ejercicioId]!),
+                ),
+              )
+            else
+              // Botón para inicializar el video
+              Center(
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.play_circle_outline),
+                  label: const Text("Ver video"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[300],
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () => _initializeVideoController(ejercicio),
+                ),
               ),
-            ),
+          ],
         ],
       ),
     );

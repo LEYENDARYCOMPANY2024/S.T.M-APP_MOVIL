@@ -1,18 +1,25 @@
-// services/ejercicios_service.dart
-import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/ejercicio.dart';
+import '../services/auth_services.dart';
 import '../models/nivel.dart';
+import '../models/ejercicio.dart';
 
 class EjerciciosService {
   final SupabaseClient _supabaseClient;
+  final AuthService _authService;
 
-  EjerciciosService(this._supabaseClient);
+  EjerciciosService(this._supabaseClient, this._authService);
 
-  // Obtener todos los niveles con sus ejercicios relacionados
-  Future<List<Nivel>> obtenerNivelesConEjercicios(int idPaciente) async {
+  Future<List<Nivel>> obtenerNivelesConEjercicios() async {
     try {
-      // 1. Obtener todos los niveles en orden
+      // Obtener el id del paciente desde el token
+      final idPaciente = await _authService.obtenerIdPacienteDesdeToken();
+      if (idPaciente == null) {
+        throw Exception('No se pudo obtener el ID del paciente.');
+      }
+      
+      print('🔎 ID del Paciente: $idPaciente');
+
+      // Obtener los niveles ordenados por el campo 'orden'
       final respNiveles = await _supabaseClient
           .from('niveles')
           .select()
@@ -21,69 +28,70 @@ class EjerciciosService {
       List<Nivel> niveles = (respNiveles as List)
           .map((nivel) => Nivel.fromMap(nivel))
           .toList();
+      
+      print('📋 Niveles recuperados: ${niveles.length}');
 
-      // 2. Para cada nivel, verificar si está desbloqueado para el paciente
-      for (var i = 0; i < niveles.length; i++) {
-        final nivelId = niveles[i].id;
-        
-        // Buscar la relación paciente-nivel
-        final respPacienteNivel = await _supabaseClient
-            .from('paciente_nivel')
-            .select()
-            .eq('id_paciente_fk', idPaciente)
-            .eq('id_nivel_fk', nivelId)
-            .maybeSingle();
-
-        // Actualizar el estado (bloqueado/desbloqueado)
-        String estado = 'bloqueado';
-        if (respPacienteNivel != null) {
-          estado = respPacienteNivel['estado'] ?? 'bloqueado';
+      // Obtener TODOS los registros de paciente_nivel para este paciente de una sola vez
+      final respPacienteNiveles = await _supabaseClient
+          .from('paciente_nivel')
+          .select()
+          .eq('id_paciente_fk', idPaciente);
+          
+      print('📋 Registros paciente_nivel: ${respPacienteNiveles?.length ?? 0}');
+      
+      // Crear un mapa para acceso rápido
+      Map<int, dynamic> nivelStatusMap = {};
+      if (respPacienteNiveles != null) {
+        for (var registro in respPacienteNiveles) {
+          nivelStatusMap[registro['id_nivel_fk']] = registro;
         }
+      }
 
-        // 3. Obtener los ejercicios relacionados con el nivel
+      // Procesar cada nivel
+      for (int i = 0; i < niveles.length; i++) {
+        var nivel = niveles[i];
+        
+        // Verificar si existe un registro para este nivel
+        if (nivelStatusMap.containsKey(nivel.id)) {
+          final estadoNivel = nivelStatusMap[nivel.id]['estado'].toString().toLowerCase().trim();
+          print('✅ Estado recuperado para Nivel ${nivel.id} (Orden ${nivel.orden}): $estadoNivel');
+          nivel = nivel.copyWith(estado: estadoNivel);
+        } else {
+          print('⚠️ No se encontró registro en paciente_nivel para el Nivel ${nivel.id} (Orden ${nivel.orden})');
+          nivel = nivel.copyWith(estado: 'bloqueado');
+        }
+        
+        // Lógica de desbloqueo progresivo modificada
+        if (niveles.length > 1 && i > 0) {
+          final nivelAnterior = niveles[i - 1];
+          print('🔍 Verificando nivel anterior: ${nivelAnterior.nombre} (${nivelAnterior.estado})');
+          
+          if (nivelAnterior.estado != 'desbloqueado') {
+            nivel = nivel.copyWith(estado: 'bloqueado');
+            print('🔒 Nivel ${nivel.orden} bloqueado porque el anterior no está desbloqueado.');
+          }
+        }
+        
+        // Actualizar el nivel en la lista
+        niveles[i] = nivel;
+
+        // Obtener los ejercicios relacionados con el nivel
         final respEjercicios = await _supabaseClient
             .from('niveles_ejercicios')
             .select('ejercicios(*)')
-            .eq('id_nivel_fk', nivelId);
+            .eq('id_nivel_fk', nivel.id);
 
-        List<Ejercicio> ejercicios = [];
-        
-        if (respEjercicios.isNotEmpty) {
-          ejercicios = (respEjercicios as List).map((item) {
-            Map<String, dynamic> ejercicioData = item['ejercicios'];
-            return Ejercicio.fromMap(ejercicioData);
-          }).toList();
-        }
+        List<Ejercicio> ejercicios = (respEjercicios as List).map((item) {
+          return Ejercicio.fromMap(item['ejercicios']);
+        }).toList();
 
-        // Actualizar el nivel con su estado y ejercicios
-        niveles[i] = niveles[i].copyWith(
-          estado: estado,
-          ejercicios: ejercicios,
-        );
+        niveles[i] = niveles[i].copyWith(ejercicios: ejercicios);
       }
 
       return niveles;
     } catch (e) {
-      debugPrint('Error al obtener niveles y ejercicios: $e');
+      print('❌ Error al obtener niveles y ejercicios: $e');
       rethrow;
-    }
-  }
-
-  // Verificar si un nivel está desbloqueado
-  Future<bool> nivelDesbloqueado(int idPaciente, int idNivel) async {
-    try {
-      final response = await _supabaseClient
-          .from('paciente_nivel')
-          .select()
-          .eq('id_paciente_fk', idPaciente)
-          .eq('id_nivel_fk', idNivel)
-          .eq('estado', 'desbloqueado')
-          .maybeSingle();
-      
-      return response != null;
-    } catch (e) {
-      debugPrint('Error al verificar estado del nivel: $e');
-      return false;
     }
   }
 }

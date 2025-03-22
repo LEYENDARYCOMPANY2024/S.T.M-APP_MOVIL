@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => RegisterViewModel(authService)),
         ChangeNotifierProvider(create: (_) => HomeViewModel()), // Proveedor del HomeViewModel
         ChangeNotifierProvider(create: (_) => PerfilViewModel()), // Proveedor del PerfilViewModel
-        ChangeNotifierProvider(create: (_) => EjerciciosViewModel(EjerciciosService(Supabase.instance.client)),), // Proveedor del EjerciciosViewModel
+        ChangeNotifierProvider(create: (_) => EjerciciosViewModel(EjerciciosService(Supabase.instance.client, AuthService()),),), // Proveedor del EjerciciosViewModel
         ChangeNotifierProvider(create: (_) => SesionesViewModel()), // Proveedor del SesionViewModel
       ],
       child: MaterialApp(

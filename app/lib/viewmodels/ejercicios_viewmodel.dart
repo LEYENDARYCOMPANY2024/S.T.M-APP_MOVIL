@@ -1,4 +1,3 @@
-// viewmodels/ejercicios_viewmodel.dart
 import 'package:flutter/material.dart';
 import '../models/nivel.dart';
 import '../services/ejercicios_services.dart';
@@ -8,7 +7,6 @@ class EjerciciosViewModel extends ChangeNotifier {
   List<Nivel> _niveles = [];
   bool _cargando = false;
   String _error = '';
-  int _idPaciente = 0; // Esto debería venir de tu sistema de autenticación
 
   EjerciciosViewModel(this._ejerciciosService);
 
@@ -17,11 +15,6 @@ class EjerciciosViewModel extends ChangeNotifier {
   bool get cargando => _cargando;
   String get error => _error;
 
-  // Establecer el ID del paciente actual
-  void establecerIdPaciente(int id) {
-    _idPaciente = id;
-  }
-
   // Cargar niveles y ejercicios
   Future<void> cargarNivelesYEjercicios() async {
     _cargando = true;
@@ -29,15 +22,7 @@ class EjerciciosViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Verificar que tenemos un ID de paciente válido
-      if (_idPaciente <= 0) {
-        _error = 'No se ha establecido un paciente válido';
-        _cargando = false;
-        notifyListeners();
-        return;
-      }
-
-      _niveles = await _ejerciciosService.obtenerNivelesConEjercicios(_idPaciente);
+      _niveles = await _ejerciciosService.obtenerNivelesConEjercicios();
       print('Niveles cargados: ${_niveles.map((n) => '${n.nombre}: ${n.estado}').toList()}');
       
       _cargando = false;
@@ -62,7 +47,8 @@ class EjerciciosViewModel extends ChangeNotifier {
   // Verificar si un nivel está desbloqueado
   bool nivelDesbloqueado(int index) {
     if (index >= 0 && index < _niveles.length) {
-      return _niveles[index].estado == 'desbloqueado';
+      String estadoActual = _niveles[index].estado.toString().toLowerCase().trim();
+      return estadoActual.contains('desbloqueado');
     }
     return false;
   }
