@@ -98,6 +98,16 @@ class _HistorialClinicoReadOnlyViewState extends State<HistorialClinicoReadOnlyV
               const SizedBox(height: 16),
               HistorialClinicoReadOnlyDesign.buildInformacionMujeres(datos),
             ],
+
+            ElevatedButton(
+              onPressed: () {
+              // Acción para generar PDF
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+            ),
+            child: const Text('Generar PDF', style: TextStyle(color: Colors.white)),)
           ],
         ),
       ),

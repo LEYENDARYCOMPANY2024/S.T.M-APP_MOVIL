@@ -302,32 +302,49 @@ class HistorialClinicoReadOnlyDesign {
 
 
   static Widget _buildPatologiaInfo(String titulo, String? valor, String? detalle) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _buildInfoRow(titulo, valor ?? 'No especificado'),
-      if (valor == 'Sí')
-        Padding(
-          padding: const EdgeInsets.only(left: 20.0, bottom: 8.0),
-          child: _buildInfoRow('Detalle', detalle ?? 'No especificado'),
-        ),
-    ],
-  );
-}
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildInfoRow(titulo, valor ?? 'No especificado'),
+        if (valor == 'Sí')
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0, bottom: 8.0),
+            child: _buildInfoRow('Detalle', detalle ?? 'No especificado'),
+          ),
+      ],
+    );
+  }
 
 
   static Widget _buildHabitoInfo(String titulo, String? valor, String? detalle) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _buildInfoRow(titulo, valor ?? 'No especificado'),
-      if (valor == 'Sí')
-        Padding(
-          padding: const EdgeInsets.only(left: 20.0, bottom: 8.0),
-          child: _buildInfoRow('Detalle', detalle ?? 'No especificado'),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildInfoRow(titulo, valor ?? 'No especificado'),
+        if (valor == 'Sí')
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0, bottom: 8.0),
+            child: _buildInfoRow('Detalle', detalle ?? 'No especificado'),
         ),
-    ],
-  );
-}
+      ],
+    );
+  }
+
+  static Widget buildGenerarPdfButton(VoidCallback onPressed) {
+    return Center(
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blueAccent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+        ),
+        child: const Text('Generar PDF',style: TextStyle(color: Colors.white, fontSize: 16),),
+      ),
+    );
+  }
+
 
 }
