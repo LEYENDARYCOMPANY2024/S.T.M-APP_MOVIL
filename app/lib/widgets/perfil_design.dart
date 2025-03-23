@@ -266,7 +266,7 @@ class _PerfilDesignState extends State<PerfilDesign> {
           ],
         ),
         
-        SizedBox(height: 15),
+        SizedBox(height: 5),
         
         // Name and age
         Text(
@@ -274,7 +274,7 @@ class _PerfilDesignState extends State<PerfilDesign> {
           style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Colors.black,
             shadows: [
               Shadow(
                 blurRadius: 2,
@@ -289,7 +289,7 @@ class _PerfilDesignState extends State<PerfilDesign> {
           '${widget.paciente.edad} años',
           style: TextStyle(
             fontSize: 18,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.black,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -305,7 +305,7 @@ class _PerfilDesignState extends State<PerfilDesign> {
         style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          color: Color(0xFF1565C0),
+          color: Colors.black,
         ),
       ),
     );
