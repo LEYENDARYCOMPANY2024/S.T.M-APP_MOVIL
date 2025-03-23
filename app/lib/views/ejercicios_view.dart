@@ -253,7 +253,7 @@ class _EjerciciosViewState extends State<EjerciciosView> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Inicio"),
           BottomNavigationBarItem(icon: Icon(Icons.fitness_center), label: "Ejercicios"),
-          BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: "Progreso"),
+          BottomNavigationBarItem(icon: Icon(Icons.assignment), label: "Historial Clinico"),
         ],
         onTap: (index) {
           if (index == 0) {
