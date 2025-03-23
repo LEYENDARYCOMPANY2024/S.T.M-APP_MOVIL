@@ -9,6 +9,7 @@ import 'views/splash_view.dart';
 import 'views/perfil_view.dart';  // Importa el PerfilView
 import 'views/ejercicios_view.dart'; // Importa la nueva vista de ejercicios
 import 'views/sesion_view.dart'; // Importa la vista de sesión
+import 'views/historial_clinico_view.dart'; // Importa la vista del historial clínico
 import 'viewmodels/login_viewmodel.dart';
 import 'viewmodels/register_viewmodel.dart';
 import 'viewmodels/home_viewmodel.dart'; // Importar el HomeViewModel
@@ -17,6 +18,8 @@ import 'viewmodels/ejercicios_viewmodel.dart'; // Importa el EjerciciosViewModel
 import 'viewmodels/sesiones_viewmodels.dart'; // Importa el SesionViewModel
 import 'services/ejercicios_services.dart'; // Importa el servicio de ejercicios
 import 'services/auth_services.dart';
+import 'viewmodels/historial_clinico_viewmodel.dart';
+import 'services/historial_clinico_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +53,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => PerfilViewModel()), // Proveedor del PerfilViewModel
         ChangeNotifierProvider(create: (_) => EjerciciosViewModel(EjerciciosService(Supabase.instance.client, AuthService()),),), // Proveedor del EjerciciosViewModel
         ChangeNotifierProvider(create: (_) => SesionesViewModel()), // Proveedor del SesionViewModel
+        ChangeNotifierProvider(create: (_) => HistorialClinicoViewModel(HistorialClinicoService(Supabase.instance.client, authService),authService,),),
+
+
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -67,6 +73,7 @@ class MyApp extends StatelessWidget {
           '/perfil': (context) => const PerfilView(), // Ruta para el perfil
           '/ejercicios': (context) => const EjerciciosView(), // Nueva ruta para ejercicios
           '/sesion': (context) => const SesionesView(), // Ruta para la nueva vista de sesión
+          '/historial-clinico': (context) => const HistorialClinicoReadOnlyView(), // Nueva ruta para historial clínico
         },
       ),
     );

@@ -70,7 +70,9 @@ class _HomeViewState extends State<HomeView> {
         ],
         onTap: (index) {
           if (index == 0) {
+            Navigator.of(context).pushNamed('/inicio');
           } else if (index == 1) {
+            Navigator.of(context).pushNamed('/historial-clinico');
           } else if (index == 2) {
             Navigator.of(context).pushNamed('/ejercicios');
           }
