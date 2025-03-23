@@ -146,8 +146,7 @@ class _HomeViewState extends State<HomeView> {
             _buildTerapeutaCard(viewModel),
             const SizedBox(height: 20),
             _buildProximaSesionCard(viewModel),
-            const SizedBox(height: 20),
-            _buildProgresoCard(viewModel),
+            const SizedBox(height: 20)
           ],
         ),
       ),
@@ -331,31 +330,6 @@ class _HomeViewState extends State<HomeView> {
           ),
         ),
       ],
-    );
-  }
-
-  // Tarjeta de progreso
-  Widget _buildProgresoCard(HomeViewModel viewModel) {
-    return Card(
-      color: Colors.grey[800],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Icon(Icons.show_chart, color: Colors.white, size: 24),
-            SizedBox(width: 10),
-            Text(
-              "Progreso",
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
