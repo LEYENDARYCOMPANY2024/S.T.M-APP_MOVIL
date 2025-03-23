@@ -1,152 +1,156 @@
 import 'package:flutter/material.dart';
 
 class HistorialClinicoReadOnlyDesign {
+  // Constantes de diseño para mantener consistencia
+  static const Color _primaryColor = Color(0xFF2C3E50);
+  static const Color _accentColor = Color(0xFF3498DB);
+  static const Color _cardColor = Color(0xFF34495E);
+  static const Color _textColor = Colors.white;
+  static const Color _subtitleColor = Color(0xFFBDC3C7);
+  static const double _borderRadius = 12.0;
+  static const double _elevation = 4.0;
+
   static Widget buildDatosPaciente(paciente) {
-    return Card(
-      color: Colors.grey[800],
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Datos del Paciente', style: TextStyle(fontSize: 18, color: Colors.white,)),
-            const SizedBox(height: 16),
-            Text('Nombre: ${paciente.nombre} ${paciente.primerApellido} ${paciente.segundoApellido}'),
-            Text('Sexo: ${paciente.genero}'),
-            Text('Edad: ${paciente.edad}'),
-            Text('Estado Civil: ${paciente.estadoCivil}'),
-            Text('Ocupación: ${paciente.ocupacion}'),
-            Text('Escolaridad: ${paciente.escolaridad}'),
-          ],
-        ),
+    return _buildCard(
+      title: 'Datos del Paciente',
+      icon: Icons.person,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildPatientInfoRow('Nombre completo', '${paciente.nombre} ${paciente.primerApellido} ${paciente.segundoApellido}'),
+          _buildInfoDivider(),
+          Row(
+            children: [
+              Expanded(child: _buildPatientInfoRow('Sexo', '${paciente.genero}')),
+              Expanded(child: _buildPatientInfoRow('Edad', '${paciente.edad}')),
+            ],
+          ),
+          _buildInfoDivider(),
+          Row(
+            children: [
+              Expanded(child: _buildPatientInfoRow('Estado Civil', '${paciente.estadoCivil}')),
+              Expanded(child: _buildPatientInfoRow('Ocupación', '${paciente.ocupacion}')),
+            ],
+          ),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Escolaridad', '${paciente.escolaridad}'),
+        ],
       ),
     );
   }
 
   static Widget buildExpedienteSection(Map<String, dynamic> datos) {
-    return Card(
-      color: Colors.grey[800],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Expediente', style: TextStyle(fontSize: 18, color: Colors.white,)),
-            const SizedBox(height: 16),
-            _buildInfoRow('Número de Expediente', datos['expediente']),
-            _buildInfoRow('Fecha', datos['fecha']),
-          ],
-        ),
+    return _buildCard(
+      title: 'Expediente',
+      icon: Icons.folder,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: _buildPatientInfoRow('Número de Expediente', datos['expediente'])),
+              Expanded(child: _buildPatientInfoRow('Fecha', datos['fecha'])),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   static Widget buildExploracionFisica(Map<String, dynamic> datos) {
-    return Card(
-      color: Colors.grey[800],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Exploración Física', style: TextStyle(fontSize: 18, color: Colors.white,)),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: _buildInfoRow('Peso (kg)', datos['peso'])),
-                Expanded(child: _buildInfoRow('Estatura (cm)', datos['estatura'])),
-              ],
+    return _buildCard(
+      title: 'Exploración Física',
+      icon: Icons.accessibility_new,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: _buildPatientInfoRow('Peso (kg)', datos['peso'])),
+              Expanded(child: _buildPatientInfoRow('Estatura (cm)', datos['estatura'])),
+            ],
+          ),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('IMC', datos['imc'], showCalculation: true),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Espasmos o Contractura Muscular', datos['espasmos']),
+          if (datos['espasmos'] == 'Sí')
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+              child: _buildPatientInfoRow('Sitio/Características', datos['sitioEspasmos']),
             ),
-            _buildInfoRow('IMC', datos['imc']),
-            _buildInfoRow('Espasmos o Contractura Muscular', datos['espasmos']),
-            if (datos['espasmos'] == 'Sí')
-              _buildInfoRow('Sitio/Características', datos['sitioEspasmos']),
-          ],
-        ),
+        ],
       ),
     );
   }
 
   static Widget buildAntecedentesPatologicos(Map<String, dynamic> datos) {
-    return Card(
-      color: Colors.grey[800],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Antecedentes Patológicos y Heredofamiliares', 
-              style: TextStyle(fontSize: 18, color: Colors.white,)),
-            const SizedBox(height: 16),
-            _buildPatologiaInfo('Diabetes', datos['diabetes'], datos['sitioDiabetes']),
-            _buildPatologiaInfo('Alergia', datos['alergia'], datos['sitioAlergia']),
-            _buildPatologiaInfo('HTA', datos['hta'], datos['sitioHTA']),
-            _buildPatologiaInfo('Cáncer', datos['cancer'], datos['sitioCancer']),
-            _buildPatologiaInfo('Transfusiones', datos['transfusiones'], datos['sitioTransfusiones']),
-            _buildPatologiaInfo('Enf. Reumáticas', datos['reumaticas'], datos['sitioReutmaticas']),
-            _buildInfoRow('Encames', datos['encames']),
-            _buildInfoRow('Accidentes', datos['accidentes']),
-          ],
-        ),
+    return _buildCard(
+      title: 'Antecedentes Patológicos y Heredofamiliares',
+      icon: Icons.medical_services,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildExpandablePatologiaInfo('Diabetes', datos['diabetes'], datos['sitioDiabetes']),
+          _buildExpandablePatologiaInfo('Alergia', datos['alergia'], datos['sitioAlergia']),
+          _buildExpandablePatologiaInfo('HTA', datos['hta'], datos['sitioHTA']),
+          _buildExpandablePatologiaInfo('Cáncer', datos['cancer'], datos['sitioCancer']),
+          _buildExpandablePatologiaInfo('Transfusiones', datos['transfusiones'], datos['sitioTransfusiones']),
+          _buildExpandablePatologiaInfo('Enf. Reumáticas', datos['reumaticas'], datos['sitioReutmaticas']),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Encames', datos['encames']),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Accidentes', datos['accidentes']),
+        ],
       ),
     );
   }
 
   static Widget buildHabitosSalud(Map<String, dynamic> datos) {
-    return Card(
-      color: Colors.grey[800],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Hábitos de Salud', style: TextStyle(fontSize: 18, color: Colors.white,)),
-            const SizedBox(height: 16),
-            _buildHabitoInfo('Alcoholismo', datos['alcoholismo'], datos['sitioAlcoholismo']),
-            _buildHabitoInfo('Tabaquismo', datos['tabaquismo'], datos['sitioTabaquismo']),
-            _buildHabitoInfo('Actividad Física', datos['actividadFisica'], datos['sitioActividad']),
-          ],
-        ),
+    return _buildCard(
+      title: 'Hábitos de Salud',
+      icon: Icons.local_hospital,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildExpandablePatologiaInfo('Alcoholismo', datos['alcoholismo'], datos['sitioAlcoholismo']),
+          _buildExpandablePatologiaInfo('Tabaquismo', datos['tabaquismo'], datos['sitioTabaquismo']),
+          _buildExpandablePatologiaInfo('Actividad Física', datos['actividadFisica'], datos['sitioActividad']),
+        ],
       ),
     );
   }
 
   static Widget buildDiagnosticoMedico(Map<String, dynamic> datos) {
-    return Card(
-      color: Colors.grey[800],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Diagnóstico Médico', style: TextStyle(fontSize: 18, color: Colors.white,)),
-            const SizedBox(height: 16),
-            _buildInfoMultiline('Diagnóstico', datos['valoracionInicial']),
-            _buildInfoMultiline('Valoración Final', datos['valoracionFinal']),
-          ],
-        ),
+    return _buildCard(
+      title: 'Diagnóstico Médico',
+      icon: Icons.description,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildInfoMultiline('Diagnóstico Inicial', datos['valoracionInicial']),
+          const SizedBox(height: 16),
+          _buildInfoMultiline('Valoración Final', datos['valoracionFinal']),
+        ],
       ),
     );
   }
 
   static Widget buildCicatrizQuirurgica(Map<String, dynamic> datos) {
-    return Card(
-      color: Colors.grey[800],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Cicatriz Quirúrgica', style: TextStyle(fontSize: 18, color: Colors.white,)),
-            const SizedBox(height: 16),
-            _buildInfoRow('Cicatrices', datos['cirugias']),
-            if (datos['cirugias'] == 'Sí') ...[
-              _buildInfoRow('Tipo de Cicatriz', _getTipoCicatriz(datos)),
-              _buildInfoRow('Características', datos['sitioSitio']),
-            ],
+    return _buildCard(
+      title: 'Cicatriz Quirúrgica',
+      icon: Icons.healing,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildPatientInfoRow('Cicatrices', datos['cirugias']),
+          if (datos['cirugias'] == 'Sí') ...[
+            _buildInfoDivider(),
+            _buildPatientInfoRow('Tipo de Cicatriz', _getTipoCicatriz(datos)),
+            _buildInfoDivider(),
+            _buildPatientInfoRow('Características', datos['sitioSitio']),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -163,27 +167,69 @@ class HistorialClinicoReadOnlyDesign {
   }
 
   static Widget buildMarchaDeambulacion(Map<String, dynamic> datos) {
-    return Card(
-      color: Colors.grey[800],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Marcha y Deambulación', style: TextStyle(fontSize: 18, color: Colors.white,)),
-            const SizedBox(height: 16),
-            _buildInfoRow('Tipo de Marcha', _getTipoMarcha(datos)),
-            _buildInfoRow('Características', datos['observacionesMarcha']),
-            const Divider(),
-            const SizedBox(height: 8),
-            const Text('Tipos Específicos:', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            _buildInfoRow('Atáxica', datos['ataxica']),
-            _buildInfoRow('Espástica', datos['espasticas']),
-            _buildInfoRow('Claudicante', datos['claudicante']),
-            _buildInfoRow('Otros', datos['otrosMarcha']),
-          ],
-        ),
+    return _buildCard(
+      title: 'Marcha y Deambulación',
+      icon: Icons.directions_walk,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildPatientInfoRow('Tipo de Marcha', _getTipoMarcha(datos)),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Características', datos['observacionesMarcha']),
+          _buildInfoDivider(),
+          
+          // Sección de tipos específicos con un contenedor especial
+          Container(
+            margin: const EdgeInsets.only(top: 8.0),
+            padding: const EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+              color: Colors.black26,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Tipos Específicos:', 
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold, 
+                    color: _subtitleColor,
+                    fontSize: 14,
+                  )
+                ),
+                const SizedBox(height: 8),
+                _buildTipoMarchaRow('Atáxica', datos['ataxica']),
+                _buildTipoMarchaRow('Espástica', datos['espasticas']),
+                _buildTipoMarchaRow('Claudicante', datos['claudicante']),
+                _buildTipoMarchaRow('Otros', datos['otrosMarcha']),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _buildTipoMarchaRow(String tipo, String? valor) {
+    final bool isPresent = valor == 'Sí';
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Icon(
+            isPresent ? Icons.check_circle : Icons.remove_circle_outline,
+            color: isPresent ? Colors.green : Colors.red.withOpacity(0.7),
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            tipo,
+            style: TextStyle(
+              color: _textColor,
+              fontWeight: isPresent ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -199,19 +245,16 @@ class HistorialClinicoReadOnlyDesign {
   }
 
   static Widget buildTraslados(Map<String, dynamic> datos) {
-    return Card(
-      color: Colors.grey[800],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Traslados y Movilidad', style: TextStyle(fontSize: 18, color: Colors.white,)),
-            const SizedBox(height: 16),
-            _buildInfoRow('Independencia', _getNivelIndependencia(datos)),
-            _buildInfoRow('Observaciones', datos['abierta']),
-          ],
-        ),
+    return _buildCard(
+      title: 'Traslados y Movilidad',
+      icon: Icons.transfer_within_a_station,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildPatientInfoRow('Independencia', _getNivelIndependencia(datos)),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Observaciones', datos['abierta']),
+        ],
       ),
     );
   }
@@ -223,128 +266,296 @@ class HistorialClinicoReadOnlyDesign {
   }
 
   static Widget buildInformacionMujeres(Map<String, dynamic> datos) {
-    return Card(
-      color: Colors.grey[800],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Información Gineco-Obstétrica', 
-              style: TextStyle(fontSize: 18, color: Colors.white,)),
-            const SizedBox(height: 16),
-            _buildInfoRow('Embarazos', datos['embarazo']),
-            if (datos['embarazo'] == 'Sí') ...[
-              _buildInfoRow('Número de Hijos', datos['hijos']),
-              _buildInfoRow('Observaciones', datos['sitioMujeres']),
-            ],
+    return _buildCard(
+      title: 'Información Gineco-Obstétrica',
+      icon: Icons.pregnant_woman,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildPatientInfoRow('Embarazos', datos['embarazo']),
+          if (datos['embarazo'] == 'Sí') ...[
+            _buildInfoDivider(),
+            _buildPatientInfoRow('Número de Hijos', datos['hijos']),
+            _buildInfoDivider(),
+            _buildPatientInfoRow('Observaciones', datos['sitioMujeres']),
           ],
-        ),
+        ],
       ),
     );
   }
 
-  // Widgets de ayuda para mostrar información
-  static Widget _buildInfoRow(String label, dynamic value) {
+  // Widget para construir tarjetas con formato consistente
+  static Widget _buildCard({
+    required String title, 
+    required Widget content, 
+    required IconData icon,
+  }) {
+    return Card(
+      color: _cardColor,
+      elevation: _elevation,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(_borderRadius),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Encabezado de la tarjeta
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            decoration: const BoxDecoration(
+              color: _primaryColor,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(_borderRadius),
+                topRight: Radius.circular(_borderRadius),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: _accentColor, size: 24),
+                const SizedBox(width: 12),
+                Text(
+                  title, 
+                  style: const TextStyle(
+                    fontSize: 18, 
+                    fontWeight: FontWeight.bold,
+                    color: _textColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Contenido principal
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: content,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget para mostrar información del paciente
+  static Widget _buildPatientInfoRow(String label, dynamic value, {bool showCalculation = false}) {
     final String displayValue = (value == null || value.toString().isEmpty) 
       ? 'No especificado' 
       : value.toString();
-
+    
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: 130,
             child: Text(
               '$label:',
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(
+                color: _subtitleColor,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           Expanded(
-            child: Text(displayValue),
+            child: Text(
+              displayValue,
+              style: TextStyle(
+                color: _textColor,
+                fontWeight: showCalculation ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
+  // Widget para crear una línea divisoria
+  static Widget _buildInfoDivider() {
+    return const Divider(
+      color: Colors.white24,
+      height: 20,
+      thickness: 0.5,
+    );
+  }
 
+  // Widget para mostrar información multilínea
   static Widget _buildInfoMultiline(String label, dynamic value) {
     final String displayValue = (value == null || value.toString().isEmpty) 
       ? 'No especificado' 
       : value.toString();
     
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$label:',
+          style: const TextStyle(
+            color: _subtitleColor,
+            fontWeight: FontWeight.w500,
+            fontSize: 15,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+            color: Colors.black26,
+            borderRadius: BorderRadius.circular(8.0),
+            border: Border.all(color: Colors.white10),
+          ),
+          child: Text(
+            displayValue,
+            style: const TextStyle(color: _textColor),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Widget para mostrar información de patologías
+  static Widget _buildExpandablePatologiaInfo(String titulo, String? valor, String? detalle) {
+    final bool hasCondition = valor == 'Sí';
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              hasCondition ? Icons.check_circle : Icons.cancel,
+              color: hasCondition ? Colors.red : Colors.green.withOpacity(0.7),
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              titulo,
+              style: const TextStyle(
+                color: _subtitleColor,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: hasCondition ? Colors.red.withOpacity(0.2) : Colors.green.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                hasCondition ? 'Sí' : 'No',
+                style: TextStyle(
+                  color: hasCondition ? Colors.red[300] : Colors.green[300],
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (hasCondition && detalle != null && detalle.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 28.0, top: 4.0, bottom: 8.0),
+            child: Text(
+              detalle,
+              style: const TextStyle(
+                color: _textColor,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        _buildInfoDivider(),
+      ],
+    );
+  }
+
+  static Widget buildHabitosMedicacion(Map<String, dynamic> datos) {
+    return _buildCard(
+      title: 'Medicación y Sustancias',
+      icon: Icons.medication,
+      content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '$label:',
-            style: const TextStyle(color: Colors.white),
-          ),
-          const SizedBox(height: 4),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(4.0),
-            ),
-            child: Text(displayValue),
-          ),
+          _buildExpandablePatologiaInfo('Drogas', datos['drogas'], datos['sitioDrogas']),
+          _buildExpandablePatologiaInfo('Automedicación', datos['automedica'], datos['sitioAutomedica']),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Observaciones adicionales', datos['sitioHabitos']),
         ],
       ),
     );
   }
 
-
-  static Widget _buildPatologiaInfo(String titulo, String? valor, String? detalle) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildInfoRow(titulo, valor ?? 'No especificado'),
-        if (valor == 'Sí')
-          Padding(
-            padding: const EdgeInsets.only(left: 20.0, bottom: 8.0),
-            child: _buildInfoRow('Detalle', detalle ?? 'No especificado'),
-          ),
-      ],
-    );
-  }
-
-
-  static Widget _buildHabitoInfo(String titulo, String? valor, String? detalle) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildInfoRow(titulo, valor ?? 'No especificado'),
-        if (valor == 'Sí')
-          Padding(
-            padding: const EdgeInsets.only(left: 20.0, bottom: 8.0),
-            child: _buildInfoRow('Detalle', detalle ?? 'No especificado'),
-        ),
-      ],
-    );
-  }
-
-  static Widget buildGenerarPdfButton(VoidCallback onPressed) {
-    return Center(
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blueAccent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
-        ),
-        child: const Text('Generar PDF',style: TextStyle(color: Colors.white, fontSize: 16),),
+  static Widget buildCondicionesFisicas(Map<String, dynamic> datos) {
+    return _buildCard(
+      title: 'Fracturas y Condiciones Físicas',
+      icon: Icons.fitness_center,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildExpandablePatologiaInfo('Fracturas', datos['fracturas'], datos['sitioFracturas']),
+          _buildExpandablePatologiaInfo('Cardiopatías', datos['cardiopatias'], null),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Otras condiciones', datos['sitioOtros']),
+        ],
       ),
     );
   }
 
+  static Widget buildRespuestasSensoriales(Map<String, dynamic> datos) {
+    return _buildCard(
+      title: 'Respuestas Sensoriales y Reflejos',
+      icon: Icons.touch_app,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildPatientInfoRow('Sensibilidad', datos['sitioSensibilidad']),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Reflejos', datos['sitioreflejos']),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Lenguaje', datos['sitioLenguaje']),
+        ],
+      ),
+    );
+  }
 
+  static Widget buildObservacionesFinales(Map<String, dynamic> datos) {
+    return _buildCard(
+      title: 'Observaciones Finales',
+      icon: Icons.note_add,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildInfoMultiline('Observaciones', datos['Observacionesfinales']),
+        ],
+      ),
+    );
+  }
+
+  // Botón para generar PDF con diseño mejorado
+  static Widget buildGenerarPdfButton(VoidCallback onPressed) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 24.0),
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
+        label: const Text(
+          'Generar PDF',
+          style: TextStyle(
+            color: Colors.white, 
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _accentColor,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+          elevation: 4,
+        ),
+      ),
+    );
+  }
 }

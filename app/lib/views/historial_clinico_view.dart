@@ -92,6 +92,15 @@ class _HistorialClinicoReadOnlyViewState extends State<HistorialClinicoReadOnlyV
             HistorialClinicoReadOnlyDesign.buildMarchaDeambulacion(datos),
             const SizedBox(height: 16),
             HistorialClinicoReadOnlyDesign.buildTraslados(datos),
+            // Después de las secciones existentes, antes del botón de PDF
+            const SizedBox(height: 16),
+            HistorialClinicoReadOnlyDesign.buildHabitosMedicacion(datos),
+            const SizedBox(height: 16),
+            HistorialClinicoReadOnlyDesign.buildCondicionesFisicas(datos),
+            const SizedBox(height: 16),
+            HistorialClinicoReadOnlyDesign.buildRespuestasSensoriales(datos),
+            const SizedBox(height: 16),
+            HistorialClinicoReadOnlyDesign.buildObservacionesFinales(datos),
             
             // Sección específica para mujeres (solo se muestra si es mujer)
             if (viewModel.esMujer) ...[
