@@ -531,29 +531,27 @@ class HistorialClinicoReadOnlyDesign {
     );
   }
 
-  // Botón para generar PDF con diseño mejorado
   static Widget buildGenerarPdfButton(VoidCallback onPressed) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 24.0),
+      width: 220, // Ancho fijo para mejor consistencia
       child: ElevatedButton.icon(
         onPressed: onPressed,
-        icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
-        label: const Text(
-          'Generar PDF',
-          style: TextStyle(
-            color: Colors.white, 
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+        icon: const Icon(
+          Icons.picture_as_pdf, 
+          color: Colors.white,
+          size: 22, // Tamaño de icono ligeramente más grande
         ),
+        label: const Text('Generar PDF', style: TextStyle(color: Colors.white, fontSize: 16,fontWeight: FontWeight.w600,letterSpacing: 0.5, ),),
         style: ElevatedButton.styleFrom(
           backgroundColor: _accentColor,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16), // Bordes más redondeados
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
-          elevation: 4,
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          elevation: 3, // Sombra más sutil
+          shadowColor: _accentColor.withOpacity(0.5), // Sombra del mismo color
         ),
       ),
     );

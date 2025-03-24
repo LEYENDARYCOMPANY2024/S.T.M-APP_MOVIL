@@ -109,14 +109,25 @@ class _HistorialClinicoReadOnlyViewState extends State<HistorialClinicoReadOnlyV
             ],
 
             ElevatedButton(
-              onPressed: () {
-              // Acción para generar PDF
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-            ),
-            child: const Text('Generar PDF', style: TextStyle(color: Colors.white)),)
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 14.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 3,
+                shadowColor: Colors.blue.withOpacity(0.5),),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.picture_as_pdf, size: 20),
+                    SizedBox(width: 10),
+                    Text('Generar PDF',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w600,letterSpacing: 0.5,),),
+                  ],
+                ),
+            )
           ],
         ),
       ),
