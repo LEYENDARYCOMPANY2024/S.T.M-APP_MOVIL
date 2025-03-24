@@ -4,8 +4,6 @@ import '../models/paciente.dart';
 import '../viewmodels/perfil_viewmodel.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:typed_data';
 
 class PerfilDesign extends StatefulWidget {
   final Paciente paciente;
@@ -23,7 +21,6 @@ class _PerfilDesignState extends State<PerfilDesign> {
   bool _showPasswordField = false;
   bool _isUpdating = false;
   bool _obscurePassword = true;
-  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
