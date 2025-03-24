@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/register_viewmodel.dart';
+import './terminos_condiciones_dialog.dart';
 
 class RegisterForm extends StatefulWidget {
   @override
@@ -86,11 +87,34 @@ class _RegisterFormState extends State<RegisterForm> {
                       value: _termsAccepted,
                       onChanged: (value) {
                         setState(() {
-                          _termsAccepted = value!;
+                          _termsAccepted = value ?? false;
                         });
                       },
                     ),
-                    const Text("He leído y aceptado los términos y condiciones"),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => const TerminosCondicionesDialog(),
+                          );
+                        },
+                        child: const Text.rich(
+                          TextSpan(
+                            text: 'He leído y aceptado los ',
+                            children: [
+                              TextSpan(
+                                text: 'términos y condiciones',
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],
