@@ -259,7 +259,7 @@ class _EjerciciosViewState extends State<EjerciciosView> {
           if (index == 0) {
             Navigator.of(context).pushReplacementNamed('/home');
           } else if (index == 2) {
-            Navigator.of(context).pushReplacementNamed('/progreso');
+            Navigator.of(context).pushReplacementNamed('/historial-clinico');
           }
         },
       ),
