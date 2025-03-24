@@ -4,6 +4,8 @@ import '../models/paciente.dart';
 import '../viewmodels/perfil_viewmodel.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
 
 class PerfilDesign extends StatefulWidget {
   final Paciente paciente;
@@ -21,6 +23,7 @@ class _PerfilDesignState extends State<PerfilDesign> {
   bool _showPasswordField = false;
   bool _isUpdating = false;
   bool _obscurePassword = true;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -474,6 +477,8 @@ class _PerfilDesignState extends State<PerfilDesign> {
   }
 
   Widget _buildCodeCard() {
+    bool isActive = widget.paciente.estadoPaciente.toLowerCase() == 'activo';
+    
     return Card(
       elevation: 3,
       shadowColor: Colors.black26,
@@ -491,7 +496,7 @@ class _PerfilDesignState extends State<PerfilDesign> {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.qr_code,
+                isActive ? Icons.lock_clock : Icons.qr_code,
                 color: Color(0xFF1565C0),
                 size: 30,
               ),
@@ -509,38 +514,54 @@ class _PerfilDesignState extends State<PerfilDesign> {
                     ),
                   ),
                   SizedBox(height: 4),
-                  Text(
-                    widget.paciente.codigo,
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
+                  if (isActive)
+                    Text(
+                      'El código se mostrará cuando termine tu tratamiento con el terapeuta',
+                      style: TextStyle(
+                        color: Colors.grey.shade700,
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    )
+                  else
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.paciente.codigo,
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.copy,
+                            color: Color(0xFF1565C0),
+                          ),
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: widget.paciente.codigo));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Código copiado al portapapeles'),
+                                backgroundColor: Colors.green,
+                                behavior: SnackBarBehavior.floating,
+                                margin: EdgeInsets.all(16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                  ),
                 ],
               ),
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.copy,
-                color: Color(0xFF1565C0),
-              ),
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: widget.paciente.codigo));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Código copiado al portapapeles'),
-                    backgroundColor: Colors.green,
-                    behavior: SnackBarBehavior.floating,
-                    margin: EdgeInsets.all(16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
             ),
           ],
         ),

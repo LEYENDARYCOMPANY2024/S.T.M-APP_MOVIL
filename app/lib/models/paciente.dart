@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class Paciente {
   final int id;
   final String nombre;
@@ -12,7 +14,8 @@ class Paciente {
   final String nombreUsuario;
   final String contrasena;
   final String estadoPaciente;
-  final String correoElectronico;  // Nuevo atributo
+  final String correoElectronico;
+  final Uint8List? fotoPerfil;  // Mantenemos el atributo
 
   Paciente({
     required this.id,
@@ -28,13 +31,15 @@ class Paciente {
     required this.nombreUsuario,
     required this.contrasena,
     required this.estadoPaciente,
-    required this.correoElectronico,  // Inicializa el nuevo atributo
+    required this.correoElectronico,
+    this.fotoPerfil,
   });
 
   // 🔹 Método para actualizar solo los valores modificados sin perder los demás datos
   Paciente copyWith({
     String? nombreUsuario,
     String? correoElectronico,
+    Uint8List? fotoPerfil,
   }) {
     return Paciente(
       id: id,
@@ -51,6 +56,7 @@ class Paciente {
       contrasena: contrasena,
       estadoPaciente: estadoPaciente,
       correoElectronico: correoElectronico ?? this.correoElectronico,
+      fotoPerfil: fotoPerfil ?? this.fotoPerfil,
     );
   }
 
@@ -70,7 +76,8 @@ class Paciente {
       nombreUsuario: map['nombre_usuario_p'] ?? '',
       contrasena: map['contrasena_p'] ?? '',
       estadoPaciente: map['estado_paciente'] ?? '',
-      correoElectronico: map['correo_electronico_p'] ?? '',  // Recuperar el correo electrónico del mapa
+      correoElectronico: map['correo_electronico_p'] ?? '',
+      fotoPerfil: map['foto_perfil'] is Uint8List ? map['foto_perfil'] : null,
     );
   }
 
@@ -90,7 +97,8 @@ class Paciente {
       'nombre_usuario_p': nombreUsuario,
       'contrasena_p': contrasena,
       'estado_paciente': estadoPaciente,
-      'correo_electronico_p': correoElectronico,  // Agregar el correo electrónico al mapa
+      'correo_electronico_p': correoElectronico,
+      // No incluimos la foto_perfil aquí ya que se maneja por separado
     };
   }
 }
