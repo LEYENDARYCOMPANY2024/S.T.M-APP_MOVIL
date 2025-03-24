@@ -37,28 +37,98 @@ class _PerfilViewState extends State<PerfilView> {
 
   // 📌 Muestra error con opción de reintentar
   Widget _buildErrorView(PerfilViewModel perfilViewModel) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error, color: Colors.red.shade700, size: 50),
-          const SizedBox(height: 10),
-          Text(perfilViewModel.errorMessage!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.red, fontSize: 18)),
-          const SizedBox(height: 20),
-          ElevatedButton.icon(
-            onPressed: () {
-              perfilViewModel.cargarDatos();
-            },
-            icon: const Icon(Icons.refresh),
-            label: const Text("Reintentar"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1565C0),
-              foregroundColor: Colors.white,
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1565C0), Color(0xFF42A5F5)],
+        ),
+      ),
+      child: Center(
+        child: Card(
+          margin: EdgeInsets.symmetric(horizontal: 32),
+          elevation: 8,
+          shadowColor: Colors.black26,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.wifi_off_rounded,
+                    color: Colors.red.shade700,
+                    size: 48,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  "¡Ups! Algo salió mal",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "No se pudieron cargar los datos del perfil.\nPor favor, revise su conexión a internet.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 16,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      perfilViewModel.cargarDatos();
+                    },
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text(
+                      "Reintentar",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF1565C0),
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 2,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  perfilViewModel.errorMessage ?? "Error desconocido",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.red.shade400,
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

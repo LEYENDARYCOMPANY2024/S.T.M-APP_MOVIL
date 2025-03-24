@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/paciente.dart';
 import '../viewmodels/perfil_viewmodel.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 class PerfilDesign extends StatefulWidget {
   final Paciente paciente;
@@ -179,6 +181,8 @@ class _PerfilDesignState extends State<PerfilDesign> {
                         _buildInfoCard(),
                         SizedBox(height: 20),
                         _buildStatusCard(),
+                        SizedBox(height: 20),
+                        _buildCodeCard(),
                         SizedBox(height: 20),
                         _buildSectionTitle('Actualizar Datos'),
                         SizedBox(height: 10),
@@ -462,6 +466,81 @@ class _PerfilDesignState extends State<PerfilDesign> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCodeCard() {
+    return Card(
+      elevation: 3,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Color(0xFF1565C0).withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.qr_code,
+                color: Color(0xFF1565C0),
+                size: 30,
+              ),
+            ),
+            SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Código de Paciente',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    widget.paciente.codigo,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.copy,
+                color: Color(0xFF1565C0),
+              ),
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: widget.paciente.codigo));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Código copiado al portapapeles'),
+                    backgroundColor: Colors.green,
+                    behavior: SnackBarBehavior.floating,
+                    margin: EdgeInsets.all(16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
             ),
           ],
         ),
