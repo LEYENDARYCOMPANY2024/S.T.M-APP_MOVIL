@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class HistorialClinicoReadOnlyDesign {
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   // Constantes de diseño para mantener consistencia
   static const Color _primaryColor = Color(0xFF2C3E50);
   static const Color _accentColor = Color(0xFF3498DB);
@@ -21,8 +25,15 @@ class HistorialClinicoReadOnlyDesign {
           _buildInfoDivider(),
           Row(
             children: [
-              Expanded(child: _buildPatientInfoRow('Sexo', '${paciente.genero}')),
-              Expanded(child: _buildPatientInfoRow('Edad', '${paciente.edad}')),
+              Flexible(
+                flex: 1,
+                child: _buildPatientInfoRow('Sexo', '${paciente.genero}'),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                flex: 1,
+                child: _buildPatientInfoRow('Edad', '${paciente.edad}'),
+              ),
             ],
           ),
           _buildInfoDivider(),
@@ -346,8 +357,8 @@ class HistorialClinicoReadOnlyDesign {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 130,
+          Flexible(
+            flex: 2,
             child: Text(
               '$label:',
               style: const TextStyle(
@@ -356,13 +367,17 @@ class HistorialClinicoReadOnlyDesign {
               ),
             ),
           ),
-          Expanded(
+          const SizedBox(width: 8),
+          Flexible(
+            flex: 3,
             child: Text(
               displayValue,
               style: TextStyle(
                 color: _textColor,
                 fontWeight: showCalculation ? FontWeight.bold : FontWeight.normal,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
             ),
           ),
         ],
@@ -531,27 +546,200 @@ class HistorialClinicoReadOnlyDesign {
     );
   }
 
+  static Future<void> generarPDF(Map<String, dynamic> datos, dynamic paciente) async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (context) {
+          return [
+            pw.Header(
+              level: 0,
+              child: pw.Text('Historial Clínico', 
+                style: pw.TextStyle(
+                  fontSize: 24,
+                  fontWeight: pw.FontWeight.bold
+                )
+              ),
+            ),
+            
+            // Datos del Paciente
+            _buildPDFSection('Datos del Paciente', [
+              'Nombre: ${paciente.nombre} ${paciente.primerApellido} ${paciente.segundoApellido}',
+              'Edad: ${paciente.edad}',
+              'Género: ${paciente.genero}',
+              'Estado Civil: ${paciente.estadoCivil}',
+              'Ocupación: ${paciente.ocupacion}',
+              'Escolaridad: ${paciente.escolaridad}',
+            ]),
+
+            // Expediente
+            _buildPDFSection('Expediente', [
+              'Número: ${datos['expediente']}',
+              'Fecha: ${datos['fecha']}',
+            ]),
+
+            // Exploración Física
+            _buildPDFSection('Exploración Física', [
+              'Peso: ${datos['peso']} kg',
+              'Estatura: ${datos['estatura']} cm',
+              'IMC: ${datos['imc']}',
+              'Espasmos o Contractura Muscular: ${datos['espasmos']}',
+              if (datos['espasmos'] == 'Sí') 'Sitio/Características: ${datos['sitioEspasmos']}',
+            ]),
+
+            // Antecedentes Patológicos
+            _buildPDFSection('Antecedentes Patológicos y Heredofamiliares', [
+              'Diabetes: ${datos['diabetes']}',
+              if(datos['diabetes'] == 'Sí') 'Detalles: ${datos['sitioDiabetes']}',
+              'Alergia: ${datos['alergia']}',
+              if(datos['alergia'] == 'Sí') 'Detalles: ${datos['sitioAlergia']}',
+              'HTA: ${datos['hta']}',
+              if(datos['hta'] == 'Sí') 'Detalles: ${datos['sitioHTA']}',
+              'Cáncer: ${datos['cancer']}',
+              if(datos['cancer'] == 'Sí') 'Detalles: ${datos['sitioCancer']}',
+              'Transfusiones: ${datos['transfusiones']}',
+              if(datos['transfusiones'] == 'Sí') 'Detalles: ${datos['sitioTransfusiones']}',
+              'Enf. Reumáticas: ${datos['reumaticas']}',
+              if(datos['reumaticas'] == 'Sí') 'Detalles: ${datos['sitioReutmaticas']}',
+              'Encames: ${datos['encames']}',
+              'Accidentes: ${datos['accidentes']}',
+            ]),
+
+            // Hábitos de Salud
+            _buildPDFSection('Hábitos de Salud', [
+              'Alcoholismo: ${datos['alcoholismo']}',
+              if(datos['alcoholismo'] == 'Sí') 'Detalles: ${datos['sitioAlcoholismo']}',
+              'Tabaquismo: ${datos['tabaquismo']}',
+              if(datos['tabaquismo'] == 'Sí') 'Detalles: ${datos['sitioTabaquismo']}',
+              'Actividad Física: ${datos['actividadFisica']}',
+              if(datos['actividadFisica'] == 'Sí') 'Detalles: ${datos['sitioActividad']}',
+            ]),
+
+            // Diagnóstico Médico
+            _buildPDFSection('Diagnóstico Médico', [
+              'Diagnóstico Inicial: ${datos['valoracionInicial']}',
+              'Valoración Final: ${datos['valoracionFinal']}',
+            ]),
+
+            // Cicatriz Quirúrgica
+            _buildPDFSection('Cicatriz Quirúrgica', [
+              'Cicatrices: ${datos['cirugias']}',
+              if (datos['cirugias'] == 'Sí') ...[
+                'Tipo de Cicatriz: ${_getTipoCicatriz(datos)}',
+                'Características: ${datos['sitioSitio']}',
+              ],
+            ]),
+
+            // Marcha y Deambulación
+            _buildPDFSection('Marcha y Deambulación', [
+              'Tipo de Marcha: ${_getTipoMarcha(datos)}',
+              'Características: ${datos['observacionesMarcha']}',
+              'Atáxica: ${datos['ataxica']}',
+              'Espástica: ${datos['espasticas']}',
+              'Claudicante: ${datos['claudicante']}',
+              'Otros: ${datos['otrosMarcha']}',
+            ]),
+
+            // Traslados
+            _buildPDFSection('Traslados y Movilidad', [
+              'Independencia: ${_getNivelIndependencia(datos)}',
+              'Observaciones: ${datos['abierta']}',
+            ]),
+
+            // Medicación y Sustancias
+            _buildPDFSection('Medicación y Sustancias', [
+              'Drogas: ${datos['drogas']}',
+              if(datos['drogas'] == 'Sí') 'Detalles: ${datos['sitioDrogas']}',
+              'Automedicación: ${datos['automedica']}',
+              if(datos['automedica'] == 'Sí') 'Detalles: ${datos['sitioAutomedica']}',
+              'Observaciones adicionales: ${datos['sitioHabitos']}',
+            ]),
+
+            // Respuestas Sensoriales
+            _buildPDFSection('Respuestas Sensoriales y Reflejos', [
+              'Sensibilidad: ${datos['sitioSensibilidad']}',
+              'Reflejos: ${datos['sitioreflejos']}',
+              'Lenguaje: ${datos['sitioLenguaje']}',
+            ]),
+
+            // Observaciones Finales
+            _buildPDFSection('Observaciones Finales', [
+              '${datos['Observacionesfinales']}',
+            ]),
+          ];
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+      name: 'Historial_Clinico_${paciente.nombre}',
+      format: PdfPageFormat.a4.copyWith(
+        marginLeft: 32,
+        marginTop: 32,
+        marginRight: 32,
+        marginBottom: 32,
+      ),
+    );
+  }
+
+  static pw.Widget _buildPDFSection(String title, List<String> items) {
+    return pw.Container(
+      margin: const pw.EdgeInsets.only(bottom: 10),
+      padding: const pw.EdgeInsets.all(10),
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(),
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            title,
+            style: pw.TextStyle(
+              fontSize: 16,
+              fontWeight: pw.FontWeight.bold
+            ),
+          ),
+          pw.SizedBox(height: 5),
+          ...items.map((item) => pw.Text(item)),
+        ],
+      ),
+    );
+  }
+
   static Widget buildGenerarPdfButton(VoidCallback onPressed) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 24.0),
-      width: 220, // Ancho fijo para mejor consistencia
+      width: 220,
       child: ElevatedButton.icon(
         onPressed: onPressed,
         icon: const Icon(
           Icons.picture_as_pdf, 
           color: Colors.white,
-          size: 22, // Tamaño de icono ligeramente más grande
+          size: 22,
         ),
-        label: const Text('Generar PDF', style: TextStyle(color: Colors.white, fontSize: 16,fontWeight: FontWeight.w600,letterSpacing: 0.5, ),),
+        label: const Text(
+          'Generar PDF', 
+          style: TextStyle(
+            color: Colors.white, 
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
         style: ElevatedButton.styleFrom(
           backgroundColor: _accentColor,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16), // Bordes más redondeados
+            borderRadius: BorderRadius.circular(16),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          elevation: 3, // Sombra más sutil
-          shadowColor: _accentColor.withOpacity(0.5), // Sombra del mismo color
+          elevation: 3,
+          shadowColor: _accentColor.withOpacity(0.5),
         ),
       ),
     );

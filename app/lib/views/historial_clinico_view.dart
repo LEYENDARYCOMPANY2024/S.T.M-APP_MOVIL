@@ -17,7 +17,6 @@ class _HistorialClinicoReadOnlyViewState extends State<HistorialClinicoReadOnlyV
   @override
   void initState() {
     super.initState();
-    // Inicializar el ViewModel
     _viewModel = Provider.of<HistorialClinicoViewModel>(context, listen: false);
     _cargarDatos();
   }
@@ -33,7 +32,7 @@ class _HistorialClinicoReadOnlyViewState extends State<HistorialClinicoReadOnlyV
     return Scaffold(
       appBar: AppBar(
         title: const Text('Historial Clínico'),
-        backgroundColor:  Colors.blue[900],
+        backgroundColor: Colors.blue[900],
       ),
       backgroundColor: Colors.blue[700],
       body: Consumer<HistorialClinicoViewModel>(
@@ -108,26 +107,9 @@ class _HistorialClinicoReadOnlyViewState extends State<HistorialClinicoReadOnlyV
               HistorialClinicoReadOnlyDesign.buildInformacionMujeres(datos),
             ],
 
-            ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 14.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 3,
-                shadowColor: Colors.blue.withOpacity(0.5),),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.picture_as_pdf, size: 20),
-                    SizedBox(width: 10),
-                    Text('Generar PDF',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w600,letterSpacing: 0.5,),),
-                  ],
-                ),
-            )
+            HistorialClinicoReadOnlyDesign.buildGenerarPdfButton(() {
+              HistorialClinicoReadOnlyDesign.generarPDF(datos, paciente);
+            }),
           ],
         ),
       ),
