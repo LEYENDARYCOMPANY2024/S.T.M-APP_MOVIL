@@ -68,6 +68,17 @@ class HistorialClinicoReadOnlyDesign {
     );
   }
 
+  static String _formatearSiNo(String valor) {
+    // Manejar valores como "diabetesSi" o "diabetesNo"
+    if (valor.toLowerCase().contains('si')) return 'Sí';
+    if (valor.toLowerCase().contains('no')) return 'No';
+    return valor;
+  }
+
+  static bool _esSi(String valor) {
+    return valor.toLowerCase().contains('si');
+  }
+
   static Widget buildExploracionFisica(Map<String, dynamic> datos) {
     return _buildCard(
       title: 'Exploración Física',
@@ -84,8 +95,9 @@ class HistorialClinicoReadOnlyDesign {
           _buildInfoDivider(),
           _buildPatientInfoRow('IMC', datos['imc'], showCalculation: true),
           _buildInfoDivider(),
-          _buildPatientInfoRow('Espasmos o Contractura Muscular', datos['espasmos']),
-          if (datos['espasmos'] == 'Sí')
+          _buildPatientInfoRow('Espasmos o Contractura Muscular', 
+            _formatearSiNo(datos['espasmos'])),
+          if (_esSi(datos['espasmos']))
             Padding(
               padding: const EdgeInsets.only(left: 16.0, top: 8.0),
               child: _buildPatientInfoRow('Sitio/Características', datos['sitioEspasmos']),
@@ -108,10 +120,15 @@ class HistorialClinicoReadOnlyDesign {
           _buildExpandablePatologiaInfo('Cáncer', datos['cancer'], datos['sitioCancer']),
           _buildExpandablePatologiaInfo('Transfusiones', datos['transfusiones'], datos['sitioTransfusiones']),
           _buildExpandablePatologiaInfo('Enf. Reumáticas', datos['reumaticas'], datos['sitioReutmaticas']),
-          _buildInfoDivider(),
           _buildPatientInfoRow('Encames', datos['encames']),
           _buildInfoDivider(),
           _buildPatientInfoRow('Accidentes', datos['accidentes']),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Cardiopatías', datos['cardiopatias']),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Cirugías', datos['cirugias']),
+          _buildInfoDivider(),
+          _buildExpandablePatologiaInfo('Fracturas', datos['fracturas'], datos['sitioFracturas']),
         ],
       ),
     );
@@ -134,14 +151,18 @@ class HistorialClinicoReadOnlyDesign {
 
   static Widget buildDiagnosticoMedico(Map<String, dynamic> datos) {
     return _buildCard(
-      title: 'Diagnóstico Médico',
-      icon: Icons.description,
+      title: 'Diagnóstico Médico en Rehabilitación',
+      icon: Icons.medical_services,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInfoMultiline('Diagnóstico Inicial', datos['valoracionInicial']),
-          const SizedBox(height: 16),
-          _buildInfoMultiline('Valoración Final', datos['valoracionFinal']),
+          _buildPatientInfoRow('Reflejos', datos['sitioreflejos']),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Sensibilidad', datos['sitioSensibilidad']),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Lenguaje/Orientación', datos['sitioLenguaje']),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Otros', datos['sitioOtros']),
         ],
       ),
     );
@@ -154,27 +175,16 @@ class HistorialClinicoReadOnlyDesign {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildPatientInfoRow('Cicatrices', datos['cirugias']),
-          if (datos['cirugias'] == 'Sí') ...[
-            _buildInfoDivider(),
-            _buildPatientInfoRow('Tipo de Cicatriz', _getTipoCicatriz(datos)),
-            _buildInfoDivider(),
-            _buildPatientInfoRow('Características', datos['sitioSitio']),
-          ],
+          _buildPatientInfoRow('Sitio', datos['sitioSitio']),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Queloide', _formatearSiNo(datos['queloide'])),
+          _buildPatientInfoRow('Abierta', _formatearSiNo(datos['abierta'])),
+          _buildPatientInfoRow('Retráctil', _formatearSiNo(datos['retractil'])),
+          _buildPatientInfoRow('Con Adherencia', _formatearSiNo(datos['adherencia'])),
+          _buildPatientInfoRow('Hipertrófica', _formatearSiNo(datos['hipertrofica'])),
         ],
       ),
     );
-  }
-
-  static String _getTipoCicatriz(Map<String, dynamic> datos) {
-    List<String> tipos = [];
-    
-    if (datos['queloide'] == 'Sí') tipos.add('Queloide');
-    if (datos['retractil'] == 'Sí') tipos.add('Retráctil');
-    if (datos['hipertrofica'] == 'Sí') tipos.add('Hipertrófica');
-    if (datos['adherencia'] == 'Sí') tipos.add('Adherencia');
-    
-    return tipos.isEmpty ? 'No especificado' : tipos.join(', ');
   }
 
   static Widget buildMarchaDeambulacion(Map<String, dynamic> datos) {
@@ -184,112 +194,45 @@ class HistorialClinicoReadOnlyDesign {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildPatientInfoRow('Tipo de Marcha', _getTipoMarcha(datos)),
+          _buildPatientInfoRow('Libre', _formatearSiNo(datos['libre'])),
+          _buildPatientInfoRow('Espásticas', _formatearSiNo(datos['espasticas'])),
+          _buildPatientInfoRow('Claudicante', _formatearSiNo(datos['claudicante'])),
+          _buildPatientInfoRow('Atáxica', _formatearSiNo(datos['ataxica'])),
+          _buildPatientInfoRow('Con Ayuda', _formatearSiNo(datos['conAyuda'])),
           _buildInfoDivider(),
-          _buildPatientInfoRow('Características', datos['observacionesMarcha']),
+          _buildPatientInfoRow('Otros', datos['otrosMarcha']),
           _buildInfoDivider(),
-          
-          // Sección de tipos específicos con un contenedor especial
-          Container(
-            margin: const EdgeInsets.only(top: 8.0),
-            padding: const EdgeInsets.all(12.0),
-            decoration: BoxDecoration(
-              color: Colors.black26,
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Tipos Específicos:', 
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold, 
-                    color: _subtitleColor,
-                    fontSize: 14,
-                  )
-                ),
-                const SizedBox(height: 8),
-                _buildTipoMarchaRow('Atáxica', datos['ataxica']),
-                _buildTipoMarchaRow('Espástica', datos['espasticas']),
-                _buildTipoMarchaRow('Claudicante', datos['claudicante']),
-                _buildTipoMarchaRow('Otros', datos['otrosMarcha']),
-              ],
-            ),
-          ),
+          _buildPatientInfoRow('Observaciones', datos['observacionesMarcha']),
         ],
       ),
     );
-  }
-
-  static Widget _buildTipoMarchaRow(String tipo, String? valor) {
-    final bool isPresent = valor == 'Sí';
-    
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Icon(
-            isPresent ? Icons.check_circle : Icons.remove_circle_outline,
-            color: isPresent ? Colors.green : Colors.red.withOpacity(0.7),
-            size: 20,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            tipo,
-            style: TextStyle(
-              color: _textColor,
-              fontWeight: isPresent ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static String _getTipoMarcha(Map<String, dynamic> datos) {
-    List<String> tipos = [];
-    
-    if (datos['ataxica'] == 'Sí') tipos.add('Atáxica');
-    if (datos['espasticas'] == 'Sí') tipos.add('Espástica');
-    if (datos['claudicante'] == 'Sí') tipos.add('Claudicante');
-    
-    return tipos.isEmpty ? 'Normal' : tipos.join(', ');
   }
 
   static Widget buildTraslados(Map<String, dynamic> datos) {
     return _buildCard(
-      title: 'Traslados y Movilidad',
+      title: 'Traslados',
       icon: Icons.transfer_within_a_station,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildPatientInfoRow('Independencia', _getNivelIndependencia(datos)),
+          _buildPatientInfoRow('Valoración Final', datos['valoracionFinal']),
           _buildInfoDivider(),
-          _buildPatientInfoRow('Observaciones', datos['abierta']),
+          _buildPatientInfoRow('Observaciones', datos['Observacionesfinales']),
         ],
       ),
     );
   }
 
-  static String _getNivelIndependencia(Map<String, dynamic> datos) {
-    if (datos['conAyuda'] == 'Sí') return 'Con Ayuda';
-    if (datos['libre'] == 'Sí') return 'Independiente';
-    return 'No especificado';
-  }
-
   static Widget buildInformacionMujeres(Map<String, dynamic> datos) {
     return _buildCard(
-      title: 'Información Gineco-Obstétrica',
+      title: 'Información Específica para Mujeres',
       icon: Icons.pregnant_woman,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildPatientInfoRow('Embarazos', datos['embarazo']),
-          if (datos['embarazo'] == 'Sí') ...[
-            _buildInfoDivider(),
-            _buildPatientInfoRow('Número de Hijos', datos['hijos']),
-            _buildInfoDivider(),
-            _buildPatientInfoRow('Observaciones', datos['sitioMujeres']),
-          ],
+          _buildPatientInfoRow('Está embarazada', _formatearSiNo(datos['embarazo'])),
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Número de hijos', datos['hijos']),
         ],
       ),
     );
@@ -430,8 +373,8 @@ class HistorialClinicoReadOnlyDesign {
   }
 
   // Widget para mostrar información de patologías
-  static Widget _buildExpandablePatologiaInfo(String titulo, String? valor, String? detalle) {
-    final bool hasCondition = valor == 'Sí';
+  static Widget _buildExpandablePatologiaInfo(String titulo, String valor, String? detalle) {
+    final bool hasCondition = _esSi(valor);
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -440,7 +383,7 @@ class HistorialClinicoReadOnlyDesign {
           children: [
             Icon(
               hasCondition ? Icons.check_circle : Icons.cancel,
-              color: hasCondition ? Colors.red : Colors.green.withOpacity(0.7),
+              color: hasCondition ? Colors.green.withOpacity(0.7): Colors.red,
               size: 20,
             ),
             const SizedBox(width: 8),
@@ -455,20 +398,20 @@ class HistorialClinicoReadOnlyDesign {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: hasCondition ? Colors.red.withOpacity(0.2) : Colors.green.withOpacity(0.2),
+                color: hasCondition ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 hasCondition ? 'Sí' : 'No',
                 style: TextStyle(
-                  color: hasCondition ? Colors.red[300] : Colors.green[300],
+                  color: hasCondition ? Colors.green[300] : Colors.red[300],
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
           ],
         ),
-        if (hasCondition && detalle != null && detalle.isNotEmpty)
+        if (hasCondition && detalle != null && detalle.isNotEmpty && detalle != "No aplica")
           Padding(
             padding: const EdgeInsets.only(left: 28.0, top: 4.0, bottom: 8.0),
             child: Text(
@@ -743,5 +686,34 @@ class HistorialClinicoReadOnlyDesign {
         ),
       ),
     );
+  }
+
+  static String _getTipoCicatriz(Map<String, dynamic> datos) {
+    List<String> tipos = [];
+    
+    if (_esSi(datos['queloide'])) tipos.add('Queloide');
+    if (_esSi(datos['retractil'])) tipos.add('Retráctil');
+    if (_esSi(datos['hipertrofica'])) tipos.add('Hipertrófica');
+    if (_esSi(datos['adherencia'])) tipos.add('Adherencia');
+    
+    return tipos.isEmpty ? 'No especificado' : tipos.join(', ');
+  }
+
+  static String _getTipoMarcha(Map<String, dynamic> datos) {
+    List<String> tipos = [];
+    
+    if (_esSi(datos['ataxica'])) tipos.add('Atáxica');
+    if (_esSi(datos['espasticas'])) tipos.add('Espástica');
+    if (_esSi(datos['claudicante'])) tipos.add('Claudicante');
+    if (_esSi(datos['libre'])) tipos.add('Libre');
+    if (_esSi(datos['conAyuda'])) tipos.add('Con Ayuda');
+    
+    return tipos.isEmpty ? 'No especificado' : tipos.join(', ');
+  }
+
+  static String _getNivelIndependencia(Map<String, dynamic> datos) {
+    if (_esSi(datos['conAyuda'])) return 'Con Ayuda';
+    if (_esSi(datos['libre'])) return 'Independiente';
+    return 'No especificado';
   }
 }
