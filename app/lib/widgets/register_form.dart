@@ -11,6 +11,7 @@ class RegisterForm extends StatefulWidget {
 class _RegisterFormState extends State<RegisterForm> {
   bool _isPasswordVisible = false;
   bool _termsAccepted = false;
+  String? _codigoError;
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +57,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   label: "Código de Paciente",
                   icon: Icons.badge_outlined,
                   hint: "Ingrese su código único de paciente",
+                  errorText: _codigoError,
                 ),
                 const SizedBox(height: 20),
                 _buildTextField(
@@ -133,7 +135,19 @@ class _RegisterFormState extends State<RegisterForm> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onPressed: _termsAccepted ? () => registerViewModel.register(context) : null,
+                onPressed: _termsAccepted 
+                    ? () async {
+                        bool isValid = await registerViewModel.validateCodigo();
+                        setState(() {
+                          _codigoError = isValid 
+                              ? null 
+                              : "Código de paciente incorrecto. Por favor, verifique.";
+                        });
+                        if (isValid) {
+                          registerViewModel.register(context);
+                        }
+                      } 
+                    : null,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -162,6 +176,7 @@ class _RegisterFormState extends State<RegisterForm> {
     required IconData icon,
     required String hint,
     bool isPassword = false,
+    String? errorText,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,7 +190,9 @@ class _RegisterFormState extends State<RegisterForm> {
           decoration: BoxDecoration(
             color: Colors.grey[100],
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.grey[300]!),
+            border: Border.all(
+              color: errorText != null ? Colors.red : Colors.grey[300]!,
+            ),
           ),
           child: TextField(
             controller: controller,
@@ -183,7 +200,7 @@ class _RegisterFormState extends State<RegisterForm> {
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(color: Colors.grey[400]),
-              prefixIcon: Icon(icon, color: Colors.blue[800]),
+              prefixIcon: Icon(icon, color: errorText != null ? Colors.red : Colors.blue[800]),
               suffixIcon: isPassword
                   ? IconButton(
                       icon: Icon(
@@ -202,6 +219,14 @@ class _RegisterFormState extends State<RegisterForm> {
             ),
           ),
         ),
+        if (errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              errorText,
+              style: const TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          ),
       ],
     );
   }

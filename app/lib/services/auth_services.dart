@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'dart:math';
 import 'hash_services.dart';
 import 'token_service.dart';
+import 'package:dio/dio.dart';
 
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
+  final Dio _dio = Dio();
 
   // 🔹 LOGIN (Verifica contraseña hasheada y genera token)
   Future<bool> login(String username, String password) async {
@@ -139,5 +141,10 @@ class AuthService {
       print('❌ Error al obtener ID de paciente desde el token: $e');
       return null;
     }
+  }
+
+  Future<bool> validatePatientCode(String code) async {
+    // Validación temporal - reemplazar con la llamada real al backend
+    return code.length == 8 && code.startsWith('PAC'); // ejemplo
   }
 }

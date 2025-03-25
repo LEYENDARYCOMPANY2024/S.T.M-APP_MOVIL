@@ -12,6 +12,23 @@ class RegisterViewModel extends ChangeNotifier {
 
   RegisterViewModel(this._authService);
 
+  // Agregar método para validar el código
+  Future<bool> validateCodigo() async {
+    String codigo = codigoController.text.trim();
+    
+    if (codigo.isEmpty) {
+      return false;
+    }
+
+    // Aquí deberías hacer la validación con tu servicio
+    try {
+      bool isValid = await _authService.validatePatientCode(codigo);
+      return isValid;
+    } catch (e) {
+      return false;
+    }
+  }
+
   // Método para registrar al paciente
   Future<void> register(BuildContext context) async {
     String codigo = codigoController.text.trim();
@@ -21,6 +38,15 @@ class RegisterViewModel extends ChangeNotifier {
     if (codigo.isEmpty || usuario.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Todos los campos son obligatorios")),
+      );
+      return;
+    }
+
+    // Validar el código antes de continuar con el registro
+    bool isValidCode = await validateCodigo();
+    if (!isValidCode) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("El código de paciente no es válido")),
       );
       return;
     }
