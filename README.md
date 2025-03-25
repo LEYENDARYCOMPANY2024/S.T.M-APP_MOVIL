@@ -58,4 +58,18 @@ flutter build apk --release
 flutter build apk --release --output=build/app/outputs/flutter-apk/SMM.apk
 ```
 
+## comandos de git que me fueron utiles
+
+Si trabajas en Windows y colaboras con personas que usan Linux o macOS, te recomiendo esta configuración:
+
+```sh
+git config --global core.autocrlf input
+```
+
+Si solo trabajas en Windows y no colaboras con otros sistemas operativos, puedes usar esta otra opción:
+
+```sh
+git config --global core.autocrlf true
+```
+
 
