@@ -223,4 +223,38 @@ class PacienteService {
       'progresoGeneral': 75, // Porcentaje
     };
   }
+
+  Future<bool> actualizarInformacionPersonal(
+    int pacienteId, {
+    required String nombre,
+    required String primerApellido,
+    required String segundoApellido,
+    required int edad,
+    required String genero,
+    String? estadoCivil,
+    String? escolaridad,
+    required String ocupacion,
+  }) async {
+    try {
+      await _supabase
+          .from('pacientes')
+          .update({
+            'nombre': nombre,
+            'primer_apellido': primerApellido,
+            'segundo_apellido': segundoApellido,
+            'edad': edad,
+            'genero': genero,
+            'estado_civil': estadoCivil,
+            'escolaridad': escolaridad,
+            'ocupacion': ocupacion,
+          })
+          .eq('id_paciente', pacienteId);
+      
+      print('✅ Información personal actualizada correctamente');
+      return true;
+    } catch (e) {
+      print('❌ Error al actualizar información personal: $e');
+      return false;
+    }
+  }
 }

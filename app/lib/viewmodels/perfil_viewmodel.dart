@@ -119,6 +119,67 @@ class PerfilViewModel extends ChangeNotifier {
     }
   }
 
+  // 🔹 Actualizar información personal del paciente
+  Future<bool> actualizarInformacionPersonal({
+    required String nombre,
+    required String primerApellido,
+    required String segundoApellido,
+    required int edad,
+    required String genero,
+    String? estadoCivil,
+    String? escolaridad,
+    required String ocupacion,
+    required String contrasenaActual,
+  }) async {
+    try {
+      // Verificar contraseña
+      bool contrasenaValida = await _pacienteService.verificarContrasena(
+        paciente!.id,
+        contrasenaActual,
+      );
+
+      if (!contrasenaValida) {
+        errorMessage = "Contraseña incorrecta";
+        notifyListeners();
+        return false;
+      }
+
+      // Actualizar información
+      bool actualizado = await _pacienteService.actualizarInformacionPersonal(
+        paciente!.id,
+        nombre: nombre,
+        primerApellido: primerApellido,
+        segundoApellido: segundoApellido,
+        edad: edad,
+        genero: genero,
+        estadoCivil: estadoCivil,
+        escolaridad: escolaridad,
+        ocupacion: ocupacion,
+      );
+
+      if (actualizado) {
+        // Actualizar el modelo local
+        paciente = paciente!.copyWith(
+          nombre: nombre,
+          primerApellido: primerApellido,
+          segundoApellido: segundoApellido,
+          edad: edad,
+          genero: genero,
+          estadoCivil: estadoCivil,
+          escolaridad: escolaridad,
+          ocupacion: ocupacion,
+        );
+        notifyListeners();
+      }
+
+      return actualizado;
+    } catch (e) {
+      errorMessage = "Error al actualizar la información personal";
+      notifyListeners();
+      return false;
+    }
+  }
+
   // 🔹 Limpiar mensajes después de mostrarlos
   void limpiarMensajes() {
     errorMessage = null;

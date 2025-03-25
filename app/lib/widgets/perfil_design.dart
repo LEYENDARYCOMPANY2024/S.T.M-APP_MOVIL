@@ -22,12 +22,35 @@ class _PerfilDesignState extends State<PerfilDesign> {
   bool _isUpdating = false;
   bool _obscurePassword = true;
 
+  // Nuevos controladores para la información personal
+  final TextEditingController _nombreController = TextEditingController();
+  final TextEditingController _primerApellidoController = TextEditingController();
+  final TextEditingController _segundoApellidoController = TextEditingController();
+  final TextEditingController _edadController = TextEditingController();
+  final TextEditingController _ocupacionController = TextEditingController();
+  String? _generoSeleccionado;
+  String? _estadoCivilSeleccionado;
+  String? _escolaridadSeleccionada;
+  bool _editandoInfo = false;
+
   @override
   void initState() {
     super.initState();
+    _inicializarControladores();
     if (widget.paciente.correoElectronico.isNotEmpty) {
       _correoController.text = widget.paciente.correoElectronico;
     }
+  }
+
+  void _inicializarControladores() {
+    _nombreController.text = widget.paciente.nombre;
+    _primerApellidoController.text = widget.paciente.primerApellido;
+    _segundoApellidoController.text = widget.paciente.segundoApellido ?? '';
+    _edadController.text = widget.paciente.edad.toString();
+    _ocupacionController.text = widget.paciente.ocupacion;
+    _generoSeleccionado = widget.paciente.genero;
+    _estadoCivilSeleccionado = widget.paciente.estadoCivil;
+    _escolaridadSeleccionada = widget.paciente.escolaridad;
   }
 
   @override
@@ -35,6 +58,11 @@ class _PerfilDesignState extends State<PerfilDesign> {
     _usuarioController.dispose();
     _correoController.dispose();
     _passwordController.dispose();
+    _nombreController.dispose();
+    _primerApellidoController.dispose();
+    _segundoApellidoController.dispose();
+    _edadController.dispose();
+    _ocupacionController.dispose();
     super.dispose();
   }
 
@@ -327,17 +355,139 @@ class _PerfilDesignState extends State<PerfilDesign> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoRow(Icons.person_outline, 'Nombre', widget.paciente.nombre),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Información Personal',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    _editandoInfo ? Icons.save : Icons.edit,
+                    color: Color(0xFF1565C0),
+                  ),
+                  onPressed: () {
+                    if (_editandoInfo) {
+                      _guardarCambios();
+                    }
+                    setState(() {
+                      _editandoInfo = !_editandoInfo;
+                    });
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: 15),
+            _buildEditableInfoRow(
+              'Nombre',
+              _nombreController,
+              Icons.person_outline,
+              enabled: _editandoInfo,
+            ),
             _divider(),
-            _buildInfoRow(Icons.wc, 'Género', widget.paciente.genero),
+            _buildEditableInfoRow(
+              'Primer Apellido',
+              _primerApellidoController,
+              Icons.person_outline,
+              enabled: _editandoInfo,
+            ),
             _divider(),
-            _buildInfoRow(Icons.favorite_border, 'Estado Civil', widget.paciente.estadoCivil),
+            _buildEditableInfoRow(
+              'Segundo Apellido',
+              _segundoApellidoController,
+              Icons.person_outline,
+              enabled: _editandoInfo,
+            ),
             _divider(),
-            _buildInfoRow(Icons.school_outlined, 'Escolaridad', widget.paciente.escolaridad),
+            _buildEditableInfoRow(
+              'Edad',
+              _edadController,
+              Icons.calendar_today,
+              enabled: _editandoInfo,
+              keyboardType: TextInputType.number,
+            ),
             _divider(),
-            _buildInfoRow(Icons.work_outline, 'Ocupación', widget.paciente.ocupacion),
+            _buildDropdownRow(
+              label: 'Género',
+              value: _generoSeleccionado,
+              icon: Icons.wc,
+              items: const ['masculino', 'femenino'],
+              onChanged: (String? value) {
+                if (_editandoInfo) {
+                  setState(() => _generoSeleccionado = value);
+                }
+              },
+              enabled: _editandoInfo,
+            ),
             _divider(),
-            _buildInfoRow(Icons.email_outlined, 'Correo', widget.paciente.correoElectronico),
+            _buildDropdownRow(
+              label: 'Estado Civil',
+              value: _estadoCivilSeleccionado,
+              icon: Icons.favorite_border,
+              items: const [
+                'soltero',
+                'casado',
+                'divorciado',
+                'viudo',
+                'union_libre',
+                'separado'
+              ],
+              onChanged: (String? value) {
+                if (_editandoInfo) {
+                  setState(() => _estadoCivilSeleccionado = value);
+                }
+              },
+              enabled: _editandoInfo,
+            ),
+            _divider(),
+            _buildDropdownRow(
+              label: 'Escolaridad',
+              value: _escolaridadSeleccionada,
+              icon: Icons.school_outlined,
+              items: const [
+                'primaria',
+                'secundaria',
+                'preparatoria',
+                'licenciatura',
+                'maestria',
+                'doctorado',
+                'otro'
+              ],
+              onChanged: (String? value) {
+                if (_editandoInfo) {
+                  setState(() => _escolaridadSeleccionada = value);
+                }
+              },
+              enabled: _editandoInfo,
+            ),
+            _divider(),
+            _buildDropdownRow(
+              label: 'Ocupación',
+              value: _ocupacionController.text,
+              icon: Icons.work_outline,
+              items: const [
+                'empleado',
+                'freelance',
+                'autonomo',
+                'empleador',
+                'desempleado',
+                'estudiante',
+                'jubilado',
+                'pensionado',
+                'otro'
+              ],
+              onChanged: (String? value) {
+                if (_editandoInfo) {
+                  setState(() => _ocupacionController.text = value ?? '');
+                }
+              },
+              enabled: _editandoInfo,
+            ),
           ],
         ),
       ),
@@ -352,7 +502,13 @@ class _PerfilDesignState extends State<PerfilDesign> {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String title, String? value) {
+  Widget _buildEditableInfoRow(
+    String label,
+    TextEditingController controller,
+    IconData icon, {
+    bool enabled = false,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -363,39 +519,192 @@ class _PerfilDesignState extends State<PerfilDesign> {
               color: Color(0xFF1565C0).withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              icon, 
-              color: Color(0xFF1565C0),
-              size: 22,
-            ),
+            child: Icon(icon, color: Color(0xFF1565C0), size: 22),
           ),
           SizedBox(width: 15),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+            child: enabled
+                ? TextField(
+                    controller: controller,
+                    keyboardType: keyboardType,
+                    decoration: InputDecoration(
+                      labelText: label,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        controller.text,
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  value != null && value.isNotEmpty ? value : "No disponible",
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatearValorEnum(String valor) {
+    // Convertir 'union_libre' a 'Unión Libre', etc.
+    return valor
+        .split('_')
+        .map((word) => word[0].toUpperCase() + word.substring(1))
+        .join(' ');
+  }
+
+  Widget _buildDropdownRow({
+    required String label,
+    required String? value,
+    required IconData icon,
+    required List<String> items,
+    required Function(String?) onChanged,
+    bool enabled = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Color(0xFF1565C0).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: Color(0xFF1565C0), size: 22),
+          ),
+          SizedBox(width: 15),
+          Expanded(
+            child: enabled
+                ? DropdownButtonFormField<String>(
+                    value: value,
+                    decoration: InputDecoration(
+                      labelText: label,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    items: items.map((String item) {
+                      return DropdownMenuItem(
+                        value: item,
+                        child: Text(_formatearValorEnum(item)),
+                      );
+                    }).toList(),
+                    onChanged: onChanged,
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        value != null ? _formatearValorEnum(value) : 'No especificado',
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _guardarCambios() async {
+    try {
+      // Validar datos
+      int? edad = int.tryParse(_edadController.text);
+      if (edad == null || edad <= 0 || edad >= 120) {
+        _mostrarSnackBar(context, "La edad debe ser un número válido entre 1 y 119", true);
+        return;
+      }
+
+      // Mostrar diálogo de confirmación con contraseña
+      bool? confirmado = await showDialog<bool>(
+        context: context,
+        builder: (context) => _buildConfirmacionDialog(),
+      );
+
+      if (confirmado == true) {
+        // Actualizar datos usando el ViewModel
+        final perfilViewModel = Provider.of<PerfilViewModel>(context, listen: false);
+        bool actualizado = await perfilViewModel.actualizarInformacionPersonal(
+          nombre: _nombreController.text,
+          primerApellido: _primerApellidoController.text,
+          segundoApellido: _segundoApellidoController.text,
+          edad: edad,
+          genero: _generoSeleccionado!,
+          estadoCivil: _estadoCivilSeleccionado,
+          escolaridad: _escolaridadSeleccionada,
+          ocupacion: _ocupacionController.text,
+          contrasenaActual: _passwordController.text,
+        );
+
+        if (actualizado) {
+          setState(() => _editandoInfo = false);
+          _mostrarSnackBar(context, "Información actualizada correctamente", false);
+        } else {
+          _mostrarSnackBar(context, "Error al actualizar la información", true);
+        }
+      }
+    } catch (e) {
+      _mostrarSnackBar(context, "Error al guardar los cambios", true);
+    }
+  }
+
+  Widget _buildConfirmacionDialog() {
+    return AlertDialog(
+      title: Text('Confirmar cambios'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Por favor, ingresa tu contraseña para confirmar los cambios'),
+          SizedBox(height: 16),
+          TextField(
+            controller: _passwordController,
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: 'Contraseña',
+              border: OutlineInputBorder(),
             ),
           ),
         ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text('Confirmar'),
+        ),
+      ],
     );
   }
 
