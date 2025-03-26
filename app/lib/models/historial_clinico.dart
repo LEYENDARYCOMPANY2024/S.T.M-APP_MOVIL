@@ -12,19 +12,29 @@ class HistorialClinico {
   });
 
   factory HistorialClinico.fromMap(Map<String, dynamic> map) {
-  print('Datos recibidos: $map');
-  return HistorialClinico(
-    idHistorialClinico: map['id_historial_clinico'] as int?,
-    idPacienteHcFk: map['id_paciente_hc_fk'] as int,
-    datosHistorialClinico: map['datos_historial_clinico'] != null
-        ? (map['datos_historial_clinico'] is String
-            ? json.decode(map['datos_historial_clinico'])
-            : map['datos_historial_clinico'])
-        : {},
+    print('Datos recibidos: $map');
+    
+    // Si datos_historial_clinico es null, retornar un mapa vacío
+    Map<String, dynamic> datos = {};
+    
+    if (map['datos_historial_clinico'] != null) {
+      if (map['datos_historial_clinico'] is String) {
+        try {
+          datos = json.decode(map['datos_historial_clinico']);
+        } catch (e) {
+          print('Error decodificando JSON: $e');
+        }
+      } else if (map['datos_historial_clinico'] is Map) {
+        datos = Map<String, dynamic>.from(map['datos_historial_clinico']);
+      }
+    }
+
+    return HistorialClinico(
+      idHistorialClinico: map['id_historial_clinico'] as int?,
+      idPacienteHcFk: map['id_paciente_hc_fk'] as int,
+      datosHistorialClinico: datos,
     );
   }
-
-
 
   Map<String, dynamic> toMap() {
     return {

@@ -561,11 +561,18 @@ class _PerfilDesignState extends State<PerfilDesign> {
     );
   }
 
-  String _formatearValorEnum(String valor) {
+  String _formatearValorEnum(String? valor) {
+    // Si el valor es null o vacío, retornar un valor por defecto
+    if (valor == null || valor.isEmpty) {
+      return 'No especificado';
+    }
+
     // Convertir 'union_libre' a 'Unión Libre', etc.
     return valor
         .split('_')
-        .map((word) => word[0].toUpperCase() + word.substring(1))
+        .map((word) => word.isNotEmpty 
+            ? word[0].toUpperCase() + word.substring(1)
+            : '')
         .join(' ');
   }
 
@@ -577,6 +584,9 @@ class _PerfilDesignState extends State<PerfilDesign> {
     required Function(String?) onChanged,
     bool enabled = false,
   }) {
+    // Verificar si el valor actual está en la lista de items
+    final bool valueInItems = value != null && items.contains(value);
+    
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -593,7 +603,7 @@ class _PerfilDesignState extends State<PerfilDesign> {
           Expanded(
             child: enabled
                 ? DropdownButtonFormField<String>(
-                    value: value,
+                    value: valueInItems ? value : null, // Solo usar el valor si está en la lista
                     decoration: InputDecoration(
                       labelText: label,
                       border: OutlineInputBorder(
@@ -607,6 +617,7 @@ class _PerfilDesignState extends State<PerfilDesign> {
                       );
                     }).toList(),
                     onChanged: onChanged,
+                    hint: Text('Seleccione una opción'), // Agregar hint para cuando no hay valor
                   )
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -620,7 +631,7 @@ class _PerfilDesignState extends State<PerfilDesign> {
                       ),
                       SizedBox(height: 2),
                       Text(
-                        value != null ? _formatearValorEnum(value) : 'No especificado',
+                        valueInItems ? _formatearValorEnum(value) : 'No especificado',
                         style: TextStyle(
                           color: Colors.black87,
                           fontSize: 16,

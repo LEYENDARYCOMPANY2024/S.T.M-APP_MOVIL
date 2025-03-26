@@ -38,21 +38,44 @@ class _HistorialClinicoReadOnlyViewState extends State<HistorialClinicoReadOnlyV
       body: Consumer<HistorialClinicoViewModel>(
         builder: (context, viewModel, child) {
           if (viewModel.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator(color: Colors.white));
+          }
+
+          if (viewModel.historialClinico == null || 
+              viewModel.historialClinico!.datosHistorialClinico.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    size: 100,
+                    color: Colors.amber,
+                  ),
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Text(
+                      'No tienes historial clínico, contacta con el terapeuta',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
           }
 
           if (viewModel.errorMessage.isNotEmpty) {
             return Center(
               child: Text(
-                'Error: ${viewModel.errorMessage}',
-                style: const TextStyle(color: Colors.red),
+                viewModel.errorMessage,
+                style: const TextStyle(color: Colors.white),
               ),
-            );
-          }
-
-          if (viewModel.historialClinico == null || viewModel.paciente == null) {
-            return const Center(
-              child: Text('No se encontró información del historial clínico'),
             );
           }
 

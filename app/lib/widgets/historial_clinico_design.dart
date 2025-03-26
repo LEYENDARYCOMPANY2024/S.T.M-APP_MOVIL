@@ -68,14 +68,16 @@ class HistorialClinicoReadOnlyDesign {
     );
   }
 
-  static String _formatearSiNo(String valor) {
+  static String _formatearSiNo(String? valor) {
+    if (valor == null) return 'No';
     // Manejar valores como "diabetesSi" o "diabetesNo"
     if (valor.toLowerCase().contains('si')) return 'Sí';
     if (valor.toLowerCase().contains('no')) return 'No';
     return valor;
   }
 
-  static bool _esSi(String valor) {
+  static bool _esSi(String? valor) {
+    if (valor == null) return false;
     return valor.toLowerCase().contains('si');
   }
 
@@ -88,19 +90,19 @@ class HistorialClinicoReadOnlyDesign {
         children: [
           Row(
             children: [
-              Expanded(child: _buildPatientInfoRow('Peso (kg)', datos['peso'])),
-              Expanded(child: _buildPatientInfoRow('Estatura (cm)', datos['estatura'])),
+              Expanded(child: _buildPatientInfoRow('Peso (kg)', datos['peso'] ?? 'No especificado')),
+              Expanded(child: _buildPatientInfoRow('Estatura (cm)', datos['estatura'] ?? 'No especificado')),
             ],
           ),
           _buildInfoDivider(),
-          _buildPatientInfoRow('IMC', datos['imc'], showCalculation: true),
+          _buildPatientInfoRow('IMC', datos['imc'] ?? 'No especificado', showCalculation: true),
           _buildInfoDivider(),
           _buildPatientInfoRow('Espasmos o Contractura Muscular', 
-            _formatearSiNo(datos['espasmos'])),
-          if (_esSi(datos['espasmos']))
+            _formatearSiNo(datos['espasmos'] ?? 'No')),
+          if (_esSi(datos['espasmos'] ?? 'No'))
             Padding(
               padding: const EdgeInsets.only(left: 16.0, top: 8.0),
-              child: _buildPatientInfoRow('Sitio/Características', datos['sitioEspasmos']),
+              child: _buildPatientInfoRow('Sitio/Características', datos['sitioEspasmos'] ?? 'No especificado'),
             ),
         ],
       ),
