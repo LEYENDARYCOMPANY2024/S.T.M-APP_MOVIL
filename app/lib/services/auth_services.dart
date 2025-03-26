@@ -143,8 +143,49 @@ class AuthService {
     }
   }
 
-  Future<bool> validatePatientCode(String code) async {
-    // Validación temporal - reemplazar con la llamada real al backend
-    return code.length == 8 && code.startsWith('PAC'); // ejemplo
+  Future<Map<String, dynamic>> validatePatientCode(String code) async {
+    try {
+      final response = await _supabase
+          .from('pacientes')
+          .select('nombre_usuario_p, contrasena_p')
+          .eq('codigo', code)
+          .maybeSingle();
+
+      if (response == null) {
+        // El código no existe en la base de datos
+        return {
+          'exists': false,
+          'hasCredentials': false
+        };
+      }
+
+      // Verificar si ya tiene credenciales (usuario y contraseña)
+      bool hasCredentials = response['nombre_usuario_p'] != null && 
+                           response['contrasena_p'] != null;
+
+      return {
+        'exists': true,
+        'hasCredentials': hasCredentials
+      };
+
+    } catch (e) {
+      print('❌ Error al validar código: $e');
+      throw Exception('Error al validar el código');
+    }
+  }
+
+  Future<bool> checkUsernameExists(String username) async {
+    try {
+      final response = await _supabase
+          .from('pacientes')
+          .select('id_paciente')
+          .eq('nombre_usuario_p', username)
+          .maybeSingle();
+      
+      return response != null;
+    } catch (e) {
+      print('❌ Error al verificar nombre de usuario: $e');
+      throw Exception('Error al verificar nombre de usuario');
+    }
   }
 }

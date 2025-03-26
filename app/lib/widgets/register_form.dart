@@ -12,6 +12,7 @@ class _RegisterFormState extends State<RegisterForm> {
   bool _isPasswordVisible = false;
   bool _termsAccepted = false;
   String? _codigoError;
+  String? _usuarioError;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +66,15 @@ class _RegisterFormState extends State<RegisterForm> {
                   label: "Nombre de Usuario",
                   icon: Icons.person_outline,
                   hint: "Elija un nombre de usuario",
+                  errorText: _usuarioError,
+                  onChanged: (value) async {
+                    if (value.isNotEmpty) {
+                      final validationResult = await registerViewModel.validateUsername();
+                      setState(() {
+                        _usuarioError = validationResult['isValid'] ? null : validationResult['message'];
+                      });
+                    }
+                  },
                 ),
                 const SizedBox(height: 20),
                 _buildTextField(
@@ -137,16 +147,16 @@ class _RegisterFormState extends State<RegisterForm> {
                 ),
                 onPressed: _termsAccepted 
                     ? () async {
-                        bool isValid = await registerViewModel.validateCodigo();
+                        final validationResult = await registerViewModel.validateCodigo();
                         setState(() {
-                          _codigoError = isValid 
-                              ? null 
-                              : "Código de paciente incorrecto. Por favor, verifique.";
+                            _codigoError = validationResult['isValid'] 
+                                ? null 
+                                : validationResult['message'];
                         });
-                        if (isValid) {
-                          registerViewModel.register(context);
+                        if (validationResult['isValid']) {
+                            registerViewModel.register(context);
                         }
-                      } 
+                    } 
                     : null,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -177,6 +187,7 @@ class _RegisterFormState extends State<RegisterForm> {
     required String hint,
     bool isPassword = false,
     String? errorText,
+    Function(String)? onChanged,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,6 +208,7 @@ class _RegisterFormState extends State<RegisterForm> {
           child: TextField(
             controller: controller,
             obscureText: isPassword ? !_isPasswordVisible : false,
+            onChanged: onChanged,
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(color: Colors.grey[400]),
