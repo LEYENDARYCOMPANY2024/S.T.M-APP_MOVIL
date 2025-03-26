@@ -59,6 +59,20 @@ class _RegisterFormState extends State<RegisterForm> {
                   icon: Icons.badge_outlined,
                   hint: "Ingrese su código único de paciente",
                   errorText: _codigoError,
+                  onChanged: (value) async {
+                    if (value.isEmpty) {
+                      setState(() {
+                        _codigoError = null;
+                      });
+                    } else {
+                      final validationResult = await registerViewModel.validateCodigo();
+                      setState(() {
+                        _codigoError = validationResult['isValid'] 
+                            ? null 
+                            : validationResult['message'];
+                      });
+                    }
+                  },
                 ),
                 const SizedBox(height: 20),
                 _buildTextField(
