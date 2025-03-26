@@ -20,6 +20,8 @@ import 'services/ejercicios_services.dart'; // Importa el servicio de ejercicios
 import 'services/auth_services.dart';
 import 'viewmodels/historial_clinico_viewmodel.dart';
 import 'services/historial_clinico_service.dart';
+import 'viewmodels/detalle_sesion_viewmodel.dart';
+import 'views/detalle_sesion_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,8 +56,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => EjerciciosViewModel(EjerciciosService(Supabase.instance.client, AuthService()),),), // Proveedor del EjerciciosViewModel
         ChangeNotifierProvider(create: (_) => SesionesViewModel()), // Proveedor del SesionViewModel
         ChangeNotifierProvider(create: (_) => HistorialClinicoViewModel(HistorialClinicoService(Supabase.instance.client, authService),authService,),),
-
-
+        ChangeNotifierProvider(create: (_) => DetalleSesionViewModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -74,6 +75,10 @@ class MyApp extends StatelessWidget {
           '/ejercicios': (context) => const EjerciciosView(), // Nueva ruta para ejercicios
           '/sesion': (context) => const SesionesView(), // Ruta para la nueva vista de sesión
           '/historial-clinico': (context) => const HistorialClinicoReadOnlyView(), // Nueva ruta para historial clínico
+          '/detalle-sesion': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return DetalleSesionView(sesion: args['sesion']);
+          },
         },
       ),
     );

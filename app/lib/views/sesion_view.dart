@@ -305,8 +305,11 @@ class _SesionesViewState extends State<SesionesView> {
           IconButton(
             icon: Icon(Icons.visibility, color: Colors.white70),
             onPressed: () {
-              // Acción para ver detalles de la sesión
-              // Aquí se podría implementar la navegación a una pantalla de detalles
+              Navigator.pushNamed(
+                context,
+                '/detalle-sesion',
+                arguments: {'sesion': sesion},
+              );
             },
           ),
         ],
