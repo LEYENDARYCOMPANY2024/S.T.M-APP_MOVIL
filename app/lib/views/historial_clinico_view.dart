@@ -43,13 +43,7 @@ class _HistorialClinicoReadOnlyViewState extends State<HistorialClinicoReadOnlyV
             );
           }
 
-          // Verificar si hay datos en el historial
-          bool noHayDatos = viewModel.historialClinico == null || 
-              viewModel.historialClinico!.datosHistorialClinico.isEmpty ||
-              viewModel.historialClinico!.datosHistorialClinico.values
-                  .every((value) => value == null || value.toString().isEmpty);
-
-          if (noHayDatos) {
+          if (viewModel.historialClinico == null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -60,24 +54,12 @@ class _HistorialClinicoReadOnlyViewState extends State<HistorialClinicoReadOnlyV
                     color: Colors.amber,
                   ),
                   const SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
-                    child: Text(
-                      'No tienes historial clínico,\ncontacta con el terapeuta',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
                   Text(
-                    'El terapeuta agregará tu información médica',
+                    'No tienes historial clínico',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 16,
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],

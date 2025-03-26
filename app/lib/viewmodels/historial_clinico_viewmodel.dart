@@ -46,12 +46,34 @@ class HistorialClinicoViewModel with ChangeNotifier {
 
       _historialClinico = await _historialService.getHistorialClinicoPorId(pacienteId);
       
-      // Si el historial es null o está vacío, mostrar mensaje apropiado
-      if (_historialClinico == null || 
-          _historialClinico!.datosHistorialClinico.isEmpty ||
-          _historialClinico!.datosHistorialClinico.values
-              .every((value) => value == null || value.toString().isEmpty)) {
-        _historialClinico = null; // Asegurar que sea null para mostrar mensaje
+      // Verificar si el historial está realmente vacío
+      if (_historialClinico != null) {
+        bool tieneDataSignificativa = false;
+        final datos = _historialClinico!.datosHistorialClinico;
+        
+        // Lista de campos clave que indican que hay datos significativos
+        final camposRequeridos = [
+          'peso', 'estatura', 'imc', 'expediente', 'fecha',
+          'diabetes', 'alergia', 'hta', 'cancer', 'transfusiones',
+          'reumaticas', 'encames', 'accidentes', 'cardiopatias',
+          'cirugias', 'fracturas'
+        ];
+
+        // Verificar si al menos uno de los campos clave tiene datos
+        for (var campo in camposRequeridos) {
+          final valor = datos[campo];
+          if (valor != null && 
+              valor.toString().isNotEmpty && 
+              valor.toString() != "No aplica" &&
+              !valor.toString().endsWith('No')) {
+            tieneDataSignificativa = true;
+            break;
+          }
+        }
+
+        if (!tieneDataSignificativa) {
+          _historialClinico = null; // Establecer como null si no hay datos significativos
+        }
       }
 
       _errorMessage = '';
