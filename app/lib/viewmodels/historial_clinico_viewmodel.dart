@@ -32,31 +32,32 @@ class HistorialClinicoViewModel with ChangeNotifier {
   Future<void> init() async {
     _setLoading(true);
     try {
-      // Obtener ID del paciente actual
       final pacienteId = await _authService.obtenerIdPacienteDesdeToken();
       if (pacienteId == null) {
         _setError('No se pudo obtener el ID del paciente');
         return;
       }
 
-      // Cargar datos del paciente
       _paciente = await _pacienteService.getPaciente(pacienteId);
       if (_paciente == null) {
         _setError('No se encontró información del paciente');
         return;
       }
 
-      // Cargar historial clínico
       _historialClinico = await _historialService.getHistorialClinicoPorId(pacienteId);
-      if (_historialClinico?.datosHistorialClinico == null) {
-        _setError('Los datos del historial clínico están incompletos o nulos');
-        return;
+      
+      // Si el historial es null o está vacío, mostrar mensaje apropiado
+      if (_historialClinico == null || 
+          _historialClinico!.datosHistorialClinico.isEmpty ||
+          _historialClinico!.datosHistorialClinico.values
+              .every((value) => value == null || value.toString().isEmpty)) {
+        _historialClinico = null; // Asegurar que sea null para mostrar mensaje
       }
 
-      
       _errorMessage = '';
     } catch (e) {
-      _setError('Error al cargar datos: $e');
+      print('Error al cargar datos: $e');
+      _setError('Error al cargar los datos del historial clínico');
     } finally {
       _setLoading(false);
     }
@@ -72,5 +73,16 @@ class HistorialClinicoViewModel with ChangeNotifier {
   void _setError(String message) {
     _errorMessage = message;
     notifyListeners();
+  }
+
+  // Método para verificar si un campo es "Sí"
+  bool esCampoSi(String? valor) {
+    if (valor == null) return false;
+    return valor.toLowerCase().contains('si');
+  }
+
+  // Método para obtener el valor de un campo con valor por defecto
+  String obtenerValorCampo(String campo, {String valorDefecto = 'No especificado'}) {
+    return _historialClinico?.datosHistorialClinico[campo]?.toString() ?? valorDefecto;
   }
 }

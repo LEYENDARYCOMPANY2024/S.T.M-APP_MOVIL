@@ -69,15 +69,14 @@ class HistorialClinicoReadOnlyDesign {
   }
 
   static String _formatearSiNo(String? valor) {
-    if (valor == null) return 'No';
-    // Manejar valores como "diabetesSi" o "diabetesNo"
+    if (valor == null || valor.isEmpty) return 'No';
     if (valor.toLowerCase().contains('si')) return 'Sí';
     if (valor.toLowerCase().contains('no')) return 'No';
     return valor;
   }
 
   static bool _esSi(String? valor) {
-    if (valor == null) return false;
+    if (valor == null || valor.isEmpty) return false;
     return valor.toLowerCase().contains('si');
   }
 
@@ -143,9 +142,24 @@ class HistorialClinicoReadOnlyDesign {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Tabaquismo
+          _buildExpandablePatologiaInfo('Tabaquismo', datos['tabaquismo'], datos['sitioHabitos']),
+          
+          // Alcoholismo
           _buildExpandablePatologiaInfo('Alcoholismo', datos['alcoholismo'], datos['sitioAlcoholismo']),
-          _buildExpandablePatologiaInfo('Tabaquismo', datos['tabaquismo'], datos['sitioTabaquismo']),
+          
+          // Drogas
+          _buildExpandablePatologiaInfo('Drogas', datos['drogas'], datos['sitioDrogas']),
+          
+          // Actividad Física
           _buildExpandablePatologiaInfo('Actividad Física', datos['actividadFisica'], datos['sitioActividad']),
+          
+          // Automedicación
+          _buildExpandablePatologiaInfo('Se Automedica', datos['automedica'], datos['sitioAutomedica']),
+          
+          // Pasatiempo (input de texto)
+          _buildInfoDivider(),
+          _buildPatientInfoRow('Pasatiempo', datos['sitioHabitos'] ?? 'No especificado'),
         ],
       ),
     );
@@ -321,8 +335,6 @@ class HistorialClinicoReadOnlyDesign {
                 color: _textColor,
                 fontWeight: showCalculation ? FontWeight.bold : FontWeight.normal,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
             ),
           ),
         ],
@@ -375,8 +387,8 @@ class HistorialClinicoReadOnlyDesign {
   }
 
   // Widget para mostrar información de patologías
-  static Widget _buildExpandablePatologiaInfo(String titulo, String valor, String? detalle) {
-    final bool hasCondition = _esSi(valor);
+  static Widget _buildExpandablePatologiaInfo(String titulo, String? valor, String? detalle) {
+    final bool hasCondition = _esSi(valor ?? '');
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -385,7 +397,7 @@ class HistorialClinicoReadOnlyDesign {
           children: [
             Icon(
               hasCondition ? Icons.check_circle : Icons.cancel,
-              color: hasCondition ? Colors.green.withOpacity(0.7): Colors.red,
+              color: hasCondition ? Colors.green.withOpacity(0.7) : Colors.red,
               size: 20,
             ),
             const SizedBox(width: 8),
@@ -413,6 +425,7 @@ class HistorialClinicoReadOnlyDesign {
             ),
           ],
         ),
+        // Solo mostrar el detalle si la condición es Sí y hay información
         if (hasCondition && detalle != null && detalle.isNotEmpty && detalle != "No aplica")
           Padding(
             padding: const EdgeInsets.only(left: 28.0, top: 4.0, bottom: 8.0),

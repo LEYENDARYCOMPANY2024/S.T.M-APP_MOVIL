@@ -38,11 +38,18 @@ class _HistorialClinicoReadOnlyViewState extends State<HistorialClinicoReadOnlyV
       body: Consumer<HistorialClinicoViewModel>(
         builder: (context, viewModel, child) {
           if (viewModel.isLoading) {
-            return const Center(child: CircularProgressIndicator(color: Colors.white));
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.white)
+            );
           }
 
-          if (viewModel.historialClinico == null || 
-              viewModel.historialClinico!.datosHistorialClinico.isEmpty) {
+          // Verificar si hay datos en el historial
+          bool noHayDatos = viewModel.historialClinico == null || 
+              viewModel.historialClinico!.datosHistorialClinico.isEmpty ||
+              viewModel.historialClinico!.datosHistorialClinico.values
+                  .every((value) => value == null || value.toString().isEmpty);
+
+          if (noHayDatos) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -56,13 +63,21 @@ class _HistorialClinicoReadOnlyViewState extends State<HistorialClinicoReadOnlyV
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 40),
                     child: Text(
-                      'No tienes historial clínico, contacta con el terapeuta',
+                      'No tienes historial clínico,\ncontacta con el terapeuta',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'El terapeuta agregará tu información médica',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 16,
                     ),
                   ),
                 ],
@@ -72,9 +87,27 @@ class _HistorialClinicoReadOnlyViewState extends State<HistorialClinicoReadOnlyV
 
           if (viewModel.errorMessage.isNotEmpty) {
             return Center(
-              child: Text(
-                viewModel.errorMessage,
-                style: const TextStyle(color: Colors.white),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 80,
+                    color: Colors.red[300],
+                  ),
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Text(
+                      viewModel.errorMessage,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             );
           }

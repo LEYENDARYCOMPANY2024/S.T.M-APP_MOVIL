@@ -14,25 +14,104 @@ class HistorialClinico {
   factory HistorialClinico.fromMap(Map<String, dynamic> map) {
     print('Datos recibidos: $map');
     
-    // Si datos_historial_clinico es null, retornar un mapa vacío
-    Map<String, dynamic> datos = {};
-    
+    // Mapa con valores por defecto siguiendo la estructura del historial clínico
+    Map<String, dynamic> datosDefault = {
+      // Expediente
+      "expediente": "",
+      "fecha": "",
+
+      // Exploración Física
+      "peso": "",
+      "estatura": "",
+      "imc": "",
+      "espasmos": "espasmosNo",
+      "sitioEspasmos": "",
+
+      // Antecedentes Patológicos
+      "diabetes": "diabetesNo",
+      "sitioDiabetes": "",
+      "alergia": "alergiaNo",
+      "sitioAlergia": "",
+      "hta": "htaNo",
+      "sitioHTA": "",
+      "cancer": "cancerNo",
+      "sitioCancer": "",
+      "transfusiones": "transfusionesNo",
+      "sitioTransfusiones": "",
+      "reumaticas": "reumaticasNo",
+      "sitioReutmaticas": "",
+      "encames": "",
+      "accidentes": "",
+      "cardiopatias": "",
+      "cirugias": "",
+      "fracturas": "fracturasNo",
+      "sitioFracturas": "",
+
+      // Hábitos de Salud
+      "tabaquismo": "tabaquismoNo",
+      "sitioHabitos": "",
+      "alcoholismo": "alcoholismoNo",
+      "sitioAlcoholismo": "",
+      "drogas": "drogasNo",
+      "sitioDrogas": "",
+      "actividadFisica": "actividadFisicaNo",
+      "sitioActividad": "",
+      "automedica": "automedicaNo",
+      "sitioAutomedica": "",
+
+      // Diagnóstico Médico
+      "sitioreflejos": "",
+      "sitioSensibilidad": "",
+      "sitioLenguaje": "",
+      "sitioOtros": "",
+
+      // Cicatriz Quirúrgica
+      "sitioSitio": "",
+      "queloide": "queloideNo",
+      "abierta": "abiertaNo",
+      "retractil": "retractilNo",
+      "adherencia": "adherenciaNo",
+      "hipertrofica": "hipertroficaNo",
+
+      // Marcha y Deambulación
+      "libre": "libreNo",
+      "espasticas": "espasticasNo",
+      "claudicante": "claudicanteNo",
+      "ataxica": "ataxicaNo",
+      "conAyuda": "conAyudaNo",
+      "otrosMarcha": "",
+      "observacionesMarcha": "",
+
+      // Traslados
+      "valoracionFinal": "",
+      "Observacionesfinales": "",
+
+      // Información específica para mujeres
+      "embarazo": "embarazoNo",
+      "hijos": "",
+    };
+
+    // Procesar los datos recibidos
+    Map<String, dynamic> datosRecibidos = {};
     if (map['datos_historial_clinico'] != null) {
       if (map['datos_historial_clinico'] is String) {
         try {
-          datos = json.decode(map['datos_historial_clinico']);
+          datosRecibidos = json.decode(map['datos_historial_clinico']);
         } catch (e) {
           print('Error decodificando JSON: $e');
         }
       } else if (map['datos_historial_clinico'] is Map) {
-        datos = Map<String, dynamic>.from(map['datos_historial_clinico']);
+        datosRecibidos = Map<String, dynamic>.from(map['datos_historial_clinico']);
       }
     }
+
+    // Combinar los datos por defecto con los recibidos
+    Map<String, dynamic> datosFinal = {...datosDefault, ...datosRecibidos};
 
     return HistorialClinico(
       idHistorialClinico: map['id_historial_clinico'] as int?,
       idPacienteHcFk: map['id_paciente_hc_fk'] as int,
-      datosHistorialClinico: datos,
+      datosHistorialClinico: datosFinal,
     );
   }
 
