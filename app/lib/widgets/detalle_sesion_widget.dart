@@ -27,35 +27,40 @@ class DetalleSesionWidget extends StatelessWidget {
       return _buildEmptyView();
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildInfoCard(
-            title: "Descripción",
-            content: sesion!.descripcion,
-            icon: Icons.description,
-          ),
-          const SizedBox(height: 16),
-          _buildInfoCard(
-            title: "Fecha y Hora",
-            content: "${sesion!.fechaFormateada} - ${sesion!.horaFormateada}",
-            icon: Icons.calendar_today,
-          ),
-          const SizedBox(height: 16),
-          _buildInfoCard(
-            title: "Terapeuta",
-            content: sesion!.nombreTerapeuta,
-            icon: Icons.person,
-          ),
-          const SizedBox(height: 16),
-          _buildInfoCard(
-            title: "Nota Evolutiva",
-            content: sesion!.notaEvolutiva ?? "Sin nota evolutiva",
-            icon: Icons.note,
-          ),
-        ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.blue[700],
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildInfoCard(
+              title: "Descripción",
+              content: sesion!.descripcion,
+              icon: Icons.description,
+            ),
+            const SizedBox(height: 16),
+            _buildInfoCard(
+              title: "Fecha y Hora",
+              content: "${sesion!.fechaFormateada} - ${sesion!.horaFormateada}",
+              icon: Icons.calendar_today,
+            ),
+            const SizedBox(height: 16),
+            _buildInfoCard(
+              title: "Terapeuta",
+              content: sesion!.nombreTerapeuta,
+              icon: Icons.person,
+            ),
+            const SizedBox(height: 16),
+            _buildInfoCard(
+              title: "Nota Evolutiva",
+              content: sesion!.notaEvolutiva ?? "Sin nota evolutiva",
+              icon: Icons.note,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -66,8 +71,11 @@ class DetalleSesionWidget extends StatelessWidget {
     required IconData icon,
   }) {
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: Colors.grey[800],
+      margin: const EdgeInsets.only(bottom: 8.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -75,22 +83,41 @@ class DetalleSesionWidget extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, color: Colors.blue[700]),
-                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[800],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[900],
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
-            const Divider(height: 16),
+            const Divider(
+              height: 24,
+              thickness: 1,
+              color: Colors.white24,
+            ),
             Text(
               content,
-              style: const TextStyle(fontSize: 16),
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 14,
+                height: 1.5,
+              ),
             ),
           ],
         ),
@@ -99,23 +126,52 @@ class DetalleSesionWidget extends StatelessWidget {
   }
 
   Widget _buildLoadingView() {
-    return const Center(
-      child: CircularProgressIndicator(),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(color: Colors.white),
+          SizedBox(height: 20),
+          Text(
+            "Cargando detalles...",
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildErrorView(String message) {
     return Center(
-      child: Text(
-        message,
-        style: const TextStyle(color: Colors.red),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, color: Colors.white, size: 60),
+          SizedBox(height: 20),
+          Text(
+            message,
+            style: TextStyle(color: Colors.white, fontSize: 18),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildEmptyView() {
-    return const Center(
-      child: Text("No se encontraron detalles de la sesión"),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.event_busy, color: Colors.white, size: 60),
+          SizedBox(height: 20),
+          Text(
+            "No se encontraron detalles de la sesión",
+            style: TextStyle(color: Colors.white, fontSize: 18),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }

@@ -28,9 +28,15 @@ class _DetalleSesionViewState extends State<DetalleSesionView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blue[700],
       appBar: AppBar(
-        title: const Text('Detalle de Sesión'),
+        title: const Text(
+          'Detalle de Sesión',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.blue[900],
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Consumer<DetalleSesionViewModel>(
         builder: (context, viewModel, _) {
