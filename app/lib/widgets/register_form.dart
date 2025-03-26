@@ -180,6 +180,62 @@ class _RegisterFormState extends State<RegisterForm> {
     );
   }
 
+  Widget _buildPasswordStrengthIndicator(String strength) {
+    if (strength.isEmpty) return const SizedBox.shrink();
+
+    Color color;
+    String message;
+    
+    switch (strength.toLowerCase()) {
+      case 'baja':
+        color = Colors.red;
+        message = 'Débil';
+        break;
+      case 'media':
+        color = Colors.orange;
+        message = 'Media';
+        break;
+      case 'alta':
+        color = Colors.green;
+        message = 'Fuerte';
+        break;
+      default:
+        return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(2),
+                child: LinearProgressIndicator(
+                  value: strength == 'baja' ? 0.33 : 
+                         strength == 'media' ? 0.66 : 1.0,
+                  backgroundColor: Colors.grey[200],
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                  minHeight: 4,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              message,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -189,6 +245,8 @@ class _RegisterFormState extends State<RegisterForm> {
     String? errorText,
     Function(String)? onChanged,
   }) {
+    final viewModel = Provider.of<RegisterViewModel>(context, listen: false);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -208,7 +266,16 @@ class _RegisterFormState extends State<RegisterForm> {
           child: TextField(
             controller: controller,
             obscureText: isPassword ? !_isPasswordVisible : false,
-            onChanged: onChanged,
+            onChanged: (value) {
+              if (isPassword) {
+                Future.delayed(const Duration(milliseconds: 100), () {
+                  if (!mounted) return;
+                  viewModel.validatePasswordStrength(value);
+                });
+              } else if (onChanged != null) {
+                onChanged(value);
+              }
+            },
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(color: Colors.grey[400]),
@@ -238,6 +305,13 @@ class _RegisterFormState extends State<RegisterForm> {
               errorText,
               style: const TextStyle(color: Colors.red, fontSize: 12),
             ),
+          ),
+        if (isPassword)
+          Consumer<RegisterViewModel>(
+            builder: (context, viewModel, _) => 
+              viewModel.passwordStrength.isNotEmpty
+                ? _buildPasswordStrengthIndicator(viewModel.passwordStrength)
+                : const SizedBox.shrink(),
           ),
       ],
     );

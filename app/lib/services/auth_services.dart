@@ -188,4 +188,19 @@ class AuthService {
       throw Exception('Error al verificar nombre de usuario');
     }
   }
+
+  Future<bool> checkPasswordExists(String hashedPassword) async {
+    try {
+      final response = await _supabase
+          .from('pacientes')
+          .select('id_paciente')
+          .eq('contrasena_p', hashedPassword)
+          .maybeSingle();
+      
+      return response != null;
+    } catch (e) {
+      print('❌ Error al verificar contraseña: $e');
+      throw Exception('Error al verificar contraseña');
+    }
+  }
 }
