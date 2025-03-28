@@ -63,10 +63,12 @@ class _HomeViewState extends State<HomeView> {
         backgroundColor: Colors.blue[900],
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white70,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Inicio"),
           BottomNavigationBarItem(icon: Icon(Icons.assignment), label: "Historial Clinico"),
           BottomNavigationBarItem(icon: Icon(Icons.fitness_center), label: "Ejercicios"),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
         ],
         onTap: (index) {
           if (index == 0) {
@@ -75,6 +77,8 @@ class _HomeViewState extends State<HomeView> {
             Navigator.of(context).pushNamed('/historial-clinico');
           } else if (index == 2) {
             Navigator.of(context).pushNamed('/ejercicios');
+          } else if (index == 3) {
+            Navigator.of(context).pushNamed('/chat');
           }
         },
       ),
@@ -229,18 +233,6 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
           ],
-        ),
-        SizedBox(height: 15),
-        OutlinedButton.icon(
-          icon: Icon(Icons.message_outlined),
-          label: Text("Contactar"),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.white,
-            side: BorderSide(color: Colors.white.withOpacity(0.6)),
-          ),
-          onPressed: () {
-            // Implementar funcionalidad para contactar al terapeuta
-          },
         ),
       ],
     );
