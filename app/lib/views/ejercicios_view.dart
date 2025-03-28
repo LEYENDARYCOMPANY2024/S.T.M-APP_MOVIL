@@ -358,17 +358,21 @@ class _EjerciciosViewState extends State<EjerciciosView> {
         backgroundColor: Colors.blue[900],
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white70,
+        type: BottomNavigationBarType.fixed,
         currentIndex: 1,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Inicio"),
           BottomNavigationBarItem(icon: Icon(Icons.fitness_center), label: "Ejercicios"),
           BottomNavigationBarItem(icon: Icon(Icons.assignment), label: "Historial Clinico"),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
         ],
         onTap: (index) {
           if (index == 0) {
             Navigator.of(context).pushReplacementNamed('/home');
           } else if (index == 2) {
             Navigator.of(context).pushReplacementNamed('/historial-clinico');
+          } else if (index == 3) {
+            Navigator.of(context).pushReplacementNamed('/chat');
           }
         },
       ),
