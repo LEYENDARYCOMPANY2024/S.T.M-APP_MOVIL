@@ -83,6 +83,7 @@ class HistorialClinico {
       "observacionesMarcha": "",
 
       // Traslados
+      "valoracionInicial": "",
       "valoracionFinal": "",
       "Observacionesfinales": "",
 

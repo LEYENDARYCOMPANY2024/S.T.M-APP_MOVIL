@@ -231,6 +231,8 @@ class HistorialClinicoReadOnlyDesign {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildPatientInfoRow('Valoración Inicial', datos['valoracionInicial']),
+          _buildInfoDivider(),
           _buildPatientInfoRow('Valoración Final', datos['valoracionFinal']),
           _buildInfoDivider(),
           _buildPatientInfoRow('Observaciones', datos['Observacionesfinales']),
