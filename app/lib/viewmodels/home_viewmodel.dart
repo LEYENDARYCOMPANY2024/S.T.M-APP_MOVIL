@@ -54,9 +54,18 @@ class HomeViewModel extends ChangeNotifier {
     }
   }
 
-  // Recargar datos (útil para un botón de actualizar)
-  void recargarDatos() {
-    cargarDatos();
+  // Recargar datos (modificado para RefreshIndicator)
+  Future<void> recargarDatos() async {
+    try {
+      await cargarDatos();
+      return;
+    } catch (e) {
+      print('❌ Error al recargar datos: $e');
+      errorMessage = "Ocurrió un error al recargar los datos";
+      isLoading = false;
+      notifyListeners();
+      throw e; // Importante para que el RefreshIndicator sepa que hubo un error
+    }
   }
 
   // Cargar datos del perfil

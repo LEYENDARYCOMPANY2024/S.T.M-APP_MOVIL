@@ -42,10 +42,6 @@ class _HomeViewState extends State<HomeView> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: () => homeViewModel.recargarDatos(),
-          ),
-          IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: () async {
               await loginViewModel.logout();
@@ -58,7 +54,11 @@ class _HomeViewState extends State<HomeView> {
           ? _buildLoadingView()
           : homeViewModel.errorMessage != null
               ? _buildErrorView(homeViewModel.errorMessage!)
-              : _buildContentView(homeViewModel),
+              : RefreshIndicator(
+                  onRefresh: () => homeViewModel.recargarDatos(),
+                  color: Colors.blue[900],
+                  child: _buildContentView(homeViewModel),
+                ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.blue[900],
         selectedItemColor: Colors.white,
@@ -141,16 +141,17 @@ class _HomeViewState extends State<HomeView> {
 
   // Vista de contenido principal
   Widget _buildContentView(HomeViewModel viewModel) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: SingleChildScrollView(
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildTerapeutaCard(viewModel),
             const SizedBox(height: 20),
             _buildProximaSesionCard(viewModel),
-            const SizedBox(height: 20)
+            const SizedBox(height: 20),
           ],
         ),
       ),

@@ -50,7 +50,36 @@ class ChatViewModel with ChangeNotifier {
   }
 
   Future<void> recargarDatos() async {
-    await cargarDatos();
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+
+      // Obtener el ID del paciente desde el token
+      final pacienteId = await _authService.obtenerIdPacienteDesdeToken();
+      
+      if (pacienteId == null) {
+        throw Exception('No se pudo obtener el ID del paciente');
+      }
+
+      // Cargar datos del paciente
+      paciente = await _pacienteService.getPaciente(pacienteId);
+
+      if (paciente == null) {
+        throw Exception('No se encontraron datos del paciente');
+      }
+
+      // Obtener terapeutas del paciente
+      terapeutas = await _sesionService.getTerapeutasPaciente(pacienteId);
+
+      isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      isLoading = false;
+      errorMessage = 'Error al cargar datos: ${e.toString()}';
+      notifyListeners();
+      throw e; // Importante para que el RefreshIndicator sepa que hubo un error
+    }
   }
 
   void selectTerapeuta(Terapeuta terapeuta) {

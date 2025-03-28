@@ -205,153 +205,153 @@ class _EjerciciosViewState extends State<EjerciciosView> {
           style: TextStyle(color: Colors.white),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Nota informativa sobre desbloqueo de ejercicios
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.amber[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                "Tienes que hacer los ejercicios en orden. Los niveles se desbloquearán cuando tu terapeuta lo indique.",
-                style: TextStyle(
-                  fontSize: 14, 
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w500,
+      body: RefreshIndicator(
+        onRefresh: () => ejerciciosViewModel.cargarNivelesYEjercicios(),
+        color: Colors.blue[900],
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Nota informativa sobre desbloqueo de ejercicios
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber[100],
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Estado de carga
-            if (ejerciciosViewModel.cargando)
-              const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
-              
-            // Mensaje de error
-            if (ejerciciosViewModel.error.isNotEmpty)
-              Center(
-                child: Text(
-                  ejerciciosViewModel.error,
-                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                child: const Text(
+                  "Tienes que hacer los ejercicios en orden. Los niveles se desbloquearán cuando tu terapeuta lo indique.",
+                  style: TextStyle(
+                    fontSize: 14, 
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
               
-            // Lista de niveles
-            if (!ejerciciosViewModel.cargando && ejerciciosViewModel.error.isEmpty)
+              const SizedBox(height: 16),
+              
+              // Estado de carga y contenido principal
               Expanded(
-                child: ListView.builder(
-                  itemCount: ejerciciosViewModel.niveles.length,
-                  itemBuilder: (context, index) {
-                    final nivel = ejerciciosViewModel.niveles[index];
-                    final desbloqueado = nivel.estado == 'desbloqueado';
-                    
-                    return Card(
-                      color: Colors.grey[800],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: Column(
-                        children: [
-                          // Cabecera del nivel (siempre visible)
-                          ListTile(
-                            leading: Icon(
-                              Icons.fitness_center,
-                              color: Colors.blue[300],
+                child: ejerciciosViewModel.cargando
+                  ? const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    )
+                  : ejerciciosViewModel.error.isNotEmpty
+                    ? Center(
+                        child: Text(
+                          ejerciciosViewModel.error,
+                          style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                        ),
+                      )
+                    : ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: ejerciciosViewModel.niveles.length,
+                        itemBuilder: (context, index) {
+                          final nivel = ejerciciosViewModel.niveles[index];
+                          final desbloqueado = nivel.estado == 'desbloqueado';
+                          
+                          return Card(
+                            color: Colors.grey[800],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
                             ),
-                            title: Text(
-                              nivel.nombre,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            subtitle: Text(
-                              nivel.descripcion ?? 'Ejercicios de este nivel',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                              ),
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: Column(
                               children: [
-                                // Icono de estado
-                                Icon(
-                                  desbloqueado 
-                                    ? Icons.lock_open 
-                                    : Icons.lock,
-                                  color: desbloqueado 
-                                    ? Colors.green[300] 
-                                    : Colors.red[300],
-                                ),
-                                const SizedBox(width: 8),
-                                // Flecha desplegable (solo activa si está desbloqueado)
-                                IconButton(
-                                  icon: Icon(
-                                    nivel.expandido
-                                        ? Icons.keyboard_arrow_up
-                                        : Icons.keyboard_arrow_down,
-                                    color: Colors.white,
+                                // Cabecera del nivel (siempre visible)
+                                ListTile(
+                                  leading: Icon(
+                                    Icons.fitness_center,
+                                    color: Colors.blue[300],
                                   ),
-                                  onPressed: desbloqueado
-                                      ? () {
-                                          ejerciciosViewModel.toggleExpansion(index);
-                                          
-                                          // Inicializar los controladores de video si el nivel se expande
-                                          if (!nivel.expandido && desbloqueado) {
-                                            for (var ejercicio in nivel.ejercicios) {
-                                              if (ejercicio.videoUrl != null && ejercicio.videoUrl!.isNotEmpty) {
-                                                _initializeVideoController(ejercicio);
+                                  title: Text(
+                                    nivel.nombre,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    nivel.descripcion ?? 'Ejercicios de este nivel',
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.7),
+                                    ),
+                                  ),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // Icono de estado
+                                      Icon(
+                                        desbloqueado 
+                                          ? Icons.lock_open 
+                                          : Icons.lock,
+                                        color: desbloqueado 
+                                          ? Colors.green[300] 
+                                          : Colors.red[300],
+                                      ),
+                                      const SizedBox(width: 8),
+                                      // Flecha desplegable (solo activa si está desbloqueado)
+                                      IconButton(
+                                        icon: Icon(
+                                          nivel.expandido
+                                              ? Icons.keyboard_arrow_up
+                                              : Icons.keyboard_arrow_down,
+                                          color: Colors.white,
+                                        ),
+                                        onPressed: desbloqueado
+                                            ? () {
+                                                ejerciciosViewModel.toggleExpansion(index);
+                                                
+                                                // Inicializar los controladores de video si el nivel se expande
+                                                if (!nivel.expandido && desbloqueado) {
+                                                  for (var ejercicio in nivel.ejercicios) {
+                                                    if (ejercicio.videoUrl != null && ejercicio.videoUrl!.isNotEmpty) {
+                                                      _initializeVideoController(ejercicio);
+                                                    }
+                                                  }
+                                                }
                                               }
-                                            }
-                                          }
-                                        }
-                                      : null,
+                                            : null,
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                                
+                                // Contenido desplegable (ejercicios)
+                                if (nivel.expandido && desbloqueado)
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemCount: nivel.ejercicios.length,
+                                    itemBuilder: (context, i) {
+                                      final ejercicio = nivel.ejercicios[i];
+                                      return _buildEjercicioItem(ejercicio);
+                                    },
+                                  ),
+                                
+                                // Mensaje cuando el nivel está bloqueado
+                                if (nivel.expandido && !desbloqueado)
+                                  const Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Text(
+                                      "Este nivel está bloqueado. Contacta a tu terapeuta para desbloquearlo.",
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
-                          ),
-                          
-                          // Contenido desplegable (ejercicios)
-                          if (nivel.expandido && desbloqueado)
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: nivel.ejercicios.length,
-                              itemBuilder: (context, i) {
-                                final ejercicio = nivel.ejercicios[i];
-                                return _buildEjercicioItem(ejercicio);
-                              },
-                            ),
-                          
-                          // Mensaje cuando el nivel está bloqueado
-                          if (nivel.expandido && !desbloqueado)
-                            const Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Text(
-                                "Este nivel está bloqueado. Contacta a tu terapeuta para desbloquearlo.",
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ),
-                        ],
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
               ),
-          ],
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(

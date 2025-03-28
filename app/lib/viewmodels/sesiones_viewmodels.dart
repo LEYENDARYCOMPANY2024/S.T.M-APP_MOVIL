@@ -129,9 +129,16 @@ class SesionesViewModel extends ChangeNotifier {
   }
   
   // Recargar todos los datos
-  void recargarDatos() {
-    sesionesPorTerapeuta.clear();
-    terapeutasExpandidos.clear();
-    cargarTerapeutas();
+  Future<void> recargarDatos() async {
+    try {
+      sesionesPorTerapeuta.clear();
+      terapeutasExpandidos.clear();
+      await cargarTerapeutas();
+    } catch (e) {
+      print('❌ Error al recargar datos: $e');
+      errorMessage = "Ocurrió un error al recargar los datos";
+      notifyListeners();
+      throw e; // Importante para que el RefreshIndicator sepa que hubo un error
+    }
   }
 }

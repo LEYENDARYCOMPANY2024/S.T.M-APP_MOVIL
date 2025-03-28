@@ -30,7 +30,11 @@ class _PerfilViewState extends State<PerfilView> {
           : perfilViewModel.errorMessage != null
               ? _buildErrorView(perfilViewModel) // Nueva función para manejar errores
               : perfilViewModel.paciente != null
-                  ? PerfilDesign(paciente: perfilViewModel.paciente!)
+                  ? RefreshIndicator(
+                      onRefresh: () => perfilViewModel.cargarDatos(),
+                      color: Color(0xFF1565C0),
+                      child: PerfilDesign(paciente: perfilViewModel.paciente!),
+                    )
                   : _buildEmptyProfileView(), // Nueva función para manejar datos nulos
     );
   }

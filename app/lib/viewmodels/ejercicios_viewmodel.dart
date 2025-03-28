@@ -17,11 +17,11 @@ class EjerciciosViewModel extends ChangeNotifier {
 
   // Cargar niveles y ejercicios
   Future<void> cargarNivelesYEjercicios() async {
-    _cargando = true;
-    _error = '';
-    notifyListeners();
-
     try {
+      _cargando = true;
+      _error = '';
+      notifyListeners();
+
       _niveles = await _ejerciciosService.obtenerNivelesConEjercicios();
       print('Niveles cargados: ${_niveles.map((n) => '${n.nombre}: ${n.estado}').toList()}');
       
@@ -31,6 +31,7 @@ class EjerciciosViewModel extends ChangeNotifier {
       _error = 'Error al cargar los niveles y ejercicios: $e';
       _cargando = false;
       notifyListeners();
+      throw e; // Importante para que el RefreshIndicator sepa que hubo un error
     }
   }
 

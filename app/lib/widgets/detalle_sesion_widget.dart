@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/sesion.dart';
+import '../viewmodels/detalle_sesion_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class DetalleSesionWidget extends StatelessWidget {
   final Sesion? sesion;
@@ -27,11 +29,11 @@ class DetalleSesionWidget extends StatelessWidget {
       return _buildEmptyView();
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.blue[700],
-      ),
+    return RefreshIndicator(
+      onRefresh: () => Provider.of<DetalleSesionViewModel>(context, listen: false).recargarDatos(),
+      color: Colors.blue[900],
       child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,6 +61,7 @@ class DetalleSesionWidget extends StatelessWidget {
               content: sesion!.notaEvolutiva ?? "Sin nota evolutiva",
               icon: Icons.note,
             ),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.1),
           ],
         ),
       ),

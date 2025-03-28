@@ -114,37 +114,50 @@ class _ChatViewState extends State<ChatView> {
 
   // Vista de contenido principal
   Widget _buildContentView(ChatViewModel viewModel) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Bienvenida con nombre de usuario
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: Text(
-              "Mis Chats",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+    return RefreshIndicator(
+      onRefresh: () => viewModel.recargarDatos(),
+      color: Colors.blue[900],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Bienvenida con nombre de usuario
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Text(
+                "Mis Chats",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-          
-          // Lista de terapeutas con chats
-          Expanded(
-            child: viewModel.terapeutas.isEmpty
-              ? _buildNoChatsView()
-              : ListView.builder(
-                  itemCount: viewModel.terapeutas.length,
-                  itemBuilder: (context, index) {
-                    final terapeuta = viewModel.terapeutas[index];
-                    return _buildChatCard(terapeuta);
-                  },
-                ),
-          ),
-        ],
+            
+            // Lista de terapeutas con chats
+            Expanded(
+              child: viewModel.terapeutas.isEmpty
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.4,
+                        child: _buildNoChatsView(),
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: viewModel.terapeutas.length,
+                    itemBuilder: (context, index) {
+                      final terapeuta = viewModel.terapeutas[index];
+                      return _buildChatCard(terapeuta);
+                    },
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }

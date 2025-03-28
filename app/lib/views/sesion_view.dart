@@ -79,9 +79,21 @@ class _SesionesViewState extends State<SesionesView> {
                 ? _buildLoadingView()
                 : viewModel.errorMessage != null
                     ? _buildErrorView(viewModel.errorMessage!)
-                    : viewModel.terapeutas.isEmpty
-                        ? _buildEmptyView()
-                        : _buildTerapeutasListView(viewModel),
+                    : RefreshIndicator(
+                        onRefresh: () => viewModel.recargarDatos(),
+                        color: Colors.blue[900],
+                        child: viewModel.terapeutas.isEmpty
+                            ? ListView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                children: [
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height * 0.4,
+                                    child: _buildEmptyView(),
+                                  ),
+                                ],
+                              )
+                            : _buildTerapeutasListView(viewModel),
+                      ),
           ),
         ],
       ),
@@ -158,6 +170,7 @@ class _SesionesViewState extends State<SesionesView> {
   // Lista de terapeutas con sus sesiones
   Widget _buildTerapeutasListView(SesionesViewModel viewModel) {
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16.0),
       itemCount: viewModel.terapeutas.length,
       itemBuilder: (context, index) {

@@ -191,6 +191,7 @@ class _PerfilDesignState extends State<PerfilDesign> {
           // Main content
           SafeArea(
             child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.only(top: 15),
               child: Column(
                 children: [

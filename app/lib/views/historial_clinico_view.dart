@@ -94,7 +94,11 @@ class _HistorialClinicoReadOnlyViewState extends State<HistorialClinicoReadOnlyV
             );
           }
 
-          return _buildView(viewModel);
+          return RefreshIndicator(
+            onRefresh: () => viewModel.init(),
+            color: Colors.blue[900],
+            child: _buildView(viewModel),
+          );
         },
       ),
     );
@@ -105,10 +109,11 @@ class _HistorialClinicoReadOnlyViewState extends State<HistorialClinicoReadOnlyV
     final datos = historial.datosHistorialClinico;
     final paciente = viewModel.paciente!;
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: SingleChildScrollView(
-        controller: _scrollController,
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      controller: _scrollController,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
