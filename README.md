@@ -73,3 +73,24 @@ git config --global core.autocrlf true
 ```
 
 
+## genera documentacion para tu proyecto en flutter/dart
+
+Primero deberas estar en la carpeta donde tienes todo tu codigo (ejemplo: app/).
+
+```sh
+cd {nombre_tu_carpeta}
+```
+
+Nota: en tu codigo deberas utilizar "/// {descripcion del metodo, funcion de tu codigo}"
+
+luego de revisar que tenga cada metodo o funcion documentado, pondras el siguiente codigo
+
+```sh
+dart doc
+```
+
+esto creara una carpeta dentro de tu aplicacion creara la carpeta 'doc/api'
+
+y pondras entrar a index.html, podras ver tu proyecto documentado
+
+Sugerencia: para mas facil (si esta en VS code) instala Live Server, es una extension que te ayudara a ver tus html con facilidad
