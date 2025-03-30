@@ -117,4 +117,50 @@ class SesionService {
       return [];
     }
   }
+
+  Future<List<Map<String, dynamic>>> obtenerGraficasSesiones(int pacienteId) async {
+    try {
+      final now = DateTime.now();
+      final sesionesResponse = await _supabase
+          .from('paciente_sesiones_p')
+          .select('''
+            sesiones!inner(
+              id_sesion,
+              fecha_inicio,
+              nota_evolutiva,
+              graficas_tablas_movil(
+                datos_graficas,
+                fecha_registro
+              )
+            )
+          ''')
+          .eq('id_paciente_ps_fk', pacienteId)
+          .order('sesiones(fecha_inicio)', ascending: false);
+
+      if (sesionesResponse.isEmpty) return [];
+
+      List<Map<String, dynamic>> sesiones = [];
+      
+      for (var sesion in sesionesResponse) {
+        if (sesion['sesiones']['graficas_tablas_movil'].isEmpty) continue;
+        
+        final fechaSesion = DateTime.parse(sesion['sesiones']['fecha_inicio']);
+        final graficaData = sesion['sesiones']['graficas_tablas_movil'][0];
+        
+        sesiones.add({
+          'id_sesion': sesion['sesiones']['id_sesion'],
+          'fecha': sesion['sesiones']['fecha_inicio'],
+          'datos_graficas': graficaData['datos_graficas'],
+          'fecha_registro': graficaData['fecha_registro'],
+          'es_antigua': fechaSesion.isBefore(now.subtract(Duration(days: 7))),
+          'nota_evolutiva': sesion['sesiones']['nota_evolutiva'],
+        });
+      }
+
+      return sesiones;
+    } catch (e) {
+      print('❌ Error al obtener gráficas de sesiones: $e');
+      return [];
+    }
+  }
 }

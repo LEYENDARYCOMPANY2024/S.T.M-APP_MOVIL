@@ -3,6 +3,7 @@ import '../services/paciente_service.dart';
 import '../services/token_service.dart';
 import '../models/terapeuta.dart';
 import '../models/paciente.dart'; // Asegúrate de importar el modelo de Paciente
+import '../services/sesion_service.dart';
 
 class HomeViewModel extends ChangeNotifier {
   final PacienteService _pacienteService = PacienteService();
@@ -15,6 +16,8 @@ class HomeViewModel extends ChangeNotifier {
   bool isLoading = true; // Estado de carga
   String? errorMessage; // Mensaje de error en caso de falla
 
+  List<Map<String, dynamic>>? graficasSesiones;
+
   // Cargar todos los datos necesarios para la pantalla Home
   Future<void> cargarDatos() async {
     try {
@@ -22,7 +25,6 @@ class HomeViewModel extends ChangeNotifier {
       errorMessage = null;
       notifyListeners();
       
-      // Obtener el ID del usuario actual desde el servicio de tokens
       final userId = await TokenService.getUserId();
       
       if (userId == null) {
@@ -43,6 +45,10 @@ class HomeViewModel extends ChangeNotifier {
       
       // Obtener datos de progreso del paciente
       datosProgreso = await _pacienteService.getDatosProgreso(userId);
+      
+      // Cargar datos de gráficas
+      final sesionService = SesionService();
+      graficasSesiones = await sesionService.obtenerGraficasSesiones(userId);
       
       isLoading = false;
       notifyListeners();

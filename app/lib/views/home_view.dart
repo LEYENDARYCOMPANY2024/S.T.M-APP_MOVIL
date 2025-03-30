@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/login_viewmodel.dart';
 import '../viewmodels/home_viewmodel.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({Key? key}) : super(key: key);
@@ -152,6 +153,7 @@ class _HomeViewState extends State<HomeView> {
             const SizedBox(height: 20),
             _buildProximaSesionCard(viewModel),
             const SizedBox(height: 20),
+            _buildProgresoCard(viewModel),
           ],
         ),
       ),
@@ -323,6 +325,286 @@ class _HomeViewState extends State<HomeView> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildProgresoCard(HomeViewModel viewModel) {
+    return Card(
+      color: Colors.grey[800],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.trending_up, color: Colors.white, size: 24),
+                SizedBox(width: 10),
+                Text(
+                  "Progreso",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            if (viewModel.graficasSesiones?.isEmpty ?? true)
+              Center(
+                child: Text(
+                  "No hay datos de progreso disponibles",
+                  style: TextStyle(color: Colors.white70),
+                ),
+              )
+            else
+              Column(
+                children: [
+                  _buildGraficaSesion(
+                    "Sesión más reciente",
+                    viewModel.graficasSesiones![0],
+                  ),
+                  SizedBox(height: 20),
+                  if (viewModel.graficasSesiones!.length > 1)
+                    _buildGraficaSesion(
+                      "Sesión anterior",
+                      viewModel.graficasSesiones![1],
+                    ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGraficaSesion(String titulo, Map<String, dynamic> sesion) {
+    final fechaSesion = DateTime.parse(sesion['fecha']);
+    final esAntigua = sesion['es_antigua'] as bool;
+    final notaEvolutiva = sesion['nota_evolutiva'] as String?;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    titulo,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    '(${_formatearFecha(fechaSesion)})',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.description, color: Colors.white70),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Dialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Container(
+                        padding: EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[900],
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Nota Evolutiva',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.close, color: Colors.white70),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'Fecha: ${_formatearFecha(fechaSesion)}',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            Container(
+                              constraints: BoxConstraints(maxHeight: 300),
+                              child: SingleChildScrollView(
+                                child: Text(
+                                  notaEvolutiva ?? 'No hay nota evolutiva disponible',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text(
+                                  'Cerrar',
+                                  style: TextStyle(
+                                    color: Colors.blue[300],
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+        if (esAntigua)
+          Padding(
+            padding: EdgeInsets.only(top: 4),
+            child: Text(
+              '⚠️ Sesión antigua',
+              style: TextStyle(
+                color: Colors.orange,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        SizedBox(height: 10),
+        Container(
+          height: 200,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.blue[900]!.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: sesion['datos_graficas'] == null
+              ? Center(
+                  child: Text(
+                    "No existen gráficas para esta sesión",
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                )
+              : Padding(
+                  padding: EdgeInsets.all(16),
+                  child: _buildLineChart(sesion['datos_graficas']),
+                ),
+        ),
+        SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              color: Colors.blue[300],
+            ),
+            SizedBox(width: 8),
+            Text(
+              'Pierna Izquierda',
+              style: TextStyle(color: Colors.white70),
+            ),
+            SizedBox(width: 20),
+            Container(
+              width: 12,
+              height: 12,
+              color: Colors.green[300],
+            ),
+            SizedBox(width: 8),
+            Text(
+              'Pierna Derecha',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  String _formatearFecha(DateTime fecha) {
+    final List<String> meses = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    return '${fecha.day} de ${meses[fecha.month - 1]}';
+  }
+
+  Widget _buildLineChart(Map<String, dynamic> datos) {
+    final datosIzquierda = (datos['izquierda'] as List<dynamic>)
+        .map((e) => FlSpot(
+              e['timestamp'].toDouble(),
+              e['value'].toDouble(),
+            ))
+        .toList();
+
+    final datosDerecha = (datos['derecha'] as List<dynamic>)
+        .map((e) => FlSpot(
+              e['timestamp'].toDouble(),
+              e['value'].toDouble(),
+            ))
+        .toList();
+
+    return LineChart(
+      LineChartData(
+        gridData: FlGridData(show: false),
+        titlesData: FlTitlesData(show: false),
+        borderData: FlBorderData(show: false),
+        lineBarsData: [
+          if (datosIzquierda.isNotEmpty)
+            LineChartBarData(
+              spots: datosIzquierda,
+              isCurved: true,
+              color: Colors.blue[300],
+              dotData: FlDotData(show: false),
+              belowBarData: BarAreaData(show: false),
+            ),
+          if (datosDerecha.isNotEmpty)
+            LineChartBarData(
+              spots: datosDerecha,
+              isCurved: true,
+              color: Colors.green[300],
+              dotData: FlDotData(show: false),
+              belowBarData: BarAreaData(show: false),
+            ),
+        ],
+        lineTouchData: LineTouchData(enabled: true),
+      ),
     );
   }
 }
