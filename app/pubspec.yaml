@@ -53,6 +53,7 @@ dependencies:
   dio: ^5.4.0
   fl_chart: ^0.66.2
   youtube_player_iframe: ^4.0.4
+  web_socket_channel: ^2.4.0
 
 dev_dependencies:
   flutter_test:

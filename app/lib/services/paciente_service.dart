@@ -321,7 +321,7 @@ class PacienteService {
           .insert({
             'id_chat_m_fk': idChat,
             'mensaje': mensaje,
-            'remitente': 'paciente',
+            'remitente': remitente,
           });
 
       print('✅ Mensaje enviado correctamente');
