@@ -3,6 +3,7 @@ import '../models/terapeuta.dart';
 import '../models/paciente.dart';
 import '../services/hash_services.dart';
 import 'package:intl/intl.dart';
+import '../services/auth_services.dart';
 
 class PacienteService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -228,6 +229,105 @@ class PacienteService {
       return true;
     } catch (e) {
       print('❌ Error al actualizar información personal: $e');
+      return false;
+    }
+  }
+
+  // Obtener o crear chat con terapeuta
+  Future<Map<String, dynamic>?> obtenerOCrearChat(Terapeuta terapeuta) async {
+    try {
+      // Obtener el ID del paciente desde el token
+      final pacienteId = await AuthService().obtenerIdPacienteDesdeToken();
+      if (pacienteId == null) {
+        throw Exception('No se pudo obtener el ID del paciente');
+      }
+
+      // Primero obtenemos el id_terapeuta_paciente
+      final terapeutaPacienteData = await _supabase
+          .from('terapeuta_paciente')
+          .select('id_terapeuta_paciente')
+          .eq('id_terapeuta_tp_fk', terapeuta.id)
+          .eq('id_paciente_tp_fk', pacienteId)
+          .single();
+
+      final idTerapeutaPaciente = terapeutaPacienteData['id_terapeuta_paciente'];
+
+      // Buscamos si existe un chat
+      final chatExistente = await _supabase
+          .from('chat')
+          .select('''
+            *,
+            mensajes (
+              id_mensaje,
+              mensaje,
+              remitente,
+              enviado_en
+            )
+          ''')
+          .eq('id_terapeuta_paciente_c_fk', idTerapeutaPaciente)
+          .maybeSingle();
+
+      if (chatExistente != null) {
+        print('✅ Chat existente encontrado');
+        return chatExistente;
+      }
+
+      // Si no existe, creamos uno nuevo
+      final nuevoChat = await _supabase
+          .from('chat')
+          .insert({
+            'id_terapeuta_paciente_c_fk': idTerapeutaPaciente,
+          })
+          .select()
+          .single();
+
+      print('✅ Nuevo chat creado');
+      return {
+        ...nuevoChat,
+        'mensajes': [],
+      };
+    } catch (e) {
+      print('❌ Error al obtener/crear chat: $e');
+      return null;
+    }
+  }
+
+  // Obtener mensajes de un chat
+  Future<List<Map<String, dynamic>>> obtenerMensajes(int idChat) async {
+    try {
+      final mensajes = await _supabase
+          .from('mensajes')
+          .select()
+          .eq('id_chat_m_fk', idChat)
+          .order('enviado_en', ascending: true);
+
+      print('✅ Mensajes obtenidos: ${mensajes.length}');
+      return List<Map<String, dynamic>>.from(mensajes);
+    } catch (e) {
+      print('❌ Error al obtener mensajes: $e');
+      return [];
+    }
+  }
+
+  // Enviar un nuevo mensaje
+  Future<bool> enviarMensaje({
+    required int idChat,
+    required String mensaje,
+    required String remitente,
+  }) async {
+    try {
+      await _supabase
+          .from('mensajes')
+          .insert({
+            'id_chat_m_fk': idChat,
+            'mensaje': mensaje,
+            'remitente': 'paciente',
+          });
+
+      print('✅ Mensaje enviado correctamente');
+      return true;
+    } catch (e) {
+      print('❌ Error al enviar mensaje: $e');
       return false;
     }
   }

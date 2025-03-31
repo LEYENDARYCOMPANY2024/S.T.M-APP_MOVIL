@@ -24,6 +24,7 @@ import 'viewmodels/detalle_sesion_viewmodel.dart';
 import 'views/detalle_sesion_view.dart';
 import 'views/chat_view.dart'; // Importa la vista de chat
 import 'viewmodels/chat_viewmodel.dart'; // Importa el ViewModel de chat
+import 'viewmodels/detalle_chat_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,6 +61,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => HistorialClinicoViewModel(HistorialClinicoService(Supabase.instance.client, authService),authService,),),
         ChangeNotifierProvider(create: (_) => DetalleSesionViewModel()),
         ChangeNotifierProvider(create: (_) => ChatViewModel()), // Proveedor del ChatViewModel
+        ChangeNotifierProvider(create: (_) => DetalleChatViewModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/login_viewmodel.dart';
 import '../viewmodels/chat_viewmodel.dart';
+import '../views/detalle_chat_view.dart';
 
 class ChatView extends StatefulWidget {
   const ChatView({Key? key}) : super(key: key);
@@ -197,11 +198,12 @@ class _ChatViewState extends State<ChatView> {
           color: Colors.white,
         ),
         onTap: () {
-          // TODO: Implementar navegación a chat individual
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Chat con ${terapeuta.nombreCompleto} próximamente'),
-              backgroundColor: Colors.blue[900],
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetalleChatView(
+                terapeuta: terapeuta,
+              ),
             ),
           );
         },
