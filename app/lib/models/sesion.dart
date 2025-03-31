@@ -51,6 +51,6 @@ class Sesion {
 
   // Formato amigable para la hora
   String get horaFormateada {
-    return DateFormat('HH:mm').format(horaInicio);
+    return DateFormat('hh:mm a').format(horaInicio);
   }
 }

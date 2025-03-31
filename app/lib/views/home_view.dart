@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../viewmodels/login_viewmodel.dart';
 import '../viewmodels/home_viewmodel.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({Key? key}) : super(key: key);
@@ -275,10 +276,9 @@ class _HomeViewState extends State<HomeView> {
               : viewModel.proximaSesion != null
                   ? _buildSessionInfo(viewModel)
                   : Text(
-                      "No hay sesiones programadas",
+                      "No tienes sesiones programadas próximamente",
                       style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
                     ),
-
           ],
         ),
       ),
@@ -307,25 +307,41 @@ class _HomeViewState extends State<HomeView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                viewModel.proximaSesion!['fecha'] ?? 'Fecha pendiente',
+                viewModel.proximaSesion!['descripcion'] ?? 'Sesión sin descripción',
                 style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
               ),
               SizedBox(height: 5),
               Text(
-                "Hora: ${viewModel.proximaSesion!['hora'] ?? 'Pendiente'}",
+                "Fecha: ${viewModel.proximaSesion!['fecha']}",
                 style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14),
               ),
-              if (viewModel.terapeuta != null) SizedBox(height: 5),
-              if (viewModel.terapeuta != null)
+              SizedBox(height: 5),
+              Text(
+                "Hora: ${_formatearHora(viewModel.proximaSesion!['hora'])}",
+                style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14),
+              ),
+              if (viewModel.terapeuta != null) ...[
+                SizedBox(height: 5),
                 Text(
                   "Terapeuta: ${viewModel.terapeuta!.nombreCompleto}",
                   style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14),
                 ),
+              ],
             ],
           ),
         ),
       ],
     );
+  }
+
+  String _formatearHora(String? hora) {
+    if (hora == null) return 'Pendiente';
+    try {
+      final DateTime horaDateTime = DateTime.parse('2000-01-01 $hora');
+      return DateFormat('hh:mm a').format(horaDateTime);
+    } catch (e) {
+      return hora;
+    }
   }
 
   Widget _buildProgresoCard(HomeViewModel viewModel) {

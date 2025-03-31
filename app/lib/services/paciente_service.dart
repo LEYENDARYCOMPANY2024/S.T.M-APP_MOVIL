@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/terapeuta.dart';
 import '../models/paciente.dart';
 import '../services/hash_services.dart';
+import 'package:intl/intl.dart';
 
 class PacienteService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -135,84 +136,57 @@ class PacienteService {
     }
   }
 
+  // Obtener la próxima sesión
   Future<Map<String, dynamic>?> getProximaSesion(int pacienteId) async {
-  try {
-    // Obtener la fecha actual
-    final now = DateTime.now();
-    final hoy = now.toString().split(' ')[0]; // Formato YYYY-MM-DD
-    
-    // Primero, obtenemos todas las sesiones del paciente
-    final response = await _supabase
-        .from('paciente_sesiones_p')
-        .select('sesiones(*)')
-        .eq('id_paciente_ps_fk', pacienteId);
-    
-    print('📅 Respuesta de sesiones: $response');
-    
-    if (response.isEmpty) {
-      print('ℹ️ No hay sesiones para el paciente ID: $pacienteId');
-      return null;
-    }
+    try {
+      final now = DateTime.now();
+      
+      final response = await _supabase
+          .from('paciente_sesiones_p')
+          .select('''
+            sesiones (
+              fecha_inicio,
+              hora_inicio,
+              descripcion_sesion
+            )
+          ''')
+          .eq('id_paciente_ps_fk', pacienteId)
+          .order('sesiones(fecha_inicio)', ascending: true)
+          .order('sesiones(hora_inicio)', ascending: true);
 
-    
-    // Filtrar y ordenar manualmente las sesiones para encontrar la próxima
-    List<Map<String, dynamic>> sesiones = [];
-    for (var item in response) {
-      final sesionData = item['sesiones'];
-      // Verificar si la fecha es futura o de hoy
-      if (sesionData['fecha_inicio'] != null && sesionData['fecha_inicio'].compareTo(hoy) >= 0) {
-        sesiones.add(sesionData);
-      }
-    }
-    
-    if (sesiones.isEmpty) {
-      print('ℹ️ No hay sesiones futuras para el paciente ID: $pacienteId');
-      return null;
-    }
-    
-    // Ordenar las sesiones por fecha_inicio
-    sesiones.sort((a, b) => a['fecha_inicio'].compareTo(b['fecha_inicio']));
-    
-    // Obtener la primera (más cercana) sesión
-    final proximaSesion = sesiones.first;
-    
-    // Formatear la fecha para mostrarla en español
-    final fechaInicio = DateTime.parse(proximaSesion['fecha_inicio']);
-    final List<String> meses = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-    ];
-    
-    final fechaFormateada = '${fechaInicio.day} de ${meses[fechaInicio.month - 1]}, ${fechaInicio.year}';
-    
-    // Extraer y formatear la hora
-    String horaInicio = 'Pendiente';
-    if (proximaSesion['hora_inicio'] != null) {
-      try {
-        // Intentar parsear la hora del timestamp
-        final horaCompleta = DateTime.parse(proximaSesion['hora_inicio']);
-        horaInicio = '${horaCompleta.hour.toString().padLeft(2, '0')}:${horaCompleta.minute.toString().padLeft(2, '0')}';
-      } catch (e) {
-        print('⚠️ Error al parsear la hora: $e');
-        // Si hay error, intentar extraer solo la parte de la hora si es un string
-        if (proximaSesion['hora_inicio'] is String) {
-          final partes = proximaSesion['hora_inicio'].split('T');
-          if (partes.length > 1) {
-            horaInicio = partes[1].substring(0, 5); // Formato HH:MM
+      if (response.isEmpty) return null;
+
+      // Filtrar y encontrar la próxima sesión
+      for (var item in response) {
+        if (item['sesiones'] != null) {
+          final fechaSesion = DateTime.parse(item['sesiones']['fecha_inicio']);
+          final horaSesion = DateTime.parse(item['sesiones']['hora_inicio']);
+          
+          // Combinar fecha y hora para comparación
+          final fechaHoraSesion = DateTime(
+            fechaSesion.year,
+            fechaSesion.month,
+            fechaSesion.day,
+            horaSesion.hour,
+            horaSesion.minute,
+          );
+
+          if (fechaHoraSesion.isAfter(now)) {
+            return {
+              'fecha': DateFormat('dd/MM/yyyy').format(fechaSesion),
+              'hora': DateFormat('HH:mm').format(horaSesion),
+              'descripcion': item['sesiones']['descripcion_sesion'],
+            };
           }
         }
       }
+
+      return null;
+    } catch (e) {
+      print('❌ Error al obtener próxima sesión: $e');
+      return null;
     }
-    
-    return {
-      'fecha': fechaFormateada,
-      'hora': horaInicio,
-    };
-  } catch (e) {
-    print('❌ Error al obtener próxima sesión: $e');
-    return null;
   }
-}
 
   // Obtener datos de progreso del paciente
   Future<Map<String, dynamic>> getDatosProgreso(int pacienteId) async {
