@@ -122,5 +122,19 @@ class DetalleChatViewModel with ChangeNotifier {
       return false;
     }
   }
+
+  Future<bool> eliminarMensaje(int idMensaje) async {
+    try {
+      final eliminado = await _pacienteService.eliminarMensaje(idMensaje);
+      if (eliminado) {
+        await cargarMensajes(); // Recargar mensajes después de eliminar
+      }
+      return eliminado;
+    } catch (e) {
+      errorMessage = 'Error al eliminar mensaje: ${e.toString()}';
+      notifyListeners();
+      return false;
+    }
+  }
 } 
  

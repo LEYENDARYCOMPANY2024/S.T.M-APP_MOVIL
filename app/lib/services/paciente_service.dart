@@ -331,4 +331,19 @@ class PacienteService {
       return false;
     }
   }
+
+  Future<bool> eliminarMensaje(int idMensaje) async {
+    try {
+      await _supabase
+          .from('mensajes')
+          .delete()
+          .eq('id_mensaje', idMensaje);
+      
+      print('✅ Mensaje eliminado correctamente');
+      return true;
+    } catch (e) {
+      print('❌ Error al eliminar mensaje: $e');
+      return false;
+    }
+  }
 }
