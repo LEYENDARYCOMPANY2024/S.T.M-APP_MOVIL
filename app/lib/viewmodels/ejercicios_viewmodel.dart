@@ -7,6 +7,7 @@ class EjerciciosViewModel extends ChangeNotifier {
   List<Nivel> _niveles = [];
   bool _cargando = false;
   String _error = '';
+  Map<String, bool> _videosEnCache = {};
 
   EjerciciosViewModel(this._ejerciciosService);
 
@@ -14,6 +15,19 @@ class EjerciciosViewModel extends ChangeNotifier {
   List<Nivel> get niveles => _niveles;
   bool get cargando => _cargando;
   String get error => _error;
+
+  // Nuevos métodos para manejo de videos
+  bool videoEstaCargado(String ejercicioId) => _videosEnCache[ejercicioId] ?? false;
+
+  void marcarVideoCargado(String ejercicioId, bool cargado) {
+    _videosEnCache[ejercicioId] = cargado;
+    notifyListeners();
+  }
+
+  void limpiarCacheVideos() {
+    _videosEnCache.clear();
+    notifyListeners();
+  }
 
   // Cargar niveles y ejercicios
   Future<void> cargarNivelesYEjercicios() async {
@@ -23,6 +37,23 @@ class EjerciciosViewModel extends ChangeNotifier {
       notifyListeners();
 
       _niveles = await _ejerciciosService.obtenerNivelesConEjercicios();
+      
+      // Validar URLs de videos
+      for (var nivel in _niveles) {
+        for (var ejercicio in nivel.ejercicios) {
+          if (ejercicio.videoUrl != null && ejercicio.videoUrl!.isNotEmpty) {
+            try {
+              final uri = Uri.parse(ejercicio.videoUrl!);
+              if (!uri.hasScheme || !uri.hasAuthority) {
+                print('⚠️ URL de video inválida para ejercicio ${ejercicio.id}: ${ejercicio.videoUrl}');
+              }
+            } catch (e) {
+              print('❌ Error al validar URL de video: ${ejercicio.videoUrl}');
+            }
+          }
+        }
+      }
+
       print('Niveles cargados: ${_niveles.map((n) => '${n.nombre}: ${n.estado}').toList()}');
       
       _cargando = false;
@@ -52,5 +83,11 @@ class EjerciciosViewModel extends ChangeNotifier {
       return estadoActual.contains('desbloqueado');
     }
     return false;
+  }
+
+  @override
+  void dispose() {
+    limpiarCacheVideos();
+    super.dispose();
   }
 }

@@ -352,7 +352,15 @@ class _HomeViewState extends State<HomeView> {
               ],
             ),
             SizedBox(height: 20),
-            if (viewModel.graficasSesiones?.isEmpty ?? true)
+            // Verificamos si el paciente está inactivo
+            if (viewModel.paciente?.estadoPaciente == 'inactivo')
+              Center(
+                child: Text(
+                  "Estás inactivo, no hay gráficas disponibles",
+                  style: TextStyle(color: Colors.white70),
+                ),
+              )
+            else if (viewModel.graficasSesiones?.isEmpty ?? true)
               Center(
                 child: Text(
                   "No hay datos de progreso disponibles",
@@ -381,179 +389,310 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Widget _buildGraficaSesion(String titulo, Map<String, dynamic> sesion) {
-    final fechaSesion = DateTime.parse(sesion['fecha']);
-    final esAntigua = sesion['es_antigua'] as bool;
-    final notaEvolutiva = sesion['nota_evolutiva'] as String?;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    titulo,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    '(${_formatearFecha(fechaSesion)})',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              icon: Icon(Icons.description, color: Colors.white70),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return Dialog(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[900],
-                          borderRadius: BorderRadius.circular(20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        titulo,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      ),
+                      Text(
+                        '(${_formatearFecha(DateTime.parse(sesion['fecha']))})',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.description, color: Colors.white70),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Dialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Container(
+                            padding: EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[900],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Nota Evolutiva',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.close, color: Colors.white70),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 10),
                                 Text(
-                                  'Nota Evolutiva',
+                                  'Fecha: ${_formatearFecha(DateTime.parse(sesion['fecha']))}',
                                   style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white70,
+                                    fontSize: 14,
                                   ),
                                 ),
-                                IconButton(
-                                  icon: Icon(Icons.close, color: Colors.white70),
-                                  onPressed: () => Navigator.pop(context),
+                                SizedBox(height: 20),
+                                Container(
+                                  constraints: BoxConstraints(maxHeight: 300),
+                                  child: SingleChildScrollView(
+                                    child: Text(
+                                      sesion['nota_evolutiva'] ?? 'No hay nota evolutiva disponible',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 20),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text(
+                                      'Cerrar',
+                                      style: TextStyle(
+                                        color: Colors.blue[300],
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 10),
-                            Text(
-                              'Fecha: ${_formatearFecha(fechaSesion)}',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                              ),
-                            ),
-                            SizedBox(height: 20),
-                            Container(
-                              constraints: BoxConstraints(maxHeight: 300),
-                              child: SingleChildScrollView(
-                                child: Text(
-                                  notaEvolutiva ?? 'No hay nota evolutiva disponible',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 20),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: Text(
-                                  'Cerrar',
-                                  style: TextStyle(
-                                    color: Colors.blue[300],
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      },
                     );
                   },
-                );
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            FutureBuilder<Widget>(
+              future: Future.delayed(
+                Duration(milliseconds: 100),
+                () => _buildGrafica(sesion['datos_graficas'], constraints.maxWidth),
+              ),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Container(
+                    height: 200,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.blue[900]!.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
+                      ),
+                    ),
+                  );
+                }
+                return snapshot.data!;
               },
             ),
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  color: Colors.blue[300],
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'Pierna Izquierda',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                SizedBox(width: 20),
+                Container(
+                  width: 12,
+                  height: 12,
+                  color: Colors.green[300],
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'Pierna Derecha',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ],
+            ),
           ],
+        );
+      },
+    );
+  }
+
+  Widget _buildGrafica(Map<String, dynamic>? datos, double width) {
+    if (datos == null) {
+      return Container(
+        height: 200,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.blue[900]!.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(10),
         ),
-        if (esAntigua)
-          Padding(
-            padding: EdgeInsets.only(top: 4),
-            child: Text(
-              '⚠️ Sesión antigua',
-              style: TextStyle(
-                color: Colors.orange,
-                fontSize: 12,
+        child: Center(
+          child: Text(
+            "No existen gráficas para esta sesión",
+            style: TextStyle(color: Colors.white70),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      height: 200,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.blue[900]!.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: _buildLineChart(datos),
+      ),
+    );
+  }
+
+  Widget _buildLineChart(Map<String, dynamic> datos) {
+    // Optimizamos el procesamiento de datos
+    List<FlSpot> procesarDatos(List<dynamic> datos) {
+      if (datos.isEmpty) return [];
+      
+      // Reducimos la cantidad de puntos
+      const maxPuntos = 30; // Reducimos aún más los puntos
+      if (datos.length > maxPuntos) {
+        final paso = datos.length ~/ maxPuntos;
+        return List.generate(maxPuntos, (index) {
+          final punto = datos[index * paso];
+          return FlSpot(
+            index.toDouble(), // Simplificamos el eje X
+            punto['value'].toDouble(),
+          );
+        });
+      }
+      
+      return List.generate(datos.length, (index) {
+        final punto = datos[index];
+        return FlSpot(
+          index.toDouble(), // Simplificamos el eje X
+          punto['value'].toDouble(),
+        );
+      });
+    }
+
+    final datosIzquierda = procesarDatos(datos['izquierda'] as List<dynamic>? ?? []);
+    final datosDerecha = procesarDatos(datos['derecha'] as List<dynamic>? ?? []);
+
+    return LineChart(
+      LineChartData(
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false, // Quitamos líneas verticales
+          horizontalInterval: 0.2,
+          getDrawingHorizontalLine: (_) => FlLine(
+            color: Colors.white10,
+            strokeWidth: 1,
+          ),
+        ),
+        titlesData: FlTitlesData(
+          show: true,
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: 0.2,
+              reservedSize: 30,
+              getTitlesWidget: (value, meta) => Text(
+                value.toStringAsFixed(1),
+                style: const TextStyle(
+                  color: Colors.white60,
+                  fontSize: 10,
+                ),
               ),
             ),
           ),
-        SizedBox(height: 10),
-        Container(
-          height: 200,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.blue[900]!.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(10),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(showTitles: false), // Ocultamos títulos inferiores
           ),
-          child: sesion['datos_graficas'] == null
-              ? Center(
-                  child: Text(
-                    "No existen gráficas para esta sesión",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                )
-              : Padding(
-                  padding: EdgeInsets.all(16),
-                  child: _buildLineChart(sesion['datos_graficas']),
-                ),
         ),
-        SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 12,
-              height: 12,
+        borderData: FlBorderData(
+          show: true,
+          border: const Border(
+            bottom: BorderSide(color: Colors.white30),
+            left: BorderSide(color: Colors.white30),
+          ),
+        ),
+        minY: -0.5,
+        maxY: 0.5,
+        lineBarsData: [
+          if (datosIzquierda.isNotEmpty)
+            LineChartBarData(
+              spots: datosIzquierda,
+              isCurved: true,
               color: Colors.blue[300],
+              barWidth: 2,
+              isStrokeCapRound: true,
+              dotData: FlDotData(show: false), // Quitamos los puntos
+              belowBarData: BarAreaData(
+                show: true,
+                color: Colors.blue[300]!.withOpacity(0.1),
+              ),
             ),
-            SizedBox(width: 8),
-            Text(
-              'Pierna Izquierda',
-              style: TextStyle(color: Colors.white70),
-            ),
-            SizedBox(width: 20),
-            Container(
-              width: 12,
-              height: 12,
+          if (datosDerecha.isNotEmpty)
+            LineChartBarData(
+              spots: datosDerecha,
+              isCurved: true,
               color: Colors.green[300],
+              barWidth: 2,
+              isStrokeCapRound: true,
+              dotData: FlDotData(show: false), // Quitamos los puntos
+              belowBarData: BarAreaData(
+                show: true,
+                color: Colors.green[300]!.withOpacity(0.1),
+              ),
             ),
-            SizedBox(width: 8),
-            Text(
-              'Pierna Derecha',
-              style: TextStyle(color: Colors.white70),
-            ),
-          ],
-        ),
-      ],
+        ],
+        lineTouchData: LineTouchData(enabled: false), // Desactivamos interactividad
+      ),
     );
   }
 
@@ -563,48 +702,5 @@ class _HomeViewState extends State<HomeView> {
       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
     ];
     return '${fecha.day} de ${meses[fecha.month - 1]}';
-  }
-
-  Widget _buildLineChart(Map<String, dynamic> datos) {
-    final datosIzquierda = (datos['izquierda'] as List<dynamic>)
-        .map((e) => FlSpot(
-              e['timestamp'].toDouble(),
-              e['value'].toDouble(),
-            ))
-        .toList();
-
-    final datosDerecha = (datos['derecha'] as List<dynamic>)
-        .map((e) => FlSpot(
-              e['timestamp'].toDouble(),
-              e['value'].toDouble(),
-            ))
-        .toList();
-
-    return LineChart(
-      LineChartData(
-        gridData: FlGridData(show: false),
-        titlesData: FlTitlesData(show: false),
-        borderData: FlBorderData(show: false),
-        lineBarsData: [
-          if (datosIzquierda.isNotEmpty)
-            LineChartBarData(
-              spots: datosIzquierda,
-              isCurved: true,
-              color: Colors.blue[300],
-              dotData: FlDotData(show: false),
-              belowBarData: BarAreaData(show: false),
-            ),
-          if (datosDerecha.isNotEmpty)
-            LineChartBarData(
-              spots: datosDerecha,
-              isCurved: true,
-              color: Colors.green[300],
-              dotData: FlDotData(show: false),
-              belowBarData: BarAreaData(show: false),
-            ),
-        ],
-        lineTouchData: LineTouchData(enabled: true),
-      ),
-    );
   }
 }

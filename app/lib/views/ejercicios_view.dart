@@ -5,6 +5,9 @@ import 'package:chewie/chewie.dart';
 import '../viewmodels/ejercicios_viewmodel.dart';
 import '../models/ejercicio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io';
+import 'dart:async';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 class EjerciciosView extends StatefulWidget {
   const EjerciciosView({Key? key}) : super(key: key);
@@ -53,24 +56,24 @@ class _EjerciciosViewState extends State<EjerciciosView> {
 
       String videoUrl = ejercicio.videoUrl!;
       
-      if (kIsWeb) {
-        if (!videoUrl.startsWith('https://')) {
-          videoUrl = videoUrl.replaceAll('http://', 'https://');
+      // Verificar si es una URL de YouTube
+      bool isYoutubeUrl = videoUrl.contains('youtube.com') || videoUrl.contains('youtu.be');
+      
+      if (isYoutubeUrl) {
+        String? videoId = YoutubePlayerController.convertUrlToId(videoUrl);
+        if (videoId == null) {
+          throw Exception('URL de YouTube inválida');
         }
-        
-        if (videoUrl.contains('youtube.com') || videoUrl.contains('youtu.be')) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Los videos de YouTube no son soportados directamente en web. Por favor, usa la app móvil.'),
-                backgroundColor: Colors.orange,
-              ),
-            );
-          }
-          _isInitializing[ejercicio.id.toString()] = false;
-          if (mounted) setState(() {});
-          return;
-        }
+
+        // No necesitamos crear un ChewieController para YouTube
+        _isInitializing[ejercicio.id.toString()] = false;
+        if (mounted) setState(() {});
+        return;
+      }
+
+      // Para videos no-YouTube, continuar con la lógica existente
+      if (!videoUrl.startsWith('https://')) {
+        videoUrl = videoUrl.replaceAll('http://', 'https://');
       }
 
       final videoPlayerController = VideoPlayerController.network(
@@ -81,46 +84,26 @@ class _EjerciciosViewState extends State<EjerciciosView> {
         ),
       );
 
-      // Intentar inicializar con timeout
       bool initialized = false;
-      try {
-        await Future.wait([
-          videoPlayerController.initialize(),
-        ]).timeout(Duration(seconds: 15)); // Aumentamos el timeout a 15 segundos
-        initialized = true;
-      } catch (e) {
-        print('⚠️ Error al inicializar video: $e');
-        // Solo mostramos el mensaje si el error no es por disposición del widget
-        if (mounted && e is! StateError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  Icon(Icons.warning_amber_rounded, color: Colors.white),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text('No se pudo cargar el video. Intente nuevamente.'),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.orange,
-              duration: Duration(seconds: 3),
-              action: SnackBarAction(
-                label: 'Reintentar',
-                textColor: Colors.white,
-                onPressed: () => _retryLoadVideo(ejercicio),
-              ),
-            ),
+      int retryCount = 0;
+      while (!initialized && retryCount < 3) {
+        try {
+          await videoPlayerController.initialize().timeout(
+            Duration(seconds: 20),
+            onTimeout: () {
+              throw TimeoutException('Tiempo de espera agotado');
+            },
           );
+          initialized = true;
+        } catch (e) {
+          retryCount++;
+          if (retryCount >= 3) throw e;
+          await Future.delayed(Duration(seconds: 2));
         }
       }
 
-      if (!mounted) return;
-
-      if (!initialized) {
+      if (!mounted) {
         videoPlayerController.dispose();
-        _isInitializing[ejercicio.id.toString()] = false;
-        if (mounted) setState(() {});
         return;
       }
 
@@ -139,56 +122,17 @@ class _EjerciciosViewState extends State<EjerciciosView> {
             child: CircularProgressIndicator(color: Colors.white),
           ),
         ),
-        errorBuilder: (context, errorMessage) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, color: Colors.red, size: 30),
-                SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Error al reproducir el video',
-                    style: const TextStyle(color: Colors.white),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => _retryLoadVideo(ejercicio),
-                  icon: Icon(Icons.refresh),
-                  label: Text('Reintentar'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[300],
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
       );
-      
+
       _videoControllers[ejercicio.id.toString()] = chewieController;
       _isInitializing[ejercicio.id.toString()] = false;
       
       if (mounted) setState(() {});
     } catch (e) {
-      print('❌ Error al inicializar el reproductor de video: $e');
+      print('❌ Error al inicializar el video: $e');
       _isInitializing[ejercicio.id.toString()] = false;
       if (mounted) setState(() {});
     }
-  }
-
-  Future<void> _retryLoadVideo(Ejercicio ejercicio) async {
-    final String ejercicioId = ejercicio.id.toString();
-    if (_videoControllers.containsKey(ejercicioId)) {
-      _videoControllers[ejercicioId]?.dispose();
-      _videoControllers.remove(ejercicioId);
-    }
-    _isInitializing[ejercicioId] = false;
-    if (mounted) setState(() {});
-    await _initializeVideoController(ejercicio);
   }
 
   @override
@@ -384,106 +328,9 @@ class _EjerciciosViewState extends State<EjerciciosView> {
     final bool tieneVideo = ejercicio.videoUrl != null && ejercicio.videoUrl!.isNotEmpty;
     final String ejercicioId = ejercicio.id.toString();
     final bool isLoading = _isInitializing[ejercicioId] == true;
+    final bool isYoutubeUrl = (ejercicio.videoUrl?.contains('youtube.com') == true) || 
+                             (ejercicio.videoUrl?.contains('youtu.be') == true);
     
-    if (tieneVideo && kIsWeb) {
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.grey[700],
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          children: [
-            Text(
-              ejercicio.nombre,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              ejercicio.instrucciones,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 14,
-              ),
-            ),
-            if (tieneVideo) ...[
-              const SizedBox(height: 12),
-              if (_videoControllers.containsKey(ejercicioId))
-                Container(
-                  height: 200,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue[300]!, width: 2),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Chewie(controller: _videoControllers[ejercicioId]!),
-                  ),
-                )
-              else if (isLoading)
-                Container(
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[800],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(color: Colors.blue[300]),
-                        SizedBox(height: 8),
-                        Text(
-                          'Cargando video...',
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else
-                Center(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.play_circle_outline),
-                    label: const Text("Ver video"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[300],
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    ),
-                    onPressed: () => _initializeVideoController(ejercicio),
-                  ),
-                ),
-            ],
-            Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: Colors.orange),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Para una mejor experiencia con los videos, te recomendamos usar la aplicación móvil.',
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(12),
@@ -512,7 +359,33 @@ class _EjerciciosViewState extends State<EjerciciosView> {
           ),
           if (tieneVideo) ...[
             const SizedBox(height: 12),
-            if (_videoControllers.containsKey(ejercicioId))
+            if (isYoutubeUrl && ejercicio.videoUrl != null)
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue[300]!, width: 2),
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: YoutubePlayer(
+                    controller: YoutubePlayerController.fromVideoId(
+                      videoId: YoutubePlayerController.convertUrlToId(ejercicio.videoUrl!) ?? '',
+                      params: const YoutubePlayerParams(
+                        mute: false,
+                        showControls: true,
+                        enableJavaScript: true,
+                        enableKeyboard: false,
+                        strictRelatedVideos: true,
+                        showFullscreenButton: true,
+                        pointerEvents: PointerEvents.auto,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            else if (_videoControllers.containsKey(ejercicioId))
               Container(
                 height: 200,
                 decoration: BoxDecoration(
