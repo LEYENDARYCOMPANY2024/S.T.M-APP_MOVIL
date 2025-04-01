@@ -31,6 +31,28 @@ class _EjerciciosViewState extends State<EjerciciosView> {
     });
   }
 
+  // Nuevo método para limpiar videos no visibles
+  void _cleanupInvisibleVideos() {
+    final viewModel = Provider.of<EjerciciosViewModel>(context, listen: false);
+    for (var entry in _videoControllers.entries.toList()) {
+      bool isVisible = false;
+      for (var nivel in viewModel.niveles) {
+        if (nivel.expandido) {
+          for (var ejercicio in nivel.ejercicios) {
+            if (ejercicio.id.toString() == entry.key) {
+              isVisible = true;
+              break;
+            }
+          }
+        }
+      }
+      if (!isVisible) {
+        entry.value.dispose();
+        _videoControllers.remove(entry.key);
+      }
+    }
+  }
+
   @override
   void dispose() {
     _disposeAllVideoControllers();
@@ -66,13 +88,12 @@ class _EjerciciosViewState extends State<EjerciciosView> {
           throw Exception('URL de YouTube inválida');
         }
 
-        // No necesitamos crear un ChewieController para YouTube
         _isInitializing[ejercicio.id.toString()] = false;
         if (mounted) setState(() {});
         return;
       }
 
-      // Para videos no-YouTube, continuar con la lógica existente
+      // Optimización para videos no-YouTube
       if (!videoUrl.startsWith('https://')) {
         videoUrl = videoUrl.replaceAll('http://', 'https://');
       }
@@ -83,7 +104,7 @@ class _EjerciciosViewState extends State<EjerciciosView> {
           mixWithOthers: true,
           allowBackgroundPlayback: false,
         ),
-        formatHint: VideoFormat.hls,  // Optimización para streaming adaptativo
+        formatHint: VideoFormat.hls,
       );
 
       bool initialized = false;
@@ -91,7 +112,7 @@ class _EjerciciosViewState extends State<EjerciciosView> {
       while (!initialized && retryCount < 3) {
         try {
           await videoPlayerController.initialize().timeout(
-            Duration(seconds: 15),  // Reducido de 20 a 15 segundos
+            Duration(seconds: 10), // Reducido a 10 segundos
             onTimeout: () {
               throw TimeoutException('Tiempo de espera agotado');
             },
@@ -100,7 +121,7 @@ class _EjerciciosViewState extends State<EjerciciosView> {
         } catch (e) {
           retryCount++;
           if (retryCount >= 3) throw e;
-          await Future.delayed(Duration(seconds: 1));  // Reducido de 2 a 1 segundo
+          await Future.delayed(Duration(milliseconds: 500)); // Reducido a 500ms
         }
       }
 
@@ -118,8 +139,8 @@ class _EjerciciosViewState extends State<EjerciciosView> {
         allowMuting: true,
         showControls: true,
         allowPlaybackSpeedChanging: true,
-        maxScale: 1.0,  // Limitar el zoom máximo
-        deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],  // Volver a portrait después de pantalla completa
+        maxScale: 1.0,
+        deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],
         placeholder: Container(
           color: Colors.grey[800],
           child: const Center(
@@ -150,6 +171,8 @@ class _EjerciciosViewState extends State<EjerciciosView> {
   @override
   Widget build(BuildContext context) {
     final ejerciciosViewModel = Provider.of<EjerciciosViewModel>(context);
+    final screenSize = MediaQuery.of(context).size;
+    final isHighResolution = screenSize.width >= 1440 || screenSize.height >= 2960;
 
     return Scaffold(
       backgroundColor: Colors.blue[700],
@@ -165,30 +188,29 @@ class _EjerciciosViewState extends State<EjerciciosView> {
         onRefresh: () => ejerciciosViewModel.cargarNivelesYEjercicios(),
         color: Colors.blue[900],
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(isHighResolution ? 24.0 : 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Nota informativa sobre desbloqueo de ejercicios
+              // Nota informativa con tamaño adaptativo
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(isHighResolution ? 16 : 12),
                 decoration: BoxDecoration(
                   color: Colors.amber[100],
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text(
+                child: Text(
                   "Tienes que hacer los ejercicios en orden. Los niveles se desbloquearán cuando tu terapeuta lo indique.",
                   style: TextStyle(
-                    fontSize: 14, 
+                    fontSize: isHighResolution ? 16 : 14,
                     color: Colors.black87,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
               
-              const SizedBox(height: 16),
+              SizedBox(height: isHighResolution ? 24 : 16),
               
-              // Estado de carga y contenido principal
               Expanded(
                 child: ejerciciosViewModel.cargando
                   ? const Center(
@@ -213,20 +235,20 @@ class _EjerciciosViewState extends State<EjerciciosView> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15),
                             ),
-                            margin: const EdgeInsets.only(bottom: 12),
+                            margin: EdgeInsets.only(bottom: isHighResolution ? 16 : 12),
                             child: Column(
                               children: [
-                                // Cabecera del nivel (siempre visible)
                                 ListTile(
                                   leading: Icon(
                                     Icons.fitness_center,
                                     color: Colors.blue[300],
+                                    size: isHighResolution ? 32 : 24,
                                   ),
                                   title: Text(
                                     nivel.nombre,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 18,
+                                      fontSize: isHighResolution ? 22 : 18,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -234,12 +256,12 @@ class _EjerciciosViewState extends State<EjerciciosView> {
                                     nivel.descripcion ?? 'Ejercicios de este nivel',
                                     style: TextStyle(
                                       color: Colors.white.withOpacity(0.7),
+                                      fontSize: isHighResolution ? 16 : 14,
                                     ),
                                   ),
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      // Icono de estado
                                       Icon(
                                         desbloqueado 
                                           ? Icons.lock_open 
@@ -247,21 +269,22 @@ class _EjerciciosViewState extends State<EjerciciosView> {
                                         color: desbloqueado 
                                           ? Colors.green[300] 
                                           : Colors.red[300],
+                                        size: isHighResolution ? 28 : 24,
                                       ),
-                                      const SizedBox(width: 8),
-                                      // Flecha desplegable (solo activa si está desbloqueado)
+                                      SizedBox(width: isHighResolution ? 12 : 8),
                                       IconButton(
                                         icon: Icon(
                                           nivel.expandido
                                               ? Icons.keyboard_arrow_up
                                               : Icons.keyboard_arrow_down,
                                           color: Colors.white,
+                                          size: isHighResolution ? 32 : 24,
                                         ),
                                         onPressed: desbloqueado
                                             ? () {
                                                 ejerciciosViewModel.toggleExpansion(index);
+                                                _cleanupInvisibleVideos();
                                                 
-                                                // Inicializar los controladores de video si el nivel se expande
                                                 if (!nivel.expandido && desbloqueado) {
                                                   for (var ejercicio in nivel.ejercicios) {
                                                     if (ejercicio.videoUrl != null && ejercicio.videoUrl!.isNotEmpty) {
@@ -276,7 +299,6 @@ class _EjerciciosViewState extends State<EjerciciosView> {
                                   ),
                                 ),
                                 
-                                // Contenido desplegable (ejercicios)
                                 if (nivel.expandido && desbloqueado)
                                   ListView.builder(
                                     shrinkWrap: true,
@@ -284,19 +306,19 @@ class _EjerciciosViewState extends State<EjerciciosView> {
                                     itemCount: nivel.ejercicios.length,
                                     itemBuilder: (context, i) {
                                       final ejercicio = nivel.ejercicios[i];
-                                      return _buildEjercicioItem(ejercicio);
+                                      return _buildEjercicioItem(ejercicio, isHighResolution);
                                     },
                                   ),
                                 
-                                // Mensaje cuando el nivel está bloqueado
                                 if (nivel.expandido && !desbloqueado)
-                                  const Padding(
-                                    padding: EdgeInsets.all(16.0),
+                                  Padding(
+                                    padding: EdgeInsets.all(isHighResolution ? 20 : 16),
                                     child: Text(
                                       "Este nivel está bloqueado. Contacta a tu terapeuta para desbloquearlo.",
                                       style: TextStyle(
                                         color: Colors.white70,
                                         fontStyle: FontStyle.italic,
+                                        fontSize: isHighResolution ? 16 : 14,
                                       ),
                                     ),
                                   ),
@@ -335,8 +357,7 @@ class _EjerciciosViewState extends State<EjerciciosView> {
     );
   }
   
-  // Widget para mostrar un ejercicio individual con reproductor de video
-  Widget _buildEjercicioItem(Ejercicio ejercicio) {
+  Widget _buildEjercicioItem(Ejercicio ejercicio, bool isHighResolution) {
     final bool tieneVideo = ejercicio.videoUrl != null && ejercicio.videoUrl!.isNotEmpty;
     final String ejercicioId = ejercicio.id.toString();
     final bool isLoading = _isInitializing[ejercicioId] == true;
@@ -344,41 +365,47 @@ class _EjerciciosViewState extends State<EjerciciosView> {
                              (ejercicio.videoUrl?.contains('youtu.be') == true);
     
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.symmetric(
+        horizontal: isHighResolution ? 20 : 16,
+        vertical: isHighResolution ? 12 : 8,
+      ),
+      padding: EdgeInsets.all(isHighResolution ? 16 : 12),
       decoration: BoxDecoration(
         color: Colors.grey[700],
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             ejercicio.nombre,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: isHighResolution ? 20 : 16,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isHighResolution ? 12 : 8),
           Text(
             ejercicio.instrucciones,
             style: TextStyle(
               color: Colors.white.withOpacity(0.8),
-              fontSize: 14,
+              fontSize: isHighResolution ? 16 : 14,
             ),
           ),
           if (tieneVideo) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: isHighResolution ? 16 : 12),
             if (isYoutubeUrl && ejercicio.videoUrl != null)
               AspectRatio(
                 aspectRatio: 16 / 9,
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.black,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue[300]!, width: 2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.blue[300]!,
+                      width: isHighResolution ? 3 : 2,
+                    ),
                   ),
                   clipBehavior: Clip.hardEdge,
                   child: YoutubePlayer(
@@ -399,32 +426,41 @@ class _EjerciciosViewState extends State<EjerciciosView> {
               )
             else if (_videoControllers.containsKey(ejercicioId))
               Container(
-                height: 200,
+                height: isHighResolution ? 250 : 200,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue[300]!, width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.blue[300]!,
+                    width: isHighResolution ? 3 : 2,
+                  ),
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(10),
                   child: Chewie(controller: _videoControllers[ejercicioId]!),
                 ),
               )
             else if (isLoading)
               Container(
-                height: 200,
+                height: isHighResolution ? 250 : 200,
                 decoration: BoxDecoration(
                   color: Colors.grey[800],
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CircularProgressIndicator(color: Colors.blue[300]),
-                      SizedBox(height: 8),
+                      CircularProgressIndicator(
+                        color: Colors.blue[300],
+                        strokeWidth: isHighResolution ? 3 : 2,
+                      ),
+                      SizedBox(height: isHighResolution ? 12 : 8),
                       Text(
                         'Cargando video...',
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: isHighResolution ? 16 : 14,
+                        ),
                       ),
                     ],
                   ),
@@ -433,12 +469,23 @@ class _EjerciciosViewState extends State<EjerciciosView> {
             else
               Center(
                 child: ElevatedButton.icon(
-                  icon: const Icon(Icons.play_circle_outline),
-                  label: const Text("Ver video"),
+                  icon: Icon(
+                    Icons.play_circle_outline,
+                    size: isHighResolution ? 32 : 24,
+                  ),
+                  label: Text(
+                    "Ver video",
+                    style: TextStyle(
+                      fontSize: isHighResolution ? 16 : 14,
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue[300],
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isHighResolution ? 24 : 20,
+                      vertical: isHighResolution ? 16 : 12,
+                    ),
                   ),
                   onPressed: () => _initializeVideoController(ejercicio),
                 ),
