@@ -4,6 +4,7 @@ import '../models/paciente.dart';
 import '../viewmodels/perfil_viewmodel.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import '../viewmodels/login_viewmodel.dart';
 
 class PerfilDesign extends StatefulWidget {
   final Paciente paciente;
@@ -216,6 +217,8 @@ class _PerfilDesignState extends State<PerfilDesign> {
                         _buildSectionTitle('Actualizar Datos'),
                         SizedBox(height: 10),
                         _buildUpdateCard(),
+                        SizedBox(height: 20),
+                        _buildLogoutButton(context),
                         SizedBox(height: 30),
                       ],
                     ),
@@ -1012,6 +1015,57 @@ class _PerfilDesignState extends State<PerfilDesign> {
             fontSize: 16,
           ),
           floatingLabelBehavior: FloatingLabelBehavior.auto,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton(BuildContext context) {
+    return Card(
+      elevation: 3,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: InkWell(
+        onTap: () async {
+          final loginViewModel = Provider.of<LoginViewModel>(context, listen: false);
+          await loginViewModel.logout();
+          Navigator.of(context).pushReplacementNamed('/login');
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade100,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.logout,
+                  color: Colors.red,
+                  size: 30,
+                ),
+              ),
+              SizedBox(width: 20),
+              Expanded(
+                child: Text(
+                  'Cerrar Sesión',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: Colors.red,
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -43,13 +43,6 @@ class _HomeViewState extends State<HomeView> {
               Navigator.of(context).pushNamed('/perfil');
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () async {
-              await loginViewModel.logout();
-              Navigator.of(context).pushReplacementNamed('/login');
-            },
-          ),
         ],
       ),
       body: homeViewModel.isLoading
