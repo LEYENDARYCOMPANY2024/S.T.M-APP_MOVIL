@@ -396,6 +396,7 @@ class HistorialClinicoReadOnlyDesign {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(
               hasCondition ? Icons.check_circle : Icons.cancel,
@@ -403,14 +404,15 @@ class HistorialClinicoReadOnlyDesign {
               size: 20,
             ),
             const SizedBox(width: 8),
-            Text(
-              titulo,
-              style: const TextStyle(
-                color: _subtitleColor,
-                fontWeight: FontWeight.w500,
+            Expanded(
+              child: Text(
+                titulo,
+                style: const TextStyle(
+                  color: _subtitleColor,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
-            const Spacer(),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
@@ -437,6 +439,8 @@ class HistorialClinicoReadOnlyDesign {
                 color: _textColor,
                 fontStyle: FontStyle.italic,
               ),
+              softWrap: true,
+              overflow: TextOverflow.visible,
             ),
           ),
         _buildInfoDivider(),

@@ -5,6 +5,7 @@ import 'package:chewie/chewie.dart';
 import '../viewmodels/ejercicios_viewmodel.dart';
 import '../models/ejercicio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart';  // Importación para DeviceOrientation
 import 'dart:io';
 import 'dart:async';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
@@ -82,6 +83,7 @@ class _EjerciciosViewState extends State<EjerciciosView> {
           mixWithOthers: true,
           allowBackgroundPlayback: false,
         ),
+        formatHint: VideoFormat.hls,  // Optimización para streaming adaptativo
       );
 
       bool initialized = false;
@@ -89,7 +91,7 @@ class _EjerciciosViewState extends State<EjerciciosView> {
       while (!initialized && retryCount < 3) {
         try {
           await videoPlayerController.initialize().timeout(
-            Duration(seconds: 20),
+            Duration(seconds: 15),  // Reducido de 20 a 15 segundos
             onTimeout: () {
               throw TimeoutException('Tiempo de espera agotado');
             },
@@ -98,7 +100,7 @@ class _EjerciciosViewState extends State<EjerciciosView> {
         } catch (e) {
           retryCount++;
           if (retryCount >= 3) throw e;
-          await Future.delayed(Duration(seconds: 2));
+          await Future.delayed(Duration(seconds: 1));  // Reducido de 2 a 1 segundo
         }
       }
 
@@ -116,12 +118,22 @@ class _EjerciciosViewState extends State<EjerciciosView> {
         allowMuting: true,
         showControls: true,
         allowPlaybackSpeedChanging: true,
+        maxScale: 1.0,  // Limitar el zoom máximo
+        deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],  // Volver a portrait después de pantalla completa
         placeholder: Container(
           color: Colors.grey[800],
           child: const Center(
             child: CircularProgressIndicator(color: Colors.white),
           ),
         ),
+        errorBuilder: (context, errorMessage) {
+          return Center(
+            child: Text(
+              'Error al cargar el video. Por favor, intenta de nuevo.',
+              style: TextStyle(color: Colors.white70),
+            ),
+          );
+        },
       );
 
       _videoControllers[ejercicio.id.toString()] = chewieController;
