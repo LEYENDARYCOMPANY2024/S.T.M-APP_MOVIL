@@ -159,19 +159,27 @@ class _RegisterFormState extends State<RegisterForm> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onPressed: _termsAccepted 
-                    ? () async {
+                onPressed: (!_termsAccepted || !registerViewModel.isPasswordValid(registerViewModel.passwordController.text))
+                    ? null 
+                    : () async {
                         final validationResult = await registerViewModel.validateCodigo();
                         setState(() {
                             _codigoError = validationResult['isValid'] 
                                 ? null 
                                 : validationResult['message'];
                         });
+                        
                         if (validationResult['isValid']) {
+                            final usernameValidation = await registerViewModel.validateUsername();
+                            if (!usernameValidation['isValid']) {
+                                setState(() {
+                                    _usuarioError = usernameValidation['message'];
+                                });
+                                return;
+                            }
                             registerViewModel.register(context);
                         }
-                    } 
-                    : null,
+                    },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -199,54 +207,132 @@ class _RegisterFormState extends State<RegisterForm> {
 
     Color color;
     String message;
+    List<Color> gradientColors;
+    String detailMessage;
+    double strengthValue;
     
     switch (strength.toLowerCase()) {
       case 'baja':
         color = Colors.red;
         message = 'Débil';
+        gradientColors = [Colors.red, Colors.red.shade300];
+        detailMessage = 'La contraseña es muy débil';
+        strengthValue = 0.33;
         break;
       case 'media':
         color = Colors.orange;
         message = 'Media';
+        gradientColors = [Colors.orange, Colors.orange.shade300];
+        detailMessage = 'La contraseña es moderadamente segura';
+        strengthValue = 0.66;
         break;
       case 'alta':
         color = Colors.green;
         message = 'Fuerte';
+        gradientColors = [Colors.green, Colors.green.shade300];
+        detailMessage = '¡Excelente! La contraseña es muy segura';
+        strengthValue = 1.0;
         break;
       default:
         return const SizedBox.shrink();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(2),
-                child: LinearProgressIndicator(
-                  value: strength == 'baja' ? 0.33 : 
-                         strength == 'media' ? 0.66 : 1.0,
-                  backgroundColor: Colors.grey[200],
-                  valueColor: AlwaysStoppedAnimation<Color>(color),
-                  minHeight: 4,
+    final viewModel = Provider.of<RegisterViewModel>(context, listen: false);
+    final requirements = viewModel.getPasswordRequirements(viewModel.passwordController.text);
+
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 6,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(3),
+                    gradient: LinearGradient(
+                      colors: [Colors.grey.shade200, Colors.grey.shade200],
+                    ),
+                  ),
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: strengthValue,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(3),
+                        gradient: LinearGradient(
+                          colors: gradientColors,
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  message,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            detailMessage,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
-            const SizedBox(width: 8),
+          ),
+          if (requirements.isNotEmpty) ...[
+            const SizedBox(height: 12),
             Text(
-              message,
+              'Requisitos faltantes:',
               style: TextStyle(
-                color: color,
+                color: Colors.grey[700],
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),
+            const SizedBox(height: 4),
+            ...requirements.map((req) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 14,
+                    color: Colors.grey[600],
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    req,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            )).toList(),
           ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -276,17 +362,23 @@ class _RegisterFormState extends State<RegisterForm> {
             border: Border.all(
               color: errorText != null ? Colors.red : Colors.grey[300]!,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: TextField(
             controller: controller,
             obscureText: isPassword ? !_isPasswordVisible : false,
             onChanged: (value) {
               if (isPassword) {
-                Future.delayed(const Duration(milliseconds: 100), () {
-                  if (!mounted) return;
-                  viewModel.validatePasswordStrength(value);
-                });
-              } else if (onChanged != null) {
+                viewModel.validatePasswordStrength(value);
+              }
+              if (onChanged != null) {
                 onChanged(value);
               }
             },
@@ -308,7 +400,7 @@ class _RegisterFormState extends State<RegisterForm> {
                     )
                   : null,
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 15),
+              contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 12),
             ),
           ),
         ),

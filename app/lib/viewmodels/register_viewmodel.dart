@@ -135,18 +135,61 @@ class RegisterViewModel extends ChangeNotifier {
       _passwordStrength = 'baja';
     } else {
       bool hasUppercase = password.contains(RegExp(r'[A-Z]'));
+      bool hasLowercase = password.contains(RegExp(r'[a-z]'));
       bool hasDigits = password.contains(RegExp(r'[0-9]'));
       bool hasSpecialCharacters = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+      bool hasMinLength = password.length >= 8;
       
       int strength = 0;
       if (hasUppercase) strength++;
+      if (hasLowercase) strength++;
       if (hasDigits) strength++;
       if (hasSpecialCharacters) strength++;
+      if (hasMinLength) strength++;
       
-      _passwordStrength = strength == 0 ? 'baja' : 
-                         strength == 1 ? 'media' : 'alta';
+      if (strength <= 2) {
+        _passwordStrength = 'baja';
+      } else if (strength <= 4) {
+        _passwordStrength = 'media';
+      } else {
+        _passwordStrength = 'alta';
+      }
     }
     notifyListeners();
+  }
+
+  // Método para verificar si la contraseña cumple con los requisitos mínimos
+  bool isPasswordValid(String password) {
+    bool hasUppercase = password.contains(RegExp(r'[A-Z]'));
+    bool hasLowercase = password.contains(RegExp(r'[a-z]'));
+    bool hasDigits = password.contains(RegExp(r'[0-9]'));
+    bool hasSpecialCharacters = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+    bool hasMinLength = password.length >= 8;
+
+    return hasMinLength && (hasUppercase || hasLowercase) && (hasDigits || hasSpecialCharacters);
+  }
+
+  // Método para obtener los requisitos faltantes de la contraseña
+  List<String> getPasswordRequirements(String password) {
+    List<String> requirements = [];
+    
+    if (password.length < 8) {
+      requirements.add('Al menos 8 caracteres');
+    }
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      requirements.add('Al menos una mayúscula');
+    }
+    if (!password.contains(RegExp(r'[a-z]'))) {
+      requirements.add('Al menos una minúscula');
+    }
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      requirements.add('Al menos un número');
+    }
+    if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+      requirements.add('Al menos un carácter especial');
+    }
+    
+    return requirements;
   }
 
   // Método para verificar si la contraseña existe
