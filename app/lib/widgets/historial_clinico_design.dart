@@ -509,126 +509,243 @@ class HistorialClinicoReadOnlyDesign {
   static Future<void> generarPDF(Map<String, dynamic> datos, dynamic paciente) async {
     final pdf = pw.Document();
 
+    // Definir estilos consistentes
+    final titleStyle = pw.TextStyle(
+      fontSize: 20,
+      fontWeight: pw.FontWeight.bold,
+      color: PdfColors.blue900
+    );
+    
+    final sectionTitleStyle = pw.TextStyle(
+      fontSize: 16,
+      fontWeight: pw.FontWeight.bold,
+      color: PdfColors.blue800
+    );
+    
+    final labelStyle = pw.TextStyle(
+      fontSize: 12,
+      color: PdfColors.grey800,
+      fontWeight: pw.FontWeight.bold
+    );
+    
+    final valueStyle = pw.TextStyle(
+      fontSize: 12,
+      color: PdfColors.black
+    );
+
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
+        header: (context) => pw.Container(
+          padding: const pw.EdgeInsets.only(bottom: 20),
+          decoration: const pw.BoxDecoration(
+            border: pw.Border(bottom: pw.BorderSide(color: PdfColors.blue900))
+          ),
+          child: pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text('Historial Clínico', style: titleStyle),
+              pw.Text(
+                'Fecha: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+                style: valueStyle
+              ),
+            ]
+          ),
+        ),
+        footer: (context) => pw.Container(
+          alignment: pw.Alignment.centerRight,
+          margin: const pw.EdgeInsets.only(top: 10),
+          child: pw.Text(
+            'Página ${context.pageNumber} de ${context.pagesCount}',
+            style: pw.TextStyle(
+              fontSize: 10,
+              color: PdfColors.grey700
+            ),
+          ),
+        ),
         build: (context) {
           return [
-            pw.Header(
-              level: 0,
-              child: pw.Text('Historial Clínico', 
-                style: pw.TextStyle(
-                  fontSize: 24,
-                  fontWeight: pw.FontWeight.bold
-                )
-              ),
+            // Datos del Paciente con diseño mejorado
+            _buildPDFSection(
+              'Datos del Paciente',
+              [
+                _buildPDFInfoRow('Nombre completo:', '${paciente.nombre} ${paciente.primerApellido} ${paciente.segundoApellido}'),
+                _buildPDFInfoRow('Edad:', '${paciente.edad} años'),
+                _buildPDFInfoRow('Género:', paciente.genero),
+                _buildPDFInfoRow('Estado Civil:', paciente.estadoCivil),
+                _buildPDFInfoRow('Ocupación:', paciente.ocupacion),
+                _buildPDFInfoRow('Escolaridad:', paciente.escolaridad),
+              ],
+              sectionTitleStyle,
+              labelStyle,
+              valueStyle,
+              hasBackground: true,
             ),
-            
-            // Datos del Paciente
-            _buildPDFSection('Datos del Paciente', [
-              'Nombre: ${paciente.nombre} ${paciente.primerApellido} ${paciente.segundoApellido}',
-              'Edad: ${paciente.edad}',
-              'Género: ${paciente.genero}',
-              'Estado Civil: ${paciente.estadoCivil}',
-              'Ocupación: ${paciente.ocupacion}',
-              'Escolaridad: ${paciente.escolaridad}',
-            ]),
+
+            pw.SizedBox(height: 20),
 
             // Expediente
-            _buildPDFSection('Expediente', [
-              'Número: ${datos['expediente']}',
-              'Fecha: ${datos['fecha']}',
-            ]),
+            _buildPDFSection(
+              'Expediente',
+              [
+                _buildPDFInfoRow('Número:', datos['expediente']),
+                _buildPDFInfoRow('Fecha:', datos['fecha']),
+              ],
+              sectionTitleStyle,
+              labelStyle,
+              valueStyle,
+            ),
 
             // Exploración Física
-            _buildPDFSection('Exploración Física', [
-              'Peso: ${datos['peso']} kg',
-              'Estatura: ${datos['estatura']} cm',
-              'IMC: ${datos['imc']}',
-              'Espasmos o Contractura Muscular: ${datos['espasmos']}',
-              if (datos['espasmos'] == 'Sí') 'Sitio/Características: ${datos['sitioEspasmos']}',
-            ]),
+            _buildPDFSection(
+              'Exploración Física',
+              [
+                _buildPDFInfoRow('Peso:', '${datos['peso']} kg'),
+                _buildPDFInfoRow('Estatura:', '${datos['estatura']} cm'),
+                _buildPDFInfoRow('IMC:', datos['imc'] ?? 'No especificado'),
+                _buildPDFInfoRow('Espasmos o Contractura Muscular:', _formatearSiNo(datos['espasmos'] ?? 'No')),
+                if (_esSi(datos['espasmos'] ?? 'No'))
+                  _buildPDFInfoRow('Sitio/Características:', datos['sitioEspasmos'] ?? 'No especificado'),
+              ],
+              sectionTitleStyle,
+              labelStyle,
+              valueStyle,
+            ),
 
             // Antecedentes Patológicos
-            _buildPDFSection('Antecedentes Patológicos y Heredofamiliares', [
-              'Diabetes: ${datos['diabetes']}',
-              if(datos['diabetes'] == 'Sí') 'Detalles: ${datos['sitioDiabetes']}',
-              'Alergia: ${datos['alergia']}',
-              if(datos['alergia'] == 'Sí') 'Detalles: ${datos['sitioAlergia']}',
-              'HTA: ${datos['hta']}',
-              if(datos['hta'] == 'Sí') 'Detalles: ${datos['sitioHTA']}',
-              'Cáncer: ${datos['cancer']}',
-              if(datos['cancer'] == 'Sí') 'Detalles: ${datos['sitioCancer']}',
-              'Transfusiones: ${datos['transfusiones']}',
-              if(datos['transfusiones'] == 'Sí') 'Detalles: ${datos['sitioTransfusiones']}',
-              'Enf. Reumáticas: ${datos['reumaticas']}',
-              if(datos['reumaticas'] == 'Sí') 'Detalles: ${datos['sitioReutmaticas']}',
-              'Encames: ${datos['encames']}',
-              'Accidentes: ${datos['accidentes']}',
-            ]),
+            _buildPDFSection(
+              'Antecedentes Patológicos y Heredofamiliares',
+              [
+                _buildPDFInfoRow('Diabetes:', datos['diabetes']),
+                if(datos['diabetes'] == 'Sí') _buildPDFInfoRow('Detalles:', datos['sitioDiabetes']),
+                _buildPDFInfoRow('Alergia:', datos['alergia']),
+                if(datos['alergia'] == 'Sí') _buildPDFInfoRow('Detalles:', datos['sitioAlergia']),
+                _buildPDFInfoRow('HTA:', datos['hta']),
+                if(datos['hta'] == 'Sí') _buildPDFInfoRow('Detalles:', datos['sitioHTA']),
+                _buildPDFInfoRow('Cáncer:', datos['cancer']),
+                if(datos['cancer'] == 'Sí') _buildPDFInfoRow('Detalles:', datos['sitioCancer']),
+                _buildPDFInfoRow('Transfusiones:', datos['transfusiones']),
+                if(datos['transfusiones'] == 'Sí') _buildPDFInfoRow('Detalles:', datos['sitioTransfusiones']),
+                _buildPDFInfoRow('Enf. Reumáticas:', datos['reumaticas']),
+                if(datos['reumaticas'] == 'Sí') _buildPDFInfoRow('Detalles:', datos['sitioReutmaticas']),
+                _buildPDFInfoRow('Encames:', datos['encames']),
+                _buildPDFInfoRow('Accidentes:', datos['accidentes']),
+              ],
+              sectionTitleStyle,
+              labelStyle,
+              valueStyle,
+            ),
 
             // Hábitos de Salud
-            _buildPDFSection('Hábitos de Salud', [
-              'Alcoholismo: ${datos['alcoholismo']}',
-              if(datos['alcoholismo'] == 'Sí') 'Detalles: ${datos['sitioAlcoholismo']}',
-              'Tabaquismo: ${datos['tabaquismo']}',
-              if(datos['tabaquismo'] == 'Sí') 'Detalles: ${datos['sitioTabaquismo']}',
-              'Actividad Física: ${datos['actividadFisica']}',
-              if(datos['actividadFisica'] == 'Sí') 'Detalles: ${datos['sitioActividad']}',
-            ]),
+            _buildPDFSection(
+              'Hábitos de Salud',
+              [
+                _buildPDFInfoRow('Alcoholismo:', datos['alcoholismo']),
+                if(datos['alcoholismo'] == 'Sí') _buildPDFInfoRow('Detalles:', datos['sitioAlcoholismo']),
+                _buildPDFInfoRow('Tabaquismo:', datos['tabaquismo']),
+                if(datos['tabaquismo'] == 'Sí') _buildPDFInfoRow('Detalles:', datos['sitioTabaquismo']),
+                _buildPDFInfoRow('Actividad Física:', datos['actividadFisica']),
+                if(datos['actividadFisica'] == 'Sí') _buildPDFInfoRow('Detalles:', datos['sitioActividad']),
+              ],
+              sectionTitleStyle,
+              labelStyle,
+              valueStyle,
+            ),
 
             // Diagnóstico Médico
-            _buildPDFSection('Diagnóstico Médico', [
-              'Diagnóstico Inicial: ${datos['valoracionInicial']}',
-              'Valoración Final: ${datos['valoracionFinal']}',
-            ]),
+            _buildPDFSection(
+              'Diagnóstico Médico',
+              [
+                _buildPDFInfoRow('Diagnóstico Inicial:', datos['valoracionInicial']),
+                _buildPDFInfoRow('Valoración Final:', datos['valoracionFinal']),
+              ],
+              sectionTitleStyle,
+              labelStyle,
+              valueStyle,
+            ),
 
             // Cicatriz Quirúrgica
-            _buildPDFSection('Cicatriz Quirúrgica', [
-              'Cicatrices: ${datos['cirugias']}',
-              if (datos['cirugias'] == 'Sí') ...[
-                'Tipo de Cicatriz: ${_getTipoCicatriz(datos)}',
-                'Características: ${datos['sitioSitio']}',
+            _buildPDFSection(
+              'Cicatriz Quirúrgica',
+              [
+                _buildPDFInfoRow('Cicatrices:', datos['cirugias']),
+                if (datos['cirugias'] == 'Sí') ...[
+                  _buildPDFInfoRow('Tipo de Cicatriz:', _getTipoCicatriz(datos)),
+                  _buildPDFInfoRow('Características:', datos['sitioSitio']),
+                ],
               ],
-            ]),
+              sectionTitleStyle,
+              labelStyle,
+              valueStyle,
+            ),
 
             // Marcha y Deambulación
-            _buildPDFSection('Marcha y Deambulación', [
-              'Tipo de Marcha: ${_getTipoMarcha(datos)}',
-              'Características: ${datos['observacionesMarcha']}',
-              'Atáxica: ${datos['ataxica']}',
-              'Espástica: ${datos['espasticas']}',
-              'Claudicante: ${datos['claudicante']}',
-              'Otros: ${datos['otrosMarcha']}',
-            ]),
+            _buildPDFSection(
+              'Marcha y Deambulación',
+              [
+                _buildPDFInfoRow('Tipo de Marcha:', _getTipoMarcha(datos)),
+                _buildPDFInfoRow('Características:', datos['observacionesMarcha']),
+                _buildPDFInfoRow('Atáxica:', _formatearSiNo(datos['ataxica'])),
+                _buildPDFInfoRow('Espástica:', _formatearSiNo(datos['espasticas'])),
+                _buildPDFInfoRow('Claudicante:', _formatearSiNo(datos['claudicante'])),
+                _buildPDFInfoRow('Otros:', datos['otrosMarcha']),
+              ],
+              sectionTitleStyle,
+              labelStyle,
+              valueStyle,
+            ),
 
             // Traslados
-            _buildPDFSection('Traslados y Movilidad', [
-              'Independencia: ${_getNivelIndependencia(datos)}',
-              'Observaciones: ${datos['abierta']}',
-            ]),
+            _buildPDFSection(
+              'Traslados y Movilidad',
+              [
+                _buildPDFInfoRow('Independencia:', _getNivelIndependencia(datos)),
+                _buildPDFInfoRow('Observaciones:', datos['abierta']),
+              ],
+              sectionTitleStyle,
+              labelStyle,
+              valueStyle,
+            ),
 
             // Medicación y Sustancias
-            _buildPDFSection('Medicación y Sustancias', [
-              'Drogas: ${datos['drogas']}',
-              if(datos['drogas'] == 'Sí') 'Detalles: ${datos['sitioDrogas']}',
-              'Automedicación: ${datos['automedica']}',
-              if(datos['automedica'] == 'Sí') 'Detalles: ${datos['sitioAutomedica']}',
-              'Observaciones adicionales: ${datos['sitioHabitos']}',
-            ]),
+            _buildPDFSection(
+              'Medicación y Sustancias',
+              [
+                _buildPDFInfoRow('Drogas:', datos['drogas']),
+                if(datos['drogas'] == 'Sí') _buildPDFInfoRow('Detalles:', datos['sitioDrogas']),
+                _buildPDFInfoRow('Automedicación:', datos['automedica']),
+                if(datos['automedica'] == 'Sí') _buildPDFInfoRow('Detalles:', datos['sitioAutomedica']),
+                _buildPDFInfoRow('Observaciones adicionales:', datos['sitioHabitos']),
+              ],
+              sectionTitleStyle,
+              labelStyle,
+              valueStyle,
+            ),
 
             // Respuestas Sensoriales
-            _buildPDFSection('Respuestas Sensoriales y Reflejos', [
-              'Sensibilidad: ${datos['sitioSensibilidad']}',
-              'Reflejos: ${datos['sitioreflejos']}',
-              'Lenguaje: ${datos['sitioLenguaje']}',
-            ]),
+            _buildPDFSection(
+              'Respuestas Sensoriales y Reflejos',
+              [
+                _buildPDFInfoRow('Sensibilidad:', datos['sitioSensibilidad']),
+                _buildPDFInfoRow('Reflejos:', datos['sitioreflejos']),
+                _buildPDFInfoRow('Lenguaje:', datos['sitioLenguaje']),
+              ],
+              sectionTitleStyle,
+              labelStyle,
+              valueStyle,
+            ),
 
             // Observaciones Finales
-            _buildPDFSection('Observaciones Finales', [
-              '${datos['Observacionesfinales']}',
-            ]),
+            _buildPDFSection(
+              'Observaciones Finales',
+              [
+                _buildPDFInfoRow('Observaciones:', datos['Observacionesfinales']),
+              ],
+              sectionTitleStyle,
+              labelStyle,
+              valueStyle,
+            ),
           ];
         },
       ),
@@ -637,38 +754,103 @@ class HistorialClinicoReadOnlyDesign {
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => pdf.save(),
       name: 'Historial_Clinico_${paciente.nombre}',
-      format: PdfPageFormat.a4.copyWith(
-        marginLeft: 32,
-        marginTop: 32,
-        marginRight: 32,
-        marginBottom: 32,
-      ),
+      format: PdfPageFormat.a4,
     );
   }
 
-  static pw.Widget _buildPDFSection(String title, List<String> items) {
+  // Función auxiliar para construir secciones del PDF
+  static pw.Widget _buildPDFSection(
+    String title,
+    List<pw.Widget> content,
+    pw.TextStyle titleStyle,
+    pw.TextStyle labelStyle,
+    pw.TextStyle valueStyle,
+    {bool hasBackground = false}
+  ) {
     return pw.Container(
-      margin: const pw.EdgeInsets.only(bottom: 10),
-      padding: const pw.EdgeInsets.all(10),
+      margin: const pw.EdgeInsets.only(bottom: 15),
+      padding: const pw.EdgeInsets.all(15),
       decoration: pw.BoxDecoration(
-        border: pw.Border.all(),
-        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
+        color: hasBackground ? PdfColors.blue50 : PdfColors.white,
+        border: pw.Border.all(color: PdfColors.blue200),
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
       ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(
-            title,
-            style: pw.TextStyle(
-              fontSize: 16,
-              fontWeight: pw.FontWeight.bold
+          pw.Container(
+            padding: const pw.EdgeInsets.only(bottom: 8),
+            decoration: pw.BoxDecoration(
+              border: pw.Border(bottom: pw.BorderSide(color: PdfColors.blue200))
             ),
+            child: pw.Text(title, style: titleStyle),
           ),
-          pw.SizedBox(height: 5),
-          ...items.map((item) => pw.Text(item)),
+          pw.SizedBox(height: 10),
+          ...content,
         ],
       ),
     );
+  }
+
+  // Función auxiliar para construir filas de información
+  static pw.Widget _buildPDFInfoRow(String label, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 4),
+      child: pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Container(
+            width: 120,
+            child: pw.Text(
+              label,
+              style: pw.TextStyle(
+                fontSize: 12,
+                color: PdfColors.grey800,
+                fontWeight: pw.FontWeight.bold
+              ),
+            ),
+          ),
+          pw.Expanded(
+            child: pw.Text(
+              value,
+              style: pw.TextStyle(
+                fontSize: 12,
+                color: PdfColors.black
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static String _getTipoCicatriz(Map<String, dynamic> datos) {
+    List<String> tipos = [];
+    
+    if (_esSi(datos['queloide'])) tipos.add('Queloide');
+    if (_esSi(datos['retractil'])) tipos.add('Retráctil');
+    if (_esSi(datos['hipertrofica'])) tipos.add('Hipertrófica');
+    if (_esSi(datos['adherencia'])) tipos.add('Adherencia');
+    
+    return tipos.isEmpty ? 'No especificado' : tipos.join(', ');
+  }
+
+  static String _getTipoMarcha(Map<String, dynamic> datos) {
+    List<String> tipos = [];
+    
+    if (_esSi(datos['ataxica'])) tipos.add('Atáxica');
+    if (_esSi(datos['espasticas'])) tipos.add('Espástica');
+    if (_esSi(datos['claudicante'])) tipos.add('Claudicante');
+    if (_esSi(datos['libre'])) tipos.add('Libre');
+    if (_esSi(datos['conAyuda'])) tipos.add('Con Ayuda');
+    
+    return tipos.isEmpty ? 'No especificado' : tipos.join(', ');
+  }
+
+  static String _getNivelIndependencia(Map<String, dynamic> datos) {
+    if (_esSi(datos['conAyuda'])) return 'Con Ayuda';
+    if (_esSi(datos['libre'])) return 'Independiente';
+    return 'No especificado';
   }
 
   static Widget buildGenerarPdfButton(VoidCallback onPressed) {
@@ -703,34 +885,5 @@ class HistorialClinicoReadOnlyDesign {
         ),
       ),
     );
-  }
-
-  static String _getTipoCicatriz(Map<String, dynamic> datos) {
-    List<String> tipos = [];
-    
-    if (_esSi(datos['queloide'])) tipos.add('Queloide');
-    if (_esSi(datos['retractil'])) tipos.add('Retráctil');
-    if (_esSi(datos['hipertrofica'])) tipos.add('Hipertrófica');
-    if (_esSi(datos['adherencia'])) tipos.add('Adherencia');
-    
-    return tipos.isEmpty ? 'No especificado' : tipos.join(', ');
-  }
-
-  static String _getTipoMarcha(Map<String, dynamic> datos) {
-    List<String> tipos = [];
-    
-    if (_esSi(datos['ataxica'])) tipos.add('Atáxica');
-    if (_esSi(datos['espasticas'])) tipos.add('Espástica');
-    if (_esSi(datos['claudicante'])) tipos.add('Claudicante');
-    if (_esSi(datos['libre'])) tipos.add('Libre');
-    if (_esSi(datos['conAyuda'])) tipos.add('Con Ayuda');
-    
-    return tipos.isEmpty ? 'No especificado' : tipos.join(', ');
-  }
-
-  static String _getNivelIndependencia(Map<String, dynamic> datos) {
-    if (_esSi(datos['conAyuda'])) return 'Con Ayuda';
-    if (_esSi(datos['libre'])) return 'Independiente';
-    return 'No especificado';
   }
 }
