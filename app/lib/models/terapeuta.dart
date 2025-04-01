@@ -10,6 +10,7 @@ class Terapeuta {
   final String? colonia;
   final String? numExt;
   final String? numInt;
+  final String? fotoPerfil;
 
   Terapeuta({
     required this.id,
@@ -23,6 +24,7 @@ class Terapeuta {
     this.colonia,
     this.numExt,
     this.numInt,
+    this.fotoPerfil,
   });
 
   // Convertir un mapa (de Supabase) a un objeto Terapeuta
@@ -39,6 +41,7 @@ class Terapeuta {
       colonia: map['colonia'],
       numExt: map['num_ext'],
       numInt: map['num_int'],
+      fotoPerfil: map['foto_perfil'],
     );
   }
 
@@ -47,5 +50,16 @@ class Terapeuta {
     return segundoApellido != null && segundoApellido!.isNotEmpty
         ? '$nombre $primerApellido $segundoApellido'
         : '$nombre $primerApellido';
+  }
+
+  String get direccionCompleta {
+    List<String> partesDireccion = [];
+    if (calle != null) partesDireccion.add(calle!);
+    if (numExt != null) partesDireccion.add("No. $numExt");
+    if (numInt != null) partesDireccion.add("Int. $numInt");
+    if (colonia != null) partesDireccion.add(colonia!);
+    if (codigoPostal != null) partesDireccion.add("C.P. $codigoPostal");
+    
+    return partesDireccion.join(', ');
   }
 }

@@ -206,37 +206,133 @@ class _HomeViewState extends State<HomeView> {
 
   // Información del terapeuta
   Widget _buildTerapeutaInfo(terapeuta) {
-    return Column(
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue[900]!.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Foto de perfil o avatar
+              terapeuta.fotoPerfil != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(40),
+                      child: Image.network(
+                        terapeuta.fotoPerfil!,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => _buildAvatarFallback(terapeuta),
+                      ),
+                    )
+                  : _buildAvatarFallback(terapeuta),
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      terapeuta.nombreCompleto,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Terapeuta',
+                      style: TextStyle(
+                        color: Colors.blue[300],
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Divider(color: Colors.white24, height: 32),
+          // Información de contacto
+          _buildInfoRow(Icons.email_outlined, 'Correo', terapeuta.correo),
+          if (terapeuta.direccionCompleta.isNotEmpty) ...[
+            SizedBox(height: 12),
+            _buildInfoRow(Icons.location_on_outlined, 'Dirección', terapeuta.direccionCompleta),
+          ],
+          SizedBox(height: 16),
+          // Botón de cédula
+          Center(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                // Aquí iría la funcionalidad del botón de cédula
+              },
+              icon: Icon(Icons.badge_outlined, color: Colors.blue[900]),
+              label: Text(
+                'Ver Cédula Profesional',
+                style: TextStyle(color: Colors.blue[900]),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAvatarFallback(terapeuta) {
+    return CircleAvatar(
+      radius: 40,
+      backgroundColor: Colors.blue[300],
+      child: Text(
+        terapeuta.nombre.substring(0, 1) + terapeuta.primerApellido.substring(0, 1),
+        style: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: Colors.blue[900],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: Colors.blue[300],
-              radius: 30,
-              child: Text(
-                terapeuta.nombre.substring(0, 1) + terapeuta.primerApellido.substring(0, 1),
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue[900]),
+        Icon(icon, color: Colors.white70, size: 20),
+        SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                ),
               ),
-            ),
-            SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    terapeuta.nombreCompleto,
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500),
-                  ),
-                  SizedBox(height: 5),
-                  Text(
-                    terapeuta.correo,
-                    style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14),
-                  ),
-                ],
+              SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
