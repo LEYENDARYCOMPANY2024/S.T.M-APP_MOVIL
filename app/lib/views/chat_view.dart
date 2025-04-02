@@ -62,7 +62,7 @@ class _ChatViewState extends State<ChatView> {
         ],
         onTap: (index) {
           if (index == 0) {
-            Navigator.of(context).pushNamed('/inicio');
+            Navigator.of(context).pushNamed('/home');
           } else if (index == 1) {
             Navigator.of(context).pushNamed('/historial-clinico');
           } else if (index == 2) {

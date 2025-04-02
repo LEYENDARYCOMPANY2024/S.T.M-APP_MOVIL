@@ -1,23 +1,47 @@
 import 'package:flutter/material.dart';
 import '../models/sesion.dart';
+import '../services/detalle_sesion_service.dart';
 
 class DetalleSesionViewModel extends ChangeNotifier {
+  final DetalleSesionService _service = DetalleSesionService();
   Sesion? sesion;
   bool isLoading = false;
   String? errorMessage;
+  Map<String, dynamic> datosGraficas = {};
 
   void setSesion(Sesion sesionDetalle) {
     sesion = sesionDetalle;
+    _cargarDatosGraficas();
     notifyListeners();
   }
 
-  // Agregar método para recargar datos
+  Future<void> _cargarDatosGraficas() async {
+    if (sesion == null) return;
+    
+    try {
+      isLoading = true;
+      notifyListeners();
+      
+      datosGraficas = await _service.obtenerDatosGraficas(sesion!.id);
+      
+      isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      errorMessage = "Error al cargar los datos de las gráficas";
+      isLoading = false;
+      notifyListeners();
+      throw e;
+    }
+  }
+
   Future<void> recargarDatos() async {
     try {
       isLoading = true;
       notifyListeners();
       
-      // Aquí podrías agregar lógica adicional para recargar los datos de la sesión si es necesario
+      if (sesion != null) {
+        await _cargarDatosGraficas();
+      }
       
       isLoading = false;
       notifyListeners();
