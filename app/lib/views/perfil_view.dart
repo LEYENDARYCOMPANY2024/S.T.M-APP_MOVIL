@@ -27,8 +27,8 @@ class _PerfilViewState extends State<PerfilView> {
     return Scaffold(
       body: perfilViewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : perfilViewModel.errorMessage != null
-              ? _buildErrorView(perfilViewModel) // Nueva función para manejar errores
+          : perfilViewModel.errorMessage != null && perfilViewModel.errorType != PerfilErrorType.password
+              ? _buildErrorView(perfilViewModel) // Solo muestra la pantalla de error si no es error de contraseña
               : perfilViewModel.paciente != null
                   ? RefreshIndicator(
                       onRefresh: () => perfilViewModel.cargarDatos(),
@@ -41,6 +41,8 @@ class _PerfilViewState extends State<PerfilView> {
 
   // 📌 Muestra error con opción de reintentar
   Widget _buildErrorView(PerfilViewModel perfilViewModel) {
+    bool isConnectionError = perfilViewModel.errorType == PerfilErrorType.connection;
+    
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -69,14 +71,14 @@ class _PerfilViewState extends State<PerfilView> {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.wifi_off_rounded,
+                    isConnectionError ? Icons.wifi_off_rounded : Icons.error_outline_rounded,
                     color: Colors.red.shade700,
                     size: 48,
                   ),
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  "¡Ups! Algo salió mal",
+                  isConnectionError ? "¡Ups! Sin conexión" : "¡Ups! Algo salió mal",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -85,7 +87,9 @@ class _PerfilViewState extends State<PerfilView> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  "No se pudieron cargar los datos del perfil.\nPor favor, revise su conexión a internet.",
+                  isConnectionError 
+                    ? "No se pudieron cargar los datos del perfil.\nPor favor, revise su conexión a internet."
+                    : "No se pudieron cargar los datos del perfil.\nPor favor, intente nuevamente.",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.grey.shade600,

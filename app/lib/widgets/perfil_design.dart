@@ -684,7 +684,14 @@ class _PerfilDesignState extends State<PerfilDesign> {
           setState(() => _editandoInfo = false);
           _mostrarSnackBar(context, "Información actualizada correctamente", false);
         } else {
-          _mostrarSnackBar(context, "Error al actualizar la información", true);
+          // Mostrar mensaje específico según el tipo de error
+          if (perfilViewModel.errorType == PerfilErrorType.password) {
+            _mostrarSnackBar(context, "Contraseña incorrecta", true);
+          } else if (perfilViewModel.errorType == PerfilErrorType.connection) {
+            _mostrarSnackBar(context, "Error de conexión. Por favor, verifica tu conexión a internet", true);
+          } else {
+            _mostrarSnackBar(context, "Error al actualizar la información", true);
+          }
         }
       }
     } catch (e) {

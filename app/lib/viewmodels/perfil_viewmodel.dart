@@ -3,6 +3,13 @@ import '../services/paciente_service.dart';
 import '../services/token_service.dart';
 import '../models/paciente.dart';
 
+enum PerfilErrorType {
+  none,
+  connection,    // Error de conexión que muestra la pantalla completa
+  password,     // Error de contraseña que solo muestra SnackBar
+  unknown       // Error desconocido que muestra la pantalla completa
+}
+
 class PerfilViewModel extends ChangeNotifier {
   final PacienteService _pacienteService = PacienteService();
   Paciente? paciente;
@@ -10,6 +17,7 @@ class PerfilViewModel extends ChangeNotifier {
   bool isLoading = true;
   String? errorMessage;
   String? successMessage;
+  PerfilErrorType errorType = PerfilErrorType.none;
 
   // 🔹 Cargar datos del paciente
   Future<void> cargarDatos() async {
@@ -18,6 +26,7 @@ class PerfilViewModel extends ChangeNotifier {
       isLoading = true;
       errorMessage = null;
       successMessage = null;
+      errorType = PerfilErrorType.none;
       notifyListeners();
 
       final userId = await TokenService.getUserId();
@@ -25,6 +34,7 @@ class PerfilViewModel extends ChangeNotifier {
 
       if (userId == null) {
         errorMessage = "No se pudo obtener el ID del usuario";
+        errorType = PerfilErrorType.unknown;
         isLoading = false;
         notifyListeners();
         return;
@@ -35,6 +45,7 @@ class PerfilViewModel extends ChangeNotifier {
 
       if (nuevoPaciente == null) {
         errorMessage = "No se encontraron datos del paciente";
+        errorType = PerfilErrorType.unknown;
       }
 
       paciente = nuevoPaciente;
@@ -43,6 +54,7 @@ class PerfilViewModel extends ChangeNotifier {
     } catch (e) {
       print('❌ Error al cargar datos del perfil: $e');
       errorMessage = "Ocurrió un error al cargar los datos";
+      errorType = PerfilErrorType.connection;
       isLoading = false;
       notifyListeners();
     }
@@ -57,11 +69,13 @@ class PerfilViewModel extends ChangeNotifier {
     try {
       errorMessage = null;
       successMessage = null;
+      errorType = PerfilErrorType.none;
       notifyListeners();
 
       if ((nuevoUsuario == null || nuevoUsuario.isEmpty) &&
           (nuevoCorreo == null || nuevoCorreo.isEmpty)) {
         errorMessage = "No se ingresaron datos para actualizar";
+        errorType = PerfilErrorType.unknown;
         notifyListeners();
         return false;
       }
@@ -69,6 +83,7 @@ class PerfilViewModel extends ChangeNotifier {
       final userId = await TokenService.getUserId();
       if (userId == null) {
         errorMessage = "No se pudo obtener el ID del usuario";
+        errorType = PerfilErrorType.unknown;
         notifyListeners();
         return false;
       }
@@ -80,6 +95,7 @@ class PerfilViewModel extends ChangeNotifier {
 
       if (!contrasenaCorrecta) {
         errorMessage = "La contraseña ingresada es incorrecta";
+        errorType = PerfilErrorType.password;
         notifyListeners();
         return false;
       }
@@ -108,12 +124,14 @@ class PerfilViewModel extends ChangeNotifier {
         return true;
       } else {
         errorMessage = "No se pudieron actualizar los datos";
+        errorType = PerfilErrorType.unknown;
         notifyListeners();
         return false;
       }
     } catch (e) {
       print("❌ Error al actualizar datos: $e");
       errorMessage = "Ocurrió un error inesperado";
+      errorType = PerfilErrorType.connection;
       notifyListeners();
       return false;
     }
@@ -132,6 +150,10 @@ class PerfilViewModel extends ChangeNotifier {
     required String contrasenaActual,
   }) async {
     try {
+      errorMessage = null;
+      errorType = PerfilErrorType.none;
+      notifyListeners();
+
       // Verificar contraseña
       bool contrasenaValida = await _pacienteService.verificarContrasena(
         paciente!.id,
@@ -140,6 +162,7 @@ class PerfilViewModel extends ChangeNotifier {
 
       if (!contrasenaValida) {
         errorMessage = "Contraseña incorrecta";
+        errorType = PerfilErrorType.password;
         notifyListeners();
         return false;
       }
@@ -175,6 +198,7 @@ class PerfilViewModel extends ChangeNotifier {
       return actualizado;
     } catch (e) {
       errorMessage = "Error al actualizar la información personal";
+      errorType = PerfilErrorType.connection;
       notifyListeners();
       return false;
     }
@@ -184,6 +208,7 @@ class PerfilViewModel extends ChangeNotifier {
   void limpiarMensajes() {
     errorMessage = null;
     successMessage = null;
+    errorType = PerfilErrorType.none;
     notifyListeners();
   }
 }
