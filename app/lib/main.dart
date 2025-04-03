@@ -25,6 +25,7 @@ import 'views/detalle_sesion_view.dart';
 import 'views/chat_view.dart'; // Importa la vista de chat
 import 'viewmodels/chat_viewmodel.dart'; // Importa el ViewModel de chat
 import 'viewmodels/detalle_chat_viewmodel.dart';
+import 'services/token_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +38,9 @@ void main() async {
     url: dotenv.env['SUPABASE_URL']!,
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
+
+  // Inicializar el TokenService
+  await TokenService.init();
 
   runApp(const MyApp());
 }

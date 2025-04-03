@@ -34,7 +34,15 @@ class LoginViewModel extends ChangeNotifier {
 
   Future<void> logout() async {
     try {
+      // Limpiar los controladores
+      usernameController.clear();
+      passwordController.clear();
+      
+      // Limpiar la sesión
       await _authService.logout();
+      
+      // Forzar la limpieza del token
+      await TokenService.clearAuthData();
     } catch (e) {
       print('⚠️ Error en logout: $e');
     }

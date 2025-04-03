@@ -50,7 +50,36 @@ class AuthService {
       final token = await TokenService.getToken();
       if (token == null) return false;
       
-      return true;
+      // Decodificar el token para verificar su estructura
+      try {
+        final decoded = json.decode(utf8.decode(base64Decode(token)));
+        if (decoded is! Map<String, dynamic>) return false;
+        
+        // Verificar que tenga los campos necesarios
+        if (!decoded.containsKey('user_id') || 
+            !decoded.containsKey('username') || 
+            !decoded.containsKey('timestamp')) {
+          return false;
+        }
+        
+        // Verificar que el timestamp no sea muy antiguo (por ejemplo, más de 30 días)
+        final timestamp = decoded['timestamp'] as int;
+        final tokenDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
+        final now = DateTime.now();
+        final difference = now.difference(tokenDate);
+        
+        if (difference.inDays > 30) {
+          // Si el token es muy antiguo, lo eliminamos
+          await TokenService.clearAuthData();
+          return false;
+        }
+        
+        return true;
+      } catch (e) {
+        // Si hay error al decodificar, el token no es válido
+        await TokenService.clearAuthData();
+        return false;
+      }
     } catch (e) {
       print('❌ Error al verificar token: $e');
       return false;
