@@ -726,12 +726,37 @@ class _HomeViewState extends State<HomeView> {
     final datosIzquierda = procesarDatos(datos['izquierda'] as List<dynamic>? ?? []);
     final datosDerecha = procesarDatos(datos['derecha'] as List<dynamic>? ?? []);
 
+    // Encontrar los valores máximos y mínimos para ajustar la escala
+    double minY = 0;
+    double maxY = 0;
+    
+    void actualizarLimites(List<FlSpot> spots) {
+      for (var spot in spots) {
+        if (spot.y < minY) minY = spot.y;
+        if (spot.y > maxY) maxY = spot.y;
+      }
+    }
+    
+    actualizarLimites(datosIzquierda);
+    actualizarLimites(datosDerecha);
+
+    // Añadir un margen del 10% arriba y abajo
+    final margen = (maxY - minY) * 0.1;
+    minY = minY - margen;
+    maxY = maxY + margen;
+
+    // Si no hay datos o los valores son iguales, establecer límites por defecto
+    if (minY == maxY) {
+      minY = -0.5;
+      maxY = 0.5;
+    }
+
     return LineChart(
       LineChartData(
         gridData: FlGridData(
           show: true,
-          drawVerticalLine: false, // Quitamos líneas verticales
-          horizontalInterval: 0.2,
+          drawVerticalLine: false,
+          horizontalInterval: (maxY - minY) / 5, // Ajustamos el intervalo basado en el rango
           getDrawingHorizontalLine: (_) => FlLine(
             color: Colors.white10,
             strokeWidth: 1,
@@ -744,7 +769,7 @@ class _HomeViewState extends State<HomeView> {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              interval: 0.2,
+              interval: (maxY - minY) / 5,
               reservedSize: 30,
               getTitlesWidget: (value, meta) => Text(
                 value.toStringAsFixed(1),
@@ -756,7 +781,7 @@ class _HomeViewState extends State<HomeView> {
             ),
           ),
           bottomTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false), // Ocultamos títulos inferiores
+            sideTitles: SideTitles(showTitles: false),
           ),
         ),
         borderData: FlBorderData(
@@ -766,8 +791,8 @@ class _HomeViewState extends State<HomeView> {
             left: BorderSide(color: Colors.white30),
           ),
         ),
-        minY: -0.5,
-        maxY: 0.5,
+        minY: minY,
+        maxY: maxY,
         lineBarsData: [
           if (datosIzquierda.isNotEmpty)
             LineChartBarData(
@@ -776,7 +801,7 @@ class _HomeViewState extends State<HomeView> {
               color: Colors.blue[300],
               barWidth: 2,
               isStrokeCapRound: true,
-              dotData: FlDotData(show: false), // Quitamos los puntos
+              dotData: FlDotData(show: false),
               belowBarData: BarAreaData(
                 show: true,
                 color: Colors.blue[300]!.withOpacity(0.1),
@@ -789,14 +814,14 @@ class _HomeViewState extends State<HomeView> {
               color: Colors.green[300],
               barWidth: 2,
               isStrokeCapRound: true,
-              dotData: FlDotData(show: false), // Quitamos los puntos
+              dotData: FlDotData(show: false),
               belowBarData: BarAreaData(
                 show: true,
                 color: Colors.green[300]!.withOpacity(0.1),
               ),
             ),
         ],
-        lineTouchData: LineTouchData(enabled: false), // Desactivamos interactividad
+        lineTouchData: LineTouchData(enabled: false),
       ),
     );
   }

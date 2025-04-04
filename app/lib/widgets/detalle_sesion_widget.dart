@@ -194,12 +194,37 @@ class DetalleSesionWidget extends StatelessWidget {
     final datosIzq = procesarDatos(datosIzquierda);
     final datosDer = procesarDatos(datosDerecha);
 
+    // Encontrar los valores máximos y mínimos para ajustar la escala
+    double minY = 0;
+    double maxY = 0;
+    
+    void actualizarLimites(List<FlSpot> spots) {
+      for (var spot in spots) {
+        if (spot.y < minY) minY = spot.y;
+        if (spot.y > maxY) maxY = spot.y;
+      }
+    }
+    
+    actualizarLimites(datosIzq);
+    actualizarLimites(datosDer);
+
+    // Añadir un margen del 10% arriba y abajo
+    final margen = (maxY - minY) * 0.1;
+    minY = minY - margen;
+    maxY = maxY + margen;
+
+    // Si no hay datos o los valores son iguales, establecer límites por defecto
+    if (minY == maxY) {
+      minY = -0.5;
+      maxY = 0.5;
+    }
+
     return LineChart(
       LineChartData(
         gridData: FlGridData(
           show: true,
           drawVerticalLine: false,
-          horizontalInterval: 0.2,
+          horizontalInterval: (maxY - minY) / 5, // Ajustamos el intervalo basado en el rango
           getDrawingHorizontalLine: (_) => FlLine(
             color: Colors.white10,
             strokeWidth: 1,
@@ -212,7 +237,7 @@ class DetalleSesionWidget extends StatelessWidget {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              interval: 0.2,
+              interval: (maxY - minY) / 5,
               reservedSize: 30,
               getTitlesWidget: (value, meta) => Text(
                 value.toStringAsFixed(1),
@@ -234,8 +259,8 @@ class DetalleSesionWidget extends StatelessWidget {
             left: BorderSide(color: Colors.white30),
           ),
         ),
-        minY: -0.5,
-        maxY: 0.5,
+        minY: minY,
+        maxY: maxY,
         lineBarsData: [
           if (datosIzq.isNotEmpty)
             LineChartBarData(
