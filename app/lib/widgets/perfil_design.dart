@@ -149,199 +149,106 @@ class _PerfilDesignState extends State<PerfilDesign> {
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryColor = Color(0xFF1565C0);
-    final Color accentColor = Color(0xFF42A5F5);
-    final Color surfaceColor = Color(0xFFF5F7FA);
-
     return Scaffold(
-      backgroundColor: surfaceColor,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Container(
-          margin: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
-            shape: BoxShape.circle,
-          ),
-          child: IconButton(
-            icon: Icon(Icons.arrow_back, color: primaryColor),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
-      ),
-      body: Stack(
-        children: [
-          // Header gradient background
-          Container(
-            height: MediaQuery.of(context).size.height * 0.3,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [primaryColor, accentColor],
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
-              ),
-            ),
-          ),
-          
-          // Main content
-          SafeArea(
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.only(top: 15),
-              child: Column(
-                children: [
-                  // Profile header with avatar
-                  _buildProfileHeader(),
-                  
-                  // Content cards
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 20),
-                        _buildSectionTitle('Información Personal'),
-                        SizedBox(height: 10),
-                        _buildInfoCard(),
-                        SizedBox(height: 20),
-                        _buildStatusCard(),
-                        SizedBox(height: 20),
-                        _buildCodeCard(),
-                        SizedBox(height: 20),
-                        _buildSectionTitle('Actualizar Datos'),
-                        SizedBox(height: 10),
-                        _buildUpdateCard(),
-                        SizedBox(height: 20),
-                        _buildLogoutButton(context),
-                        SizedBox(height: 30),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileHeader() {
-    return Column(
-      children: [
-        // Avatar with decorative elements
-        Stack(
-          alignment: Alignment.center,
+      backgroundColor: Colors.blue[700],
+      body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        child: Column(
           children: [
-            // Halo effect behind avatar
-            Container(
-              width: 130,
-              height: 130,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-            ),
-            
-            // Avatar
-            Container(
-              padding: EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: CircleAvatar(
-                radius: 55,
-                backgroundColor: Color(0xFF1565C0),
-                child: Text(
-                  widget.paciente.nombreUsuario[0].toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 40, 
-                    fontWeight: FontWeight.bold, 
-                    color: Colors.white,
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16, top: 16),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ),
               ),
             ),
-            
-            // Status indicator dot
-            Positioned(
-              bottom: 5,
-              right: 5,
-              child: Container(
-                width: 25,
-                height: 25,
-                decoration: BoxDecoration(
-                  color: widget.paciente.estadoPaciente.toLowerCase() == 'activo' 
-                      ? Colors.green 
-                      : Colors.red,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 3),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4,
+            // Header con el perfil
+            Container(
+              padding: EdgeInsets.only(top: 60, bottom: 30),
+              color: Colors.blue[700],
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Avatar container
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          spreadRadius: 5,
+                        ),
+                      ],
                     ),
+                    child: Center(
+                      child: Text(
+                        widget.paciente.nombreUsuario[0].toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[700],
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    widget.paciente.nombreUsuario,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Paciente',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white.withOpacity(0.8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Contenido principal
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    _buildInfoCard(),
+                    SizedBox(height: 16),
+                    _buildStatusCard(),
+                    SizedBox(height: 16),
+                    _buildCodeCard(),
+                    SizedBox(height: 16),
+                    _buildUpdateCard(),
+                    SizedBox(height: 16),
+                    _buildLogoutButton(context),
+                    SizedBox(height: 30),
                   ],
                 ),
               ),
             ),
           ],
-        ),
-        
-        SizedBox(height: 5),
-        
-        // Name and age
-        Text(
-          widget.paciente.nombreUsuario,
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-            shadows: [
-              Shadow(
-                blurRadius: 2,
-                color: Colors.black26,
-                offset: Offset(1, 1),
-              ),
-            ],
-          ),
-        ),
-        
-        Text(
-          '${widget.paciente.edad} años',
-          style: TextStyle(
-            fontSize: 18,
-            color: Colors.black,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
         ),
       ),
     );
@@ -349,40 +256,50 @@ class _PerfilDesignState extends State<PerfilDesign> {
 
   Widget _buildInfoCard() {
     return Card(
-      elevation: 3,
-      shadowColor: Colors.black26,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      elevation: 2,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Información Personal',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                Row(
+                  children: [
+                    Icon(Icons.person, color: Colors.blue[700], size: 24),
+                    SizedBox(width: 10),
+                    Text(
+                      "Información Personal",
+                      style: TextStyle(
+                        color: Colors.blue[700],
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: Icon(
-                    _editandoInfo ? Icons.save : Icons.edit,
-                    color: Color(0xFF1565C0),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blue[700]!.withOpacity(0.1),
+                    shape: BoxShape.circle,
                   ),
-                  onPressed: () {
-                    if (_editandoInfo) {
-                      _guardarCambios();
-                    }
-                    setState(() {
-                      _editandoInfo = !_editandoInfo;
-                    });
-                  },
+                  child: IconButton(
+                    icon: Icon(
+                      _editandoInfo ? Icons.save : Icons.edit,
+                      color: Colors.blue[700],
+                    ),
+                    onPressed: () {
+                      if (_editandoInfo) {
+                        _guardarCambios();
+                      }
+                      setState(() {
+                        _editandoInfo = !_editandoInfo;
+                      });
+                    },
+                  ),
                 ),
               ],
             ),
@@ -500,7 +417,7 @@ class _PerfilDesignState extends State<PerfilDesign> {
 
   Widget _divider() {
     return Divider(
-      color: Colors.grey.shade200,
+      color: Colors.grey[300],
       thickness: 1,
       height: 20,
     );
@@ -518,12 +435,12 @@ class _PerfilDesignState extends State<PerfilDesign> {
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(8),
+            padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Color(0xFF1565C0).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
+              color: Colors.blue[700]!.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: Color(0xFF1565C0), size: 22),
+            child: Icon(icon, color: Colors.blue[700], size: 24),
           ),
           SizedBox(width: 15),
           Expanded(
@@ -531,11 +448,29 @@ class _PerfilDesignState extends State<PerfilDesign> {
                 ? TextField(
                     controller: controller,
                     keyboardType: keyboardType,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 16,
+                    ),
                     decoration: InputDecoration(
                       labelText: label,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                      labelStyle: TextStyle(
+                        color: Colors.grey[600],
                       ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.blue[700]!),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
                     ),
                   )
                 : Column(
@@ -544,7 +479,7 @@ class _PerfilDesignState extends State<PerfilDesign> {
                       Text(
                         label,
                         style: TextStyle(
-                          color: Colors.grey.shade600,
+                          color: Colors.grey[600],
                           fontSize: 14,
                         ),
                       ),
@@ -588,7 +523,6 @@ class _PerfilDesignState extends State<PerfilDesign> {
     required Function(String?) onChanged,
     bool enabled = false,
   }) {
-    // Verificar si el valor actual está en la lista de items
     final bool valueInItems = value != null && items.contains(value);
     
     return Padding(
@@ -596,32 +530,60 @@ class _PerfilDesignState extends State<PerfilDesign> {
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(8),
+            padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Color(0xFF1565C0).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
+              color: Colors.blue[700]!.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: Color(0xFF1565C0), size: 22),
+            child: Icon(icon, color: Colors.blue[700], size: 24),
           ),
           SizedBox(width: 15),
           Expanded(
             child: enabled
                 ? DropdownButtonFormField<String>(
-                    value: valueInItems ? value : null, // Solo usar el valor si está en la lista
+                    value: valueInItems ? value : null,
                     decoration: InputDecoration(
                       labelText: label,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                      labelStyle: TextStyle(
+                        color: Colors.grey[600],
                       ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.blue[700]!),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
                     ),
                     items: items.map((String item) {
                       return DropdownMenuItem(
                         value: item,
-                        child: Text(_formatearValorEnum(item)),
+                        child: Text(
+                          _formatearValorEnum(item),
+                          style: TextStyle(
+                            color: Colors.black87,
+                          ),
+                        ),
                       );
                     }).toList(),
                     onChanged: onChanged,
-                    hint: Text('Seleccione una opción'), // Agregar hint para cuando no hay valor
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 16,
+                    ),
+                    hint: Text(
+                      'Seleccione una opción',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                      ),
+                    ),
                   )
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -629,7 +591,7 @@ class _PerfilDesignState extends State<PerfilDesign> {
                       Text(
                         label,
                         style: TextStyle(
-                          color: Colors.grey.shade600,
+                          color: Colors.grey[600],
                           fontSize: 14,
                         ),
                       ),
@@ -646,6 +608,369 @@ class _PerfilDesignState extends State<PerfilDesign> {
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatusCard() {
+    bool isActive = widget.paciente.estadoPaciente.toLowerCase() == 'activo';
+    Color statusColor = isActive ? Colors.green.shade600 : Colors.red.shade600;
+    
+    return Card(
+      elevation: 2,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isActive ? Icons.check_circle : Icons.cancel_outlined,
+                color: statusColor,
+                size: 32,
+              ),
+            ),
+            SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Estado del Paciente',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    isActive ? 'Activo' : 'Inactivo',
+                    style: TextStyle(
+                      color: statusColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: statusColor,
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                isActive ? 'En Tratamiento' : 'Sin Atención',
+                style: TextStyle(
+                  color: statusColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCodeCard() {
+    bool isActive = widget.paciente.estadoPaciente.toLowerCase() == 'activo';
+    
+    return Card(
+      elevation: 2,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue[700]!.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isActive ? Icons.lock_clock : Icons.qr_code,
+                color: Colors.blue[700],
+                size: 32,
+              ),
+            ),
+            SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Código de Paciente',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  if (isActive)
+                    Text(
+                      'El código se mostrará cuando termine tu tratamiento con el terapeuta',
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    )
+                  else
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.paciente.codigo,
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.blue[700]!.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.copy,
+                              color: Colors.blue[700],
+                            ),
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: widget.paciente.codigo));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Código copiado al portapapeles'),
+                                  backgroundColor: Colors.green,
+                                  behavior: SnackBarBehavior.floating,
+                                  margin: EdgeInsets.all(16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUpdateCard() {
+    return Card(
+      elevation: 2,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.settings, color: Colors.blue[700], size: 24),
+                SizedBox(width: 10),
+                Text(
+                  "Actualizar Datos",
+                  style: TextStyle(
+                    color: Colors.blue[700],
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 15),
+            _buildTextField(
+              controller: _usuarioController,
+              icon: Icons.person_outline,
+              label: 'Nuevo Usuario',
+              hint: 'Ingresa un nuevo nombre de usuario',
+            ),
+            SizedBox(height: 15),
+            _buildTextField(
+              controller: _correoController,
+              icon: Icons.email_outlined,
+              label: 'Nuevo Correo Electrónico',
+              hint: 'Ingresa un nuevo correo electrónico',
+              keyboardType: TextInputType.emailAddress,
+            ),
+            SizedBox(height: 15),
+            if (_showPasswordField)
+              _buildTextField(
+                controller: _passwordController,
+                icon: Icons.lock_outline,
+                label: 'Contraseña Actual',
+                hint: 'Ingresa tu contraseña actual',
+                obscure: _obscurePassword,
+                onToggleVisibility: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
+              ),
+            SizedBox(height: 25),
+            SizedBox(
+              width: double.infinity,
+              child: _isUpdating
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[700]!),
+                      ),
+                    )
+                  : ElevatedButton(
+                      onPressed: () => _actualizarDatos(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue[700],
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: Text(
+                        _showPasswordField ? 'Confirmar Cambios' : 'Actualizar Datos',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required IconData icon,
+    required String label,
+    required String hint,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscure = false,
+    Function? onToggleVisibility,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.blue[900]!.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: obscure,
+        keyboardType: keyboardType,
+        style: TextStyle(
+          fontSize: 16,
+          color: Colors.white,
+        ),
+        decoration: InputDecoration(
+          contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          border: InputBorder.none,
+          prefixIcon: Icon(
+            icon,
+            color: Colors.blue[300],
+          ),
+          suffixIcon: onToggleVisibility != null
+              ? IconButton(
+                  icon: Icon(
+                    obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                    color: Colors.white70,
+                  ),
+                  onPressed: () => onToggleVisibility(),
+                )
+              : null,
+          labelText: label,
+          hintText: hint,
+          hintStyle: TextStyle(
+            color: Colors.white54,
+            fontSize: 14,
+          ),
+          labelStyle: TextStyle(
+            color: Colors.white70,
+            fontSize: 16,
+          ),
+          floatingLabelBehavior: FloatingLabelBehavior.auto,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton(BuildContext context) {
+    return Card(
+      elevation: 2,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: InkWell(
+        onTap: () async {
+          final loginViewModel = Provider.of<LoginViewModel>(context, listen: false);
+          await loginViewModel.logout();
+          Navigator.of(context).pushReplacementNamed('/login');
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.logout,
+                  color: Colors.red,
+                  size: 32,
+                ),
+              ),
+              SizedBox(width: 20),
+              Expanded(
+                child: Text(
+                  'Cerrar Sesión',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: Colors.red,
+                size: 28,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -729,352 +1054,52 @@ class _PerfilDesignState extends State<PerfilDesign> {
       ],
     );
   }
+}
 
-  Widget _buildStatusCard() {
-    bool isActive = widget.paciente.estadoPaciente.toLowerCase() == 'activo';
-    Color statusColor = isActive ? Colors.green.shade600 : Colors.red.shade600;
-    
-    return Card(
-      elevation: 3,
-      shadowColor: Colors.black26,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                isActive ? Icons.check_circle : Icons.cancel_outlined,
-                color: statusColor,
-                size: 30,
-              ),
-            ),
-            SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Estado del Paciente',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    isActive ? 'Activo' : 'Inactivo',
-                    style: TextStyle(
-                      color: statusColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: statusColor,
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                isActive ? 'En Tratamiento' : 'Sin Atención',
-                style: TextStyle(
-                  color: statusColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+// Custom painter for geometric pattern
+class GeometricPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.1)
+      ..style = PaintingStyle.fill;
+
+    // Draw triangles
+    for (int i = 0; i < 10; i++) {
+      final path = Path();
+      final x = size.width * (i / 10);
+      final y = size.height * 0.2;
+      
+      path.moveTo(x, y);
+      path.lineTo(x + 50, y + 50);
+      path.lineTo(x, y + 100);
+      path.close();
+      
+      canvas.drawPath(path, paint);
+    }
+
+    // Draw circles
+    for (int i = 0; i < 8; i++) {
+      final x = size.width * (i / 8);
+      final y = size.height * 0.6;
+      
+      canvas.drawCircle(
+        Offset(x, y),
+        20,
+        paint,
+      );
+    }
+
+    // Draw squares
+    for (int i = 0; i < 6; i++) {
+      final x = size.width * (i / 6);
+      final y = size.height * 0.8;
+      
+      final rect = Rect.fromLTWH(x, y, 40, 40);
+      canvas.drawRect(rect, paint);
+    }
   }
 
-  Widget _buildCodeCard() {
-    bool isActive = widget.paciente.estadoPaciente.toLowerCase() == 'activo';
-    
-    return Card(
-      elevation: 3,
-      shadowColor: Colors.black26,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Color(0xFF1565C0).withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                isActive ? Icons.lock_clock : Icons.qr_code,
-                color: Color(0xFF1565C0),
-                size: 30,
-              ),
-            ),
-            SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Código de Paciente',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  if (isActive)
-                    Text(
-                      'El código se mostrará cuando termine tu tratamiento con el terapeuta',
-                      style: TextStyle(
-                        color: Colors.grey.shade700,
-                        fontSize: 14,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    )
-                  else
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            widget.paciente.codigo,
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.copy,
-                            color: Color(0xFF1565C0),
-                          ),
-                          onPressed: () {
-                            Clipboard.setData(ClipboardData(text: widget.paciente.codigo));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Código copiado al portapapeles'),
-                                backgroundColor: Colors.green,
-                                behavior: SnackBarBehavior.floating,
-                                margin: EdgeInsets.all(16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUpdateCard() {
-    return Card(
-      elevation: 3,
-      shadowColor: Colors.black26,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTextField(
-              controller: _usuarioController,
-              icon: Icons.person_outline,
-              label: 'Nuevo Usuario',
-              hint: 'Ingresa un nuevo nombre de usuario',
-            ),
-            SizedBox(height: 15),
-            _buildTextField(
-              controller: _correoController,
-              icon: Icons.email_outlined,
-              label: 'Nuevo Correo Electrónico',
-              hint: 'Ingresa un nuevo correo electrónico',
-              keyboardType: TextInputType.emailAddress,
-            ),
-            SizedBox(height: 15),
-            if (_showPasswordField)
-              _buildTextField(
-                controller: _passwordController,
-                icon: Icons.lock_outline,
-                label: 'Contraseña Actual',
-                hint: 'Ingresa tu contraseña actual',
-                obscure: _obscurePassword,
-                onToggleVisibility: () {
-                  setState(() {
-                    _obscurePassword = !_obscurePassword;
-                  });
-                },
-              ),
-            SizedBox(height: 25),
-            SizedBox(
-              width: double.infinity,
-              child: _isUpdating
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1565C0)),
-                      ),
-                    )
-                  : ElevatedButton(
-                      onPressed: () => _actualizarDatos(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF1565C0),
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        elevation: 2,
-                      ),
-                      child: Text(
-                        _showPasswordField ? 'Confirmar Cambios' : 'Actualizar Datos',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required IconData icon,
-    required String label,
-    required String hint,
-    TextInputType keyboardType = TextInputType.text,
-    bool obscure = false,
-    Function? onToggleVisibility,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: TextField(
-        controller: controller,
-        obscureText: obscure,
-        keyboardType: keyboardType,
-        style: TextStyle(
-          fontSize: 16,
-          color: Colors.black87,
-        ),
-        decoration: InputDecoration(
-          contentPadding: EdgeInsets.symmetric(vertical: 16),
-          border: InputBorder.none,
-          prefixIcon: Icon(
-            icon,
-            color: Color(0xFF1565C0),
-          ),
-          suffixIcon: onToggleVisibility != null
-              ? IconButton(
-                  icon: Icon(
-                    obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                    color: Colors.grey.shade600,
-                  ),
-                  onPressed: () => onToggleVisibility(),
-                )
-              : null,
-          labelText: label,
-          hintText: hint,
-          hintStyle: TextStyle(
-            color: Colors.grey.shade400,
-            fontSize: 14,
-          ),
-          labelStyle: TextStyle(
-            color: Colors.grey.shade600,
-            fontSize: 16,
-          ),
-          floatingLabelBehavior: FloatingLabelBehavior.auto,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLogoutButton(BuildContext context) {
-    return Card(
-      elevation: 3,
-      shadowColor: Colors.black26,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: InkWell(
-        onTap: () async {
-          final loginViewModel = Provider.of<LoginViewModel>(context, listen: false);
-          await loginViewModel.logout();
-          Navigator.of(context).pushReplacementNamed('/login');
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade100,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.logout,
-                  color: Colors.red,
-                  size: 30,
-                ),
-              ),
-              SizedBox(width: 20),
-              Expanded(
-                child: Text(
-                  'Cerrar Sesión',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: Colors.red,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

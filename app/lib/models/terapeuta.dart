@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 class Terapeuta {
   final int id;
@@ -13,7 +12,6 @@ class Terapeuta {
   final String? numExt;
   final String? numInt;
   final String? fotoPerfil;
-  final Uint8List? documentoCedula;
 
   Terapeuta({
     required this.id,
@@ -28,7 +26,6 @@ class Terapeuta {
     this.numExt,
     this.numInt,
     this.fotoPerfil,
-    this.documentoCedula,
   });
 
   // Convertir un mapa (de Supabase) a un objeto Terapeuta
@@ -46,7 +43,6 @@ class Terapeuta {
       numExt: map['num_ext'],
       numInt: map['num_int'],
       fotoPerfil: map['foto_perfil'],
-      documentoCedula: map['documento_cedula'],
     );
   }
 
