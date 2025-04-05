@@ -43,6 +43,15 @@ class _HomeViewState extends State<HomeView> {
               Navigator.of(context).pushNamed('/perfil');
             },
           ),
+          if (homeViewModel.paciente?.correoElectronico.isEmpty ?? true)
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.warning, color: Colors.white),
+            ),
         ],
       ),
       body: homeViewModel.isLoading
@@ -52,7 +61,21 @@ class _HomeViewState extends State<HomeView> {
               : RefreshIndicator(
                   onRefresh: () => homeViewModel.recargarDatos(),
                   color: Colors.blue[900],
-                  child: _buildContentView(homeViewModel),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        _buildContentView(homeViewModel),
+                        if (homeViewModel.paciente?.correoElectronico.isEmpty ?? true)
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(
+                              "Completa tu perfil",
+                              style: TextStyle(color: Colors.red, fontSize: 18),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.blue[900],

@@ -820,7 +820,16 @@ class _PerfilDesignState extends State<PerfilDesign> {
               label: 'Nuevo Correo Electrónico',
               hint: 'Ingresa un nuevo correo electrónico',
               keyboardType: TextInputType.emailAddress,
+              isError: widget.paciente.correoElectronico.isEmpty,
             ),
+            if (widget.paciente.correoElectronico.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  "Agrega el correo",
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
             SizedBox(height: 15),
             if (_showPasswordField)
               _buildTextField(
@@ -878,12 +887,13 @@ class _PerfilDesignState extends State<PerfilDesign> {
     TextInputType keyboardType = TextInputType.text,
     bool obscure = false,
     Function? onToggleVisibility,
+    bool isError = false,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.blue[900]!.withOpacity(0.3),
+        color: isError ? Colors.red[100] : Colors.blue[900]!.withOpacity(0.3),
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.white24),
+        border: Border.all(color: isError ? Colors.red : Colors.white24),
       ),
       child: TextField(
         controller: controller,
