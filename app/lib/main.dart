@@ -10,6 +10,7 @@ import 'views/perfil_view.dart';  // Importa el PerfilView
 import 'views/ejercicios_view.dart'; // Importa la nueva vista de ejercicios
 import 'views/sesion_view.dart'; // Importa la vista de sesión
 import 'views/historial_clinico_view.dart'; // Importa la vista del historial clínico
+import 'views/restablecer_contrasena_view.dart'; // Actualizado
 import 'viewmodels/login_viewmodel.dart';
 import 'viewmodels/register_viewmodel.dart';
 import 'viewmodels/home_viewmodel.dart'; // Importar el HomeViewModel
@@ -89,6 +90,7 @@ class MyApp extends StatelessWidget {
             return DetalleSesionView(sesion: args['sesion']);
           },
           '/chat': (context) => ChatView(), // Ruta para la vista de chat
+          '/restablecer-contrasena': (context) => RestablecerContrasenaView(), // Ruta actualizada
         },
       ),
     );

@@ -87,7 +87,9 @@ class _LoginFormState extends State<LoginForm> {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context, '/restablecer-contrasena');
+              },
               child: Text(
                 '¿Olvidaste tu contraseña?',
                 style: TextStyle(
