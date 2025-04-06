@@ -12,12 +12,16 @@ class EmailService {
 
   static Future<bool> enviarCodigoRestablecimiento(String destinatario, String codigo) async {
     try {
+      final anonKey = dotenv.env['SUPABASE_ANON_KEY'];
+      print('🔑 Usando anon key: $anonKey');
+      print('📧 Enviando a endpoint: $_functionEndpoint');
+      
       final response = await http.post(
         Uri.parse(_functionEndpoint),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${dotenv.env['SUPABASE_ANON_KEY']}',
-          'apikey': dotenv.env['SUPABASE_ANON_KEY'] ?? ''
+          'Authorization': 'Bearer $anonKey',
+          'apikey': '$anonKey'
         },
         body: jsonEncode({
           'to': destinatario,
@@ -28,6 +32,7 @@ class EmailService {
 
       print('📧 Respuesta del servidor: ${response.body}');
       print('📧 Status code: ${response.statusCode}');
+      print('📧 Headers de respuesta: ${response.headers}');
 
       if (response.statusCode != 200) {
         print('❌ Error al enviar correo: ${response.body}');
@@ -44,12 +49,13 @@ class EmailService {
 
   static Future<bool> enviarConfirmacionCambioContrasena(String destinatario) async {
     try {
+      final anonKey = dotenv.env['SUPABASE_ANON_KEY'];
       final response = await http.post(
         Uri.parse(_functionEndpoint),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${dotenv.env['SUPABASE_ANON_KEY']}',
-          'apikey': dotenv.env['SUPABASE_ANON_KEY'] ?? ''
+          'Authorization': 'Bearer $anonKey',
+          'apikey': '$anonKey'
         },
         body: jsonEncode({
           'to': destinatario,

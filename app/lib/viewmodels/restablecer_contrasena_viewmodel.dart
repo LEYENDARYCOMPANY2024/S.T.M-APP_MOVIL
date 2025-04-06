@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/paciente_service.dart';
 import '../services/email_service.dart';
 import '../services/hash_services.dart';
+import 'dart:math';
 
 class RestablecerContrasenaViewModel extends ChangeNotifier {
   final PacienteService _pacienteService = PacienteService();
@@ -9,6 +10,7 @@ class RestablecerContrasenaViewModel extends ChangeNotifier {
   final TextEditingController codigoController = TextEditingController();
   final TextEditingController nuevaContrasenaController = TextEditingController();
   final TextEditingController confirmarContrasenaController = TextEditingController();
+  final _random = Random();
   
   bool _usuarioEncontrado = false;
   bool _codigoEnviado = false;
@@ -61,13 +63,14 @@ class RestablecerContrasenaViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Generar código de 6 dígitos
-      _codigoGenerado = List.generate(6, (_) => (DateTime.now().millisecondsSinceEpoch % 10).toString()).join();
+      // Generar código aleatorio de 6 dígitos
+      _codigoGenerado = List.generate(6, (_) => _random.nextInt(10).toString()).join();
+      print('📧 Código generado: $_codigoGenerado'); // Para debug
       
       // Guardar código en la base de datos
       final codigoGuardado = await _pacienteService.enviarCodigoRestablecimiento(
         _pacienteEncontrado!['id_paciente'],
-        _pacienteEncontrado!['correo_electronico_p']
+        _codigoGenerado!
       );
 
       if (codigoGuardado) {
@@ -91,6 +94,7 @@ class RestablecerContrasenaViewModel extends ChangeNotifier {
       notifyListeners();
       return _codigoEnviado;
     } catch (e) {
+      print('❌ Error al enviar código: $e'); // Para debug
       _mensajeError = 'Error al enviar el código de restablecimiento';
       _cargando = false;
       notifyListeners();
@@ -108,6 +112,10 @@ class RestablecerContrasenaViewModel extends ChangeNotifier {
       // Obtener el código y su fecha de expiración de la base de datos
       final pacienteData = await _pacienteService.obtenerCodigoRestablecimiento(_pacienteEncontrado!['id_paciente']);
       
+      print('🔍 Código ingresado: ${codigoController.text.trim()}');
+      print('🔍 Código en DB: ${pacienteData?['codigo_restablecimiento']}');
+      print('🔍 Fecha expiración en DB: ${pacienteData?['fecha_expiracion_codigo']}');
+      
       if (pacienteData == null || 
           pacienteData['codigo_restablecimiento'] == null || 
           pacienteData['fecha_expiracion_codigo'] == null) {
@@ -118,8 +126,14 @@ class RestablecerContrasenaViewModel extends ChangeNotifier {
       }
 
       // Verificar si el código ha expirado
-      final fechaExpiracion = DateTime.parse(pacienteData['fecha_expiracion_codigo']);
-      if (DateTime.now().isAfter(fechaExpiracion)) {
+      final fechaExpiracion = DateTime.parse(pacienteData['fecha_expiracion_codigo']).toLocal();
+      final ahora = DateTime.now();
+      
+      print('⏰ Fecha actual: ${ahora.toIso8601String()}');
+      print('⏰ Fecha expiración (local): ${fechaExpiracion.toIso8601String()}');
+      print('⏰ ¿Expirado?: ${ahora.isAfter(fechaExpiracion)}');
+
+      if (ahora.isAfter(fechaExpiracion)) {
         _mensajeError = 'El código ha expirado. Por favor, solicita uno nuevo';
         _cargando = false;
         notifyListeners();
@@ -140,6 +154,7 @@ class RestablecerContrasenaViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
+      print('❌ Error al validar código: $e');
       _mensajeError = 'Error al validar el código';
       _cargando = false;
       notifyListeners();

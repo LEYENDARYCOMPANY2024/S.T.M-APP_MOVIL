@@ -389,16 +389,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
    }
  
    // Enviar código de restablecimiento
-   Future<bool> enviarCodigoRestablecimiento(int idPaciente, String correo) async {
+   Future<bool> enviarCodigoRestablecimiento(int idPaciente, String codigo) async {
      try {
-       // Generar código aleatorio de 6 dígitos
-       final random = Random();
-       final codigo = List.generate(6, (_) => random.nextInt(10)).join();
-       
        // Calcular fecha de expiración (15 minutos desde ahora)
-       final fechaExpiracion = DateTime.now().add(Duration(minutes: 5));
+       final fechaExpiracion = DateTime.now().toUtc().add(Duration(minutes: 15));
+       print('⏰ Fecha de expiración calculada (UTC): ${fechaExpiracion.toIso8601String()}');
        
-       // Guardar el código y su fecha de expiración en la tabla pacientes
+       // Actualizar el paciente con el código y su fecha de expiración
        await _supabase
            .from('pacientes')
            .update({
@@ -407,10 +404,19 @@ import 'package:supabase_flutter/supabase_flutter.dart';
            })
            .eq('id_paciente', idPaciente);
 
-       print('✉️ Simulando envío de correo a: $correo con código: $codigo');
+       // Verificar que se guardó correctamente
+       final verificacion = await _supabase
+           .from('pacientes')
+           .select('codigo_restablecimiento, fecha_expiracion_codigo')
+           .eq('id_paciente', idPaciente)
+           .single();
+       
+       print('✅ Código guardado: ${verificacion['codigo_restablecimiento']}');
+       print('✅ Fecha expiración guardada: ${verificacion['fecha_expiracion_codigo']}');
+       
        return true;
      } catch (e) {
-       print('❌ Error al enviar código de restablecimiento: $e');
+       print('❌ Error al guardar código: $e');
        return false;
      }
    }
