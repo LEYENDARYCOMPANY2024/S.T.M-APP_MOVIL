@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
  import '../services/hash_services.dart';
  import 'package:intl/intl.dart';
  import '../services/auth_services.dart';
+ import 'dart:math';
  
  class PacienteService {
    final SupabaseClient _supabase = Supabase.instance.client;
@@ -359,4 +360,94 @@ import 'package:supabase_flutter/supabase_flutter.dart';
        return false;
      }
    }
-}
+ 
+   // Buscar paciente por usuario o correo
+   Future<Map<String, dynamic>?> buscarPacientePorUsuarioOCorreo(String usuarioOCorreo) async {
+     try {
+       final response = await _supabase
+           .from('pacientes')
+           .select('''
+             id_paciente,
+             nombre,
+             nombre_usuario_p,
+             correo_electronico_p
+           ''')
+           .or('nombre_usuario_p.eq.$usuarioOCorreo,correo_electronico_p.eq.$usuarioOCorreo')
+           .maybeSingle();
+ 
+       if (response == null) {
+         print('⚠️ No se encontró ningún paciente con ese usuario o correo');
+         return null;
+       }
+ 
+       print('✅ Paciente encontrado: ${response['nombre']}');
+       return response;
+     } catch (e) {
+       print('❌ Error al buscar paciente: $e');
+       return null;
+     }
+   }
+ 
+   // Enviar código de restablecimiento
+   Future<bool> enviarCodigoRestablecimiento(int idPaciente, String correo) async {
+     try {
+       // Generar código aleatorio de 6 dígitos
+       final random = Random();
+       final codigo = List.generate(6, (_) => random.nextInt(10)).join();
+       
+       // Calcular fecha de expiración (15 minutos desde ahora)
+       final fechaExpiracion = DateTime.now().add(Duration(minutes: 5));
+       
+       // Guardar el código y su fecha de expiración en la tabla pacientes
+       await _supabase
+           .from('pacientes')
+           .update({
+             'codigo_restablecimiento': codigo,
+             'fecha_expiracion_codigo': fechaExpiracion.toIso8601String(),
+           })
+           .eq('id_paciente', idPaciente);
+
+       print('✉️ Simulando envío de correo a: $correo con código: $codigo');
+       return true;
+     } catch (e) {
+       print('❌ Error al enviar código de restablecimiento: $e');
+       return false;
+     }
+   }
+ 
+   // Obtener código de restablecimiento
+   Future<Map<String, dynamic>?> obtenerCodigoRestablecimiento(int idPaciente) async {
+     try {
+       final response = await _supabase
+           .from('pacientes')
+           .select('codigo_restablecimiento, fecha_expiracion_codigo')
+           .eq('id_paciente', idPaciente)
+           .maybeSingle();
+
+       return response;
+     } catch (e) {
+       print('❌ Error al obtener código de restablecimiento: $e');
+       return null;
+     }
+   }
+ 
+   // Actualizar contraseña del paciente y limpiar código de restablecimiento
+   Future<bool> actualizarContrasena(int idPaciente, String nuevaContrasenaHash) async {
+     try {
+       await _supabase
+           .from('pacientes')
+           .update({
+             'contrasena_p': nuevaContrasenaHash,
+             'codigo_restablecimiento': null,
+             'fecha_expiracion_codigo': null,
+           })
+           .eq('id_paciente', idPaciente);
+
+       print('✅ Contraseña actualizada correctamente');
+       return true;
+     } catch (e) {
+       print('❌ Error al actualizar contraseña: $e');
+       return false;
+     }
+   }
+ }

@@ -27,6 +27,7 @@ import 'views/chat_view.dart'; // Importa la vista de chat
 import 'viewmodels/chat_viewmodel.dart'; // Importa el ViewModel de chat
 import 'viewmodels/detalle_chat_viewmodel.dart';
 import 'services/token_service.dart';
+import 'viewmodels/restablecer_contrasena_viewmodel.dart'; // Nuevo import
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DetalleSesionViewModel()),
         ChangeNotifierProvider(create: (_) => ChatViewModel()), // Proveedor del ChatViewModel
         ChangeNotifierProvider(create: (_) => DetalleChatViewModel()),
+        ChangeNotifierProvider(create: (_) => RestablecerContrasenaViewModel()), // Nuevo provider
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

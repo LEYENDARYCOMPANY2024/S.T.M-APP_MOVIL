@@ -16,6 +16,8 @@ class Paciente {
   final String estadoPaciente;
   final String correoElectronico;
   final Uint8List? fotoPerfil;  // Mantenemos el atributo
+  final String? codigoRestablecimiento;
+  final DateTime? fechaExpiracionCodigo;
 
   Paciente({
     required this.id,
@@ -33,6 +35,8 @@ class Paciente {
     required this.estadoPaciente,
     required this.correoElectronico,
     this.fotoPerfil,
+    this.codigoRestablecimiento,
+    this.fechaExpiracionCodigo,
   });
 
   // 🔹 Método para actualizar solo los valores modificados sin perder los demás datos
@@ -48,6 +52,8 @@ class Paciente {
     String? escolaridad,
     String? ocupacion,
     Uint8List? fotoPerfil,
+    String? codigoRestablecimiento,
+    DateTime? fechaExpiracionCodigo,
   }) {
     return Paciente(
       id: id,
@@ -65,6 +71,8 @@ class Paciente {
       estadoPaciente: estadoPaciente,
       correoElectronico: correoElectronico ?? this.correoElectronico,
       fotoPerfil: fotoPerfil ?? this.fotoPerfil,
+      codigoRestablecimiento: codigoRestablecimiento ?? this.codigoRestablecimiento,
+      fechaExpiracionCodigo: fechaExpiracionCodigo ?? this.fechaExpiracionCodigo,
     );
   }
 
@@ -86,6 +94,10 @@ class Paciente {
       estadoPaciente: map['estado_paciente'] ?? '',
       correoElectronico: map['correo_electronico_p'] ?? '',
       fotoPerfil: map['foto_perfil'] is Uint8List ? map['foto_perfil'] : null,
+      codigoRestablecimiento: map['codigo_restablecimiento'],
+      fechaExpiracionCodigo: map['fecha_expiracion_codigo'] != null 
+          ? DateTime.parse(map['fecha_expiracion_codigo']) 
+          : null,
     );
   }
 
@@ -106,6 +118,8 @@ class Paciente {
       'contrasena_p': contrasena,
       'estado_paciente': estadoPaciente,
       'correo_electronico_p': correoElectronico,
+      'codigo_restablecimiento': codigoRestablecimiento,
+      'fecha_expiracion_codigo': fechaExpiracionCodigo?.toIso8601String(),
       // No incluimos la foto_perfil aquí ya que se maneja por separado
     };
   }
