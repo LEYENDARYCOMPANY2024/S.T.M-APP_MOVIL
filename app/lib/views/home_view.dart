@@ -43,15 +43,6 @@ class _HomeViewState extends State<HomeView> {
               Navigator.of(context).pushNamed('/perfil');
             },
           ),
-          if (homeViewModel.paciente?.correoElectronico.isEmpty ?? true)
-            Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.warning, color: Colors.white),
-            ),
         ],
       ),
       body: homeViewModel.isLoading
@@ -64,15 +55,73 @@ class _HomeViewState extends State<HomeView> {
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        _buildContentView(homeViewModel),
                         if (homeViewModel.paciente?.correoElectronico.isEmpty ?? true)
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              "Completa tu perfil",
-                              style: TextStyle(color: Colors.red, fontSize: 18),
+                          Container(
+                            margin: const EdgeInsets.all(16.0),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.red.withOpacity(0.3)),
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.of(context).pushNamed('/perfil');
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red.withOpacity(0.2),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.warning_amber_rounded,
+                                          color: Colors.red,
+                                          size: 24,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              "¡Perfil incompleto!",
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              "Por favor, completa tu correo electrónico para recibir notificaciones importantes",
+                                              style: TextStyle(
+                                                color: Colors.red.withOpacity(0.7),
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.arrow_forward_ios,
+                                        color: Colors.red.withOpacity(0.7),
+                                        size: 16,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
+                        _buildContentView(homeViewModel),
                       ],
                     ),
                   ),
