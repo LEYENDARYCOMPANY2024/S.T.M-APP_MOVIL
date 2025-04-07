@@ -53,6 +53,7 @@ class _HomeViewState extends State<HomeView> {
                   onRefresh: () => homeViewModel.recargarDatos(),
                   color: Colors.blue[900],
                   child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     child: Column(
                       children: [
                         if (homeViewModel.paciente?.correoElectronico.isEmpty ?? true)
@@ -208,20 +209,17 @@ class _HomeViewState extends State<HomeView> {
 
   // Vista de contenido principal
   Widget _buildContentView(HomeViewModel viewModel) {
-    return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTerapeutaCard(viewModel),
-            const SizedBox(height: 20),
-            _buildProximaSesionCard(viewModel),
-            const SizedBox(height: 20),
-            _buildProgresoCard(viewModel),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTerapeutaCard(viewModel),
+          const SizedBox(height: 20),
+          _buildProximaSesionCard(viewModel),
+          const SizedBox(height: 20),
+          _buildProgresoCard(viewModel),
+        ],
       ),
     );
   }
